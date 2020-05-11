@@ -1,9 +1,17 @@
 import * as React from 'react';
+import io from 'socket.io-client';
+
 import Head from 'next/head';
 
 import DiceSelectionForm from '../components/DiceSelectionForm/DiceSelectionForm';
 
 const sum = (x: number, y: number) => x + y;
+
+const diceStates = {
+  pending: 'pending',
+  rolling: 'rolling',
+  finished: 'finished',
+};
 
 interface DiceBlock {
   dice: number[];
@@ -21,7 +29,12 @@ interface DiceInterface {
   d100: DiceBlock;
 }
 
-const diceInitialResultsState: DiceInterface = {
+interface DiceState extends DiceInterface {
+  state: string;
+}
+
+const diceInitialResultsState: DiceState = {
+  state: diceStates.pending,
   d6: { ...makeDiceBlock() },
   d8: { ...makeDiceBlock() },
   d10: { ...makeDiceBlock() },
@@ -44,51 +57,58 @@ type DiceEvent =
       type: 'submit';
       payload: diceNeedsSubmission;
     }
-  | { type: 'results'; payload: number[] };
+  | { type: 'results'; payload: number[] }
+  | { type: 'other-person-roll'; payload: DiceState };
 
-const diceReducer = (state: DiceInterface, event: DiceEvent) => {
-  const computeResults = (acc: DiceInterface, cur: number): DiceInterface => {
-    if (acc.d6.dice.length != acc.d6.needs) {
-      acc.d6.dice.push(cur);
-    } else if (acc.d8.dice.length != acc.d8.needs) {
-      acc.d8.dice.push(cur);
-    } else if (acc.d10.dice.length != acc.d10.needs) {
-      acc.d10.dice.push(cur);
-    } else if (acc.d12.dice.length != acc.d12.needs) {
-      acc.d12.dice.push(cur);
-    } else if (acc.d20.dice.length != acc.d20.needs) {
-      acc.d20.dice.push(cur);
-    } else if (acc.d100.dice.length != acc.d100.needs) {
-      acc.d100.dice.push(cur);
-    }
-    return acc;
-  };
+const computeResults = (acc: DiceState, cur: number): DiceState => {
+  if (acc.d6.dice.length != acc.d6.needs) {
+    acc.d6.dice.push(cur);
+  } else if (acc.d8.dice.length != acc.d8.needs) {
+    acc.d8.dice.push(cur);
+  } else if (acc.d10.dice.length != acc.d10.needs) {
+    acc.d10.dice.push(cur);
+  } else if (acc.d12.dice.length != acc.d12.needs) {
+    acc.d12.dice.push(cur);
+  } else if (acc.d20.dice.length != acc.d20.needs) {
+    acc.d20.dice.push(cur);
+  } else if (acc.d100.dice.length != acc.d100.needs) {
+    acc.d100.dice.push(cur);
+  }
+  return acc;
+};
 
-  const assignNeeds = (needs: { needs: number }): DiceBlock =>
-    Object.assign({}, makeDiceBlock(), needs);
+const assignNeeds = (needs: { needs: number }): DiceBlock =>
+  Object.assign({}, makeDiceBlock(), needs);
 
-  const makeDiceNeeds = ({ d6, d8, d10, d12, d20, d100 }): DiceInterface => ({
-    d6: assignNeeds({ needs: d6 }),
-    d8: assignNeeds({ needs: d8 }),
-    d10: assignNeeds({ needs: d10 }),
-    d12: assignNeeds({ needs: d12 }),
-    d20: assignNeeds({ needs: d20 }),
-    d100: assignNeeds({ needs: d100 }),
-  });
+const makeDiceNeeds = ({ d6, d8, d10, d12, d20, d100 }): DiceInterface => ({
+  d6: assignNeeds({ needs: d6 }),
+  d8: assignNeeds({ needs: d8 }),
+  d10: assignNeeds({ needs: d10 }),
+  d12: assignNeeds({ needs: d12 }),
+  d20: assignNeeds({ needs: d20 }),
+  d100: assignNeeds({ needs: d100 }),
+});
 
+const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
   switch (event.type) {
     case 'submit':
-      return Object.assign(
-        {},
-        diceInitialResultsState,
-        makeDiceNeeds(event.payload)
-      );
+      return {
+        state: diceStates.rolling,
+        ...diceInitialResultsState,
+        ...makeDiceNeeds(event.payload),
+      };
     case 'results':
-      return event.payload.reduce(computeResults, Object.assign({}, state));
+      return event.payload.reduce(computeResults, {
+        ...state,
+        state: diceStates.finished,
+      });
+    case 'other-person-roll':
+      return { ...event.payload };
   }
 };
 
 export default function Home() {
+  const [socket, setSocket] = React.useState(null);
   const [state, dispatch] = React.useReducer(
     diceReducer,
     diceInitialResultsState
@@ -108,6 +128,25 @@ export default function Home() {
         dispatch({ type: 'results', payload: nums.data });
       });
   };
+
+  React.useEffect(() => {
+    const ioSocket = io();
+    setSocket(ioSocket);
+    ioSocket.on('other-person-roll', ({ state }) => {
+      dispatch({ type: 'other-person-roll', payload: state });
+    });
+    return () => {
+      ioSocket.close();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (state.state === 'finished') {
+      if (socket && socket.connected) {
+        socket.emit('other-person-roll', { state });
+      }
+    }
+  }, [state.state]);
 
   return (
     <div className="container">

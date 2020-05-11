@@ -1,144 +1,152 @@
 import * as React from 'react';
 import Head from 'next/head';
 
+import DiceSelectionForm from '../components/DiceSelectionForm/DiceSelectionForm';
+
 const sum = (x: number, y: number) => x + y;
 
-export default function Home() {
-  const [nums, setNums] = React.useState([]);
-  const [d6, setD6] = React.useState('');
-  const [d8, setD8] = React.useState('');
-  const [d10, setD10] = React.useState('');
-  const [d12, setD12] = React.useState('');
-  const [d20, setD20] = React.useState('');
+interface DiceBlock {
+  dice: number[];
+  needs: number;
+}
 
-  const results = nums.reduce(
-    (acc, cur) => {
-      if (acc.d6.length != d6) {
-        acc.d6.push(cur);
-      } else if (acc.d8.length != d8) {
-        acc.d8.push(cur);
-      } else if (acc.d10.length != d10) {
-        acc.d10.push(cur);
-      } else if (acc.d12.length != d12) {
-        acc.d12.push(cur);
-      } else if (acc.d20.length != d20) {
-        acc.d20.push(cur);
-      }
-      return acc;
-    },
-    {
-      d6: [],
-      d8: [],
-      d10: [],
-      d12: [],
-      d20: [],
+const makeDiceBlock = (): DiceBlock => ({ dice: [], needs: 0 });
+
+interface DiceInterface {
+  d6: DiceBlock;
+  d8: DiceBlock;
+  d10: DiceBlock;
+  d12: DiceBlock;
+  d20: DiceBlock;
+  d100: DiceBlock;
+}
+
+const diceInitialResultsState: DiceInterface = {
+  d6: { ...makeDiceBlock() },
+  d8: { ...makeDiceBlock() },
+  d10: { ...makeDiceBlock() },
+  d12: { ...makeDiceBlock() },
+  d20: { ...makeDiceBlock() },
+  d100: { ...makeDiceBlock() },
+};
+
+type diceNeedsSubmission = {
+  d6: number;
+  d8: number;
+  d10: number;
+  d12: number;
+  d20: number;
+  d100: number;
+};
+
+type DiceEvent =
+  | {
+      type: 'submit';
+      payload: diceNeedsSubmission;
     }
+  | { type: 'results'; payload: number[] };
+
+const diceReducer = (state: DiceInterface, event: DiceEvent) => {
+  const computeResults = (acc: DiceInterface, cur: number): DiceInterface => {
+    if (acc.d6.dice.length != acc.d6.needs) {
+      acc.d6.dice.push(cur);
+    } else if (acc.d8.dice.length != acc.d8.needs) {
+      acc.d8.dice.push(cur);
+    } else if (acc.d10.dice.length != acc.d10.needs) {
+      acc.d10.dice.push(cur);
+    } else if (acc.d12.dice.length != acc.d12.needs) {
+      acc.d12.dice.push(cur);
+    } else if (acc.d20.dice.length != acc.d20.needs) {
+      acc.d20.dice.push(cur);
+    } else if (acc.d100.dice.length != acc.d100.needs) {
+      acc.d100.dice.push(cur);
+    }
+    return acc;
+  };
+
+  const assignNeeds = (needs: { needs: number }): DiceBlock =>
+    Object.assign({}, makeDiceBlock(), needs);
+
+  const makeDiceNeeds = ({ d6, d8, d10, d12, d20, d100 }): DiceInterface => ({
+    d6: assignNeeds({ needs: d6 }),
+    d8: assignNeeds({ needs: d8 }),
+    d10: assignNeeds({ needs: d10 }),
+    d12: assignNeeds({ needs: d12 }),
+    d20: assignNeeds({ needs: d20 }),
+    d100: assignNeeds({ needs: d100 }),
+  });
+
+  switch (event.type) {
+    case 'submit':
+      return Object.assign(
+        {},
+        diceInitialResultsState,
+        makeDiceNeeds(event.payload)
+      );
+    case 'results':
+      return event.payload.reduce(computeResults, Object.assign({}, state));
+  }
+};
+
+export default function Home() {
+  const [state, dispatch] = React.useReducer(
+    diceReducer,
+    diceInitialResultsState
   );
 
-  const roll = (e) => {
-    e.preventDefault();
+  const roll = ({ d6, d8, d10, d12, d20, d100 }: diceNeedsSubmission) => {
+    dispatch({ type: 'submit', payload: { d6, d8, d10, d12, d20, d100 } });
     window
       .fetch('/api/random', {
         method: 'POST',
         body: JSON.stringify({
-          size: [d6, d8, d10, d12, d20]
-            .map((n) => n && Number.parseInt(n, 10))
-            .filter(Boolean)
-            .reduce(sum, 0),
+          size: [d6, d8, d10, d12, d20, d100].filter(Boolean).reduce(sum, 0),
         }),
       })
       .then((res) => res.json())
       .then(({ nums }) => {
-        setNums(nums.data);
+        dispatch({ type: 'results', payload: nums.data });
       });
   };
 
   return (
     <div className="container">
       <Head>
-        <title>Create Next App</title>
+        <title>Roll Together</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
-        <h1 className="title">Welcome to Next Dice Roller</h1>
+        <h1 className="title">Roll Together</h1>
         <section>
           <h2>Dice Selection</h2>
-          <form>
-            <label htmlFor="d6">Number of d6</label>
-            <input
-              type="number"
-              name="d6"
-              id="d6"
-              min="1"
-              max="20"
-              onChange={(e) => setD6(e.target.value)}
-              value={d6}
-            />
-            <label htmlFor="d8">Number of d8</label>
-            <input
-              type="number"
-              name="d8"
-              id="d8"
-              min="1"
-              max="20"
-              onChange={(e) => setD8(e.target.value)}
-              value={d8}
-            />
-            <label htmlFor="d10">Number of d10</label>
-            <input
-              type="number"
-              name="d10"
-              id="d10"
-              min="1"
-              max="20"
-              onChange={(e) => setD10(e.target.value)}
-              value={d10}
-            />
-            <label htmlFor="d12">Number of d12</label>
-            <input
-              type="number"
-              name="d12"
-              id="d12"
-              min="1"
-              max="20"
-              onChange={(e) => setD12(e.target.value)}
-              value={d12}
-            />
-            <label htmlFor="d20">Number of d20</label>
-            <input
-              type="number"
-              name="d20"
-              id="d20"
-              min="1"
-              max="20"
-              onChange={(e) => setD20(e.target.value)}
-              value={d20}
-            />
-            <button onClick={roll}>Roll dice</button>
-          </form>
+          <DiceSelectionForm onSubmit={roll} />
         </section>
         <section>
           <h2>Results</h2>
           <h3>D6</h3>
-          {results.d6.map((num, i) => (
+          {state.d6.dice.map((num, i) => (
             <p key={`d6-${i}`}>{(num % 6) + 1}</p>
           ))}
           <h3>D8</h3>
-          {results.d8.map((num, i) => (
+          {state.d8.dice.map((num, i) => (
             <p key={`d8-${i}`}>{(num % 8) + 1}</p>
           ))}
           <h3>D10</h3>
-          {results.d10.map((num, i) => (
+          {state.d10.dice.map((num, i) => (
             <p key={`d10-${i}`}>{(num % 10) + 1}</p>
           ))}
           <h3>D12</h3>
-          {results.d12.map((num, i) => (
+          {state.d12.dice.map((num, i) => (
             <p key={`d12-${i}`}>{(num % 12) + 1}</p>
           ))}
           <h3>D20</h3>
-          {results.d20.map((num, i) => (
+          {state.d20.dice.map((num, i) => (
             <p key={`d20-${i}`}>{(num % 20) + 1}</p>
+          ))}
+          <h3>D100</h3>
+          {state.d100.dice.map((num, i) => (
+            <p key={`d100-${i}`}>{(num % 100) + 1}</p>
           ))}
         </section>
       </main>
@@ -171,16 +179,6 @@ export default function Home() {
           flex-direction: column;
         }
 
-        form {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: space-around;
-        }
-
-        input {
-          width: 3rem;
-        }
-
         footer {
           width: 100%;
           height: 100px;
@@ -199,20 +197,15 @@ export default function Home() {
           text-decoration: none;
         }
 
+        footer a:hover,
+        footer a:focus,
+        footer a:active {
+          text-decoration: underline;
+        }
+
         a {
           color: inherit;
           text-decoration: none;
-        }
-
-        .title a {
-          color: #0070f3;
-          text-decoration: none;
-        }
-
-        .title a:hover,
-        .title a:focus,
-        .title a:active {
-          text-decoration: underline;
         }
 
         .title {
@@ -224,71 +217,6 @@ export default function Home() {
         .title,
         .description {
           text-align: center;
-        }
-
-        .description {
-          line-height: 1.5;
-          font-size: 1.5rem;
-        }
-
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-            DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-        }
-
-        .grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          max-width: 800px;
-          margin-top: 3rem;
-        }
-
-        .card {
-          margin: 1rem;
-          flex-basis: 45%;
-          padding: 1.5rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border: 1px solid #eaeaea;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .card:hover,
-        .card:focus,
-        .card:active {
-          color: #0070f3;
-          border-color: #0070f3;
-        }
-
-        .card h3 {
-          margin: 0 0 1rem 0;
-          font-size: 1.5rem;
-        }
-
-        .card p {
-          margin: 0;
-          font-size: 1.25rem;
-          line-height: 1.5;
-        }
-
-        .logo {
-          height: 1em;
-        }
-
-        @media (max-width: 600px) {
-          .grid {
-            width: 100%;
-            flex-direction: column;
-          }
         }
       `}</style>
 

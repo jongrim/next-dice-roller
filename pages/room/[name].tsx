@@ -1,7 +1,7 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import { Box, Button, Flex, Heading } from 'rebass';
 
 import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
 
@@ -153,49 +153,82 @@ export default function Home() {
   }, [state.state]);
 
   return (
-    <div>
-      <main>
+    <Flex as="main" flexDirection="column" pt={2}>
+      <section>
+        <Flex justifyContent="center">
+          <Heading as="h2">Dice Selection</Heading>
+        </Flex>
+        <DiceSelectionForm onSubmit={roll} />
+      </section>
+      <Box mt={4}>
         <section>
-          <h2>Dice Selection</h2>
-          <DiceSelectionForm onSubmit={roll} />
+          <Flex justifyContent="center">
+            <Heading as="h2">Results</Heading>
+          </Flex>
+          <Flex flexWrap="wrap" justifyContent="space-between">
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              minWidth={128}
+              height={128}>
+              <Heading as="h3">D6</Heading>
+              {state.d6.dice.map((num, i) => (
+                <p key={`d6-${i}`}>{(num % 6) + 1}</p>
+              ))}
+            </Flex>
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              minWidth={128}
+              height={128}>
+              <Heading as="h3">D8</Heading>
+              {state.d8.dice.map((num, i) => (
+                <p key={`d8-${i}`}>{(num % 8) + 1}</p>
+              ))}
+            </Flex>
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              minWidth={128}
+              height={128}>
+              <Heading as="h3">D10</Heading>
+              {state.d10.dice.map((num, i) => (
+                <p key={`d10-${i}`}>{(num % 10) + 1}</p>
+              ))}
+            </Flex>
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              minWidth={128}
+              height={128}>
+              <Heading as="h3">D12</Heading>
+              {state.d12.dice.map((num, i) => (
+                <p key={`d12-${i}`}>{(num % 12) + 1}</p>
+              ))}
+            </Flex>
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              minWidth={128}
+              height={128}>
+              <Heading as="h3">D20</Heading>
+              {state.d20.dice.map((num, i) => (
+                <p key={`d20-${i}`}>{(num % 20) + 1}</p>
+              ))}
+            </Flex>
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+              minWidth={128}
+              height={128}>
+              <Heading as="h3">D100</Heading>
+              {state.d100.dice.map((num, i) => (
+                <p key={`d100-${i}`}>{(num % 100) + 1}</p>
+              ))}
+            </Flex>
+          </Flex>
         </section>
-        <section>
-          <h2>Results</h2>
-          <h3>D6</h3>
-          {state.d6.dice.map((num, i) => (
-            <p key={`d6-${i}`}>{(num % 6) + 1}</p>
-          ))}
-          <h3>D8</h3>
-          {state.d8.dice.map((num, i) => (
-            <p key={`d8-${i}`}>{(num % 8) + 1}</p>
-          ))}
-          <h3>D10</h3>
-          {state.d10.dice.map((num, i) => (
-            <p key={`d10-${i}`}>{(num % 10) + 1}</p>
-          ))}
-          <h3>D12</h3>
-          {state.d12.dice.map((num, i) => (
-            <p key={`d12-${i}`}>{(num % 12) + 1}</p>
-          ))}
-          <h3>D20</h3>
-          {state.d20.dice.map((num, i) => (
-            <p key={`d20-${i}`}>{(num % 20) + 1}</p>
-          ))}
-          <h3>D100</h3>
-          {state.d100.dice.map((num, i) => (
-            <p key={`d100-${i}`}>{(num % 100) + 1}</p>
-          ))}
-        </section>
-      </main>
-
-      <style jsx>{`
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-        }
-      `}</style>
-    </div>
+      </Box>
+    </Flex>
   );
 }

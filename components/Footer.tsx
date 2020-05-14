@@ -1,12 +1,30 @@
 import * as React from 'react';
+import { Box, Link, Flex } from 'rebass';
 
 const Footer: React.FC = () => (
-  <footer>
+  <Flex
+    as="footer"
+    bg="background"
+    mt="auto"
+    height="100px"
+    justifyContent="center"
+    alignItems="center"
+    sx={{
+      boxShadow: `0 -0.3px 2.2px rgba(0, 0, 0, 0.02),
+  0 -0.7px 5.3px rgba(0, 0, 0, 0.028),
+  0 -1.3px 10px rgba(0, 0, 0, 0.035),
+  0 -2.2px 17.9px rgba(0, 0, 0, 0.042),
+  0 -4.2px 33.4px rgba(0, 0, 0, 0.05),
+  0 -10px 80px rgba(0, 0, 0, 0.07)`,
+    }}>
     <p>
       Made by{' '}
-      <a href="https://twitter.com/jonjongrim" target="blank" rel="noreferrer">
+      <Link
+        href="https://twitter.com/jonjongrim"
+        target="blank"
+        rel="noreferrer">
         Jon Grim
-      </a>{' '}
+      </Link>{' '}
       for nerds
     </p>
     <style jsx>{`
@@ -19,23 +37,8 @@ const Footer: React.FC = () => (
         align-items: center;
         margin-top: auto;
       }
-
-      footer img {
-        margin-left: 0.5rem;
-      }
-
-      footer a {
-        color: #0070f3;
-        text-decoration: none;
-      }
-
-      footer a:hover,
-      footer a:focus,
-      footer a:active {
-        text-decoration: underline;
-      }
     `}</style>
-  </footer>
+  </Flex>
 );
 
 export default Footer;

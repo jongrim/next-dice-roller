@@ -8,12 +8,16 @@
     "start": "cross-env NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "@rebass/forms": "^4.0.6",
+    "@rebass/preset": "^4.0.5",
     "cross-env": "^7.0.2",
+    "emotion-theming": "^10.0.27",
     "express": "^4.17.1",
     "next": "9.3.6",
     "random-words": "^1.1.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "rebass": "^4.0.7",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0"
   },

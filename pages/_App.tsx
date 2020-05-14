@@ -1,22 +1,25 @@
 import * as React from 'react';
 import { AppProps } from 'next/app';
 import Footer from '../components/Footer';
+import { ThemeProvider } from 'emotion-theming';
+import theme from './theme.json';
 import './App.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <div className="container">
-      <Component {...pageProps} />
-      <Footer />
-      <style jsx>{`
-        .container {
-          min-height: 100vh;
-          padding: 0 0.5rem;
-          display: flex;
-          flex-direction: column;
-        }
-      `}</style>
-    </div>
+    <ThemeProvider theme={theme}>
+      <div className="container">
+        <Component {...pageProps} />
+        <Footer />
+        <style jsx>{`
+          .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+          }
+        `}</style>
+      </div>
+    </ThemeProvider>
   );
 }
 

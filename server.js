@@ -1,5 +1,6 @@
 const express = require('express');
 const next = require('next');
+const randomWords = require('random-words');
 
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
@@ -11,11 +12,22 @@ app.prepare().then(() => {
   const http = require('http').createServer(server);
   const io = require('socket.io')(http);
 
-  io.on('connection', (socket) => {
-    console.log('a user connected');
-    socket.on('other-person-roll', (data) => {
-      io.emit('other-person-roll', data);
+  function setupIoRoom(name) {
+    const room = io.of(name);
+    room.on('connection', (socket) => {
+      console.log(`a user connected to ${name}`);
+      socket.on('other-person-roll', (data) => {
+        room.emit('other-person-roll', data);
+      });
     });
+  }
+
+  server.all('/api/new-room', (req, res) => {
+    console.log('request for new room');
+    const newRoom = randomWords(3).join('-');
+    setupIoRoom(newRoom);
+    res.status(201);
+    res.json({ name: newRoom });
   });
 
   server.all('*', (req, res) => {

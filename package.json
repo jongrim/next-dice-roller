@@ -11,6 +11,7 @@
     "cross-env": "^7.0.2",
     "express": "^4.17.1",
     "next": "9.3.6",
+    "random-words": "^1.1.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "socket.io": "^2.3.0",
@@ -19,7 +20,15 @@
   "devDependencies": {
     "@types/node": "^13.13.5",
     "@types/react": "^16.9.34",
+    "@types/socket.io-client": "^1.4.32",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "eslint": "^7.0.0",
+    "eslint-plugin-react": "^7.20.0",
     "nodemon": "^2.0.3",
     "typescript": "^3.8.3"
+  },
+  "engines": {
+    "node": ">12.X"
   }
 }

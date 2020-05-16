@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Router from 'next/router';
 import Head from 'next/head';
-import { Box, Button, Flex, Heading, Image } from 'rebass';
+import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
 
 export default function Home() {
   return (
@@ -10,27 +10,37 @@ export default function Home() {
         <title>Roll Together</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <main>
-        <Flex flexDirection="column" alignItems="center">
-          <Heading as="h1" fontSize={[5, 6, 7]}>
-            Roll With Me
-          </Heading>
-          <Flex justifyContent="center">
-            <Image
-              src="/roller_1.svg"
-              alt="Person eager to roll dice"
-              sx={{ width: '25%' }}
-            />
-            <Image
-              src="/roller_2.svg"
-              alt="Person eager to roll dice"
-              sx={{ width: '25%' }}
-            />
-          </Flex>
+      <Flex as="main" flexDirection="column" pt={5}>
+        <Flex
+          justifyContent="center"
+          alignItems="center"
+          flexDirection={['column', 'column', 'row']}>
+          <Box
+            width={['380px']}
+            sx={{ order: [2, 2, 1] }}
+            textAlign={['center', 'center', 'left']}>
+            <Heading as="h1" fontSize={[5, 6, 7]}>
+              Roll With Me
+            </Heading>
+            <Text>
+              Create a new room and share the URL with your friends to roll dice
+              together online
+            </Text>
+          </Box>
+          <Image
+            src="/roller_2.svg"
+            alt="Person eager to roll dice"
+            minWidth="140px"
+            sx={{ width: '15%', order: [1, 1, 2] }}
+          />
+        </Flex>
+        <Flex justifyContent="center" alignItems="center">
           <Button
             variant="primary"
-            mt={2}
+            mt={4}
+            minWidth="250px"
+            width="33%"
+            height="3rem"
             onClick={() => {
               window
                 .fetch('/api/new-room', { method: 'POST' })
@@ -42,27 +52,7 @@ export default function Home() {
             Make a new room
           </Button>
         </Flex>
-      </main>
-
-      <style jsx>{`
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .title {
-          margin: 0;
-          line-height: 1.15;
-          font-size: 4rem;
-        }
-
-        .title,
-        .description {
-          text-align: center;
-        }
-      `}</style>
+      </Flex>
     </Box>
   );
 }

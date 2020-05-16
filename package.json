@@ -8,6 +8,7 @@
     "start": "cross-env NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "@reach/dialog": "^0.10.2",
     "@rebass/forms": "^4.0.6",
     "@rebass/preset": "^4.0.5",
     "cross-env": "^7.0.2",

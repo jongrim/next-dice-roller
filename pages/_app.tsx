@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { ThemeProvider } from 'emotion-theming';
 import theme from './theme.json';
 import './App.css';
+import '@reach/dialog/styles.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

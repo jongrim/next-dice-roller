@@ -1,8 +1,9 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Button, Flex, Heading } from 'rebass';
+import { Box, Flex, Heading } from 'rebass';
 
+import UserSetupModal from '../../components/UserSetupModal';
 import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
 
 const sum = (x: number, y: number) => x + y;
@@ -229,6 +230,7 @@ export default function Home() {
           </Flex>
         </section>
       </Box>
+      <UserSetupModal />
     </Flex>
   );
 }

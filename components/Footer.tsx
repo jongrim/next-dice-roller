@@ -5,11 +5,11 @@ const Footer: React.FC = () => (
   <Flex
     as="footer"
     bg="background"
-    mt="auto"
     height="100px"
     justifyContent="center"
     alignItems="center"
     sx={{
+      zIndex: 2,
       boxShadow: `0 -0.3px 2.2px rgba(0, 0, 0, 0.02),
   0 -0.7px 5.3px rgba(0, 0, 0, 0.028),
   0 -1.3px 10px rgba(0, 0, 0, 0.035),
@@ -27,17 +27,6 @@ const Footer: React.FC = () => (
       </Link>{' '}
       for nerds
     </p>
-    <style jsx>{`
-      footer {
-        width: 100%;
-        height: 100px;
-        border-top: 1px solid #eaeaea;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: auto;
-      }
-    `}</style>
   </Flex>
 );
 

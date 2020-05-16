@@ -5,6 +5,7 @@ import { Box, Flex, Heading } from 'rebass';
 
 import UserSetupModal from '../../components/UserSetupModal';
 import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
+import Sidebar from '../../components/Sidebar';
 
 const sum = (x: number, y: number) => x + y;
 
@@ -154,81 +155,81 @@ export default function Home() {
   }, [state.state]);
 
   return (
-    <Flex as="main" flexDirection="column" pt={2}>
-      <section>
-        <Flex justifyContent="center">
-          <Heading as="h2">Dice Selection</Heading>
-        </Flex>
+    <Flex
+      as="main"
+      flex="1"
+      pt="60px"
+      px={2}
+      flexDirection={['column', 'row', 'row']}>
+      <Box as="section" width={['100%', 1 / 4, 1 / 4]}>
         <DiceSelectionForm onSubmit={roll} />
-      </section>
-      <Box mt={4}>
-        <section>
-          <Flex justifyContent="center">
-            <Heading as="h2">Results</Heading>
+      </Box>
+      <Box as="section" mt={4} flex="1">
+        <Flex justifyContent="center">
+          <Heading as="h2">Results</Heading>
+        </Flex>
+        <Flex flexWrap="wrap" justifyContent="space-between">
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            minWidth={128}
+            height={128}>
+            <Heading as="h3">D6</Heading>
+            {state.d6.dice.map((num, i) => (
+              <p key={`d6-${i}`}>{(num % 6) + 1}</p>
+            ))}
           </Flex>
-          <Flex flexWrap="wrap" justifyContent="space-between">
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              minWidth={128}
-              height={128}>
-              <Heading as="h3">D6</Heading>
-              {state.d6.dice.map((num, i) => (
-                <p key={`d6-${i}`}>{(num % 6) + 1}</p>
-              ))}
-            </Flex>
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              minWidth={128}
-              height={128}>
-              <Heading as="h3">D8</Heading>
-              {state.d8.dice.map((num, i) => (
-                <p key={`d8-${i}`}>{(num % 8) + 1}</p>
-              ))}
-            </Flex>
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              minWidth={128}
-              height={128}>
-              <Heading as="h3">D10</Heading>
-              {state.d10.dice.map((num, i) => (
-                <p key={`d10-${i}`}>{(num % 10) + 1}</p>
-              ))}
-            </Flex>
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              minWidth={128}
-              height={128}>
-              <Heading as="h3">D12</Heading>
-              {state.d12.dice.map((num, i) => (
-                <p key={`d12-${i}`}>{(num % 12) + 1}</p>
-              ))}
-            </Flex>
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              minWidth={128}
-              height={128}>
-              <Heading as="h3">D20</Heading>
-              {state.d20.dice.map((num, i) => (
-                <p key={`d20-${i}`}>{(num % 20) + 1}</p>
-              ))}
-            </Flex>
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              minWidth={128}
-              height={128}>
-              <Heading as="h3">D100</Heading>
-              {state.d100.dice.map((num, i) => (
-                <p key={`d100-${i}`}>{(num % 100) + 1}</p>
-              ))}
-            </Flex>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            minWidth={128}
+            height={128}>
+            <Heading as="h3">D8</Heading>
+            {state.d8.dice.map((num, i) => (
+              <p key={`d8-${i}`}>{(num % 8) + 1}</p>
+            ))}
           </Flex>
-        </section>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            minWidth={128}
+            height={128}>
+            <Heading as="h3">D10</Heading>
+            {state.d10.dice.map((num, i) => (
+              <p key={`d10-${i}`}>{(num % 10) + 1}</p>
+            ))}
+          </Flex>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            minWidth={128}
+            height={128}>
+            <Heading as="h3">D12</Heading>
+            {state.d12.dice.map((num, i) => (
+              <p key={`d12-${i}`}>{(num % 12) + 1}</p>
+            ))}
+          </Flex>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            minWidth={128}
+            height={128}>
+            <Heading as="h3">D20</Heading>
+            {state.d20.dice.map((num, i) => (
+              <p key={`d20-${i}`}>{(num % 20) + 1}</p>
+            ))}
+          </Flex>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            minWidth={128}
+            height={128}>
+            <Heading as="h3">D100</Heading>
+            {state.d100.dice.map((num, i) => (
+              <p key={`d100-${i}`}>{(num % 100) + 1}</p>
+            ))}
+          </Flex>
+        </Flex>
       </Box>
       <UserSetupModal />
     </Flex>

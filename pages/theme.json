@@ -112,5 +112,13 @@
     "img": {
       "maxWidth": "100%"
     }
+  },
+  "buttons": {
+    "ghost": {
+      "bg": "transparent",
+      "color": "text",
+      "cursor": "pointer",
+      "border": "1px #000 solid"
+    }
   }
 }

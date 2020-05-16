@@ -2,16 +2,18 @@ import * as React from 'react';
 import Router from 'next/router';
 import Head from 'next/head';
 import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
+import Footer from '../components/Footer';
 
 export default function Home() {
   return (
-    <Box bg="background">
+    <>
       <Head>
         <title>Roll Together</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex as="main" flexDirection="column" pt={5}>
+      <Flex as="main" flexDirection="column" flex="1">
         <Flex
+          mt={5}
           justifyContent="center"
           alignItems="center"
           flexDirection={['column', 'column', 'row']}>
@@ -53,6 +55,7 @@ export default function Home() {
           </Button>
         </Flex>
       </Flex>
-    </Box>
+      <Footer />
+    </>
   );
 }

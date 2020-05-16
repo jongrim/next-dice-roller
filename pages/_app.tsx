@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { AppProps } from 'next/app';
-import Footer from '../components/Footer';
 import { ThemeProvider } from 'emotion-theming';
 import theme from './theme.json';
 import './App.css';
@@ -11,7 +10,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={theme}>
       <div className="container">
         <Component {...pageProps} />
-        <Footer />
         <style jsx>{`
           .container {
             min-height: 100vh;

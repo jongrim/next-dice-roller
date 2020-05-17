@@ -5,7 +5,12 @@ import { Box, Flex, Heading } from 'rebass';
 
 import UserSetupModal from '../../components/UserSetupModal';
 import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
+import RollBubbleManager from '../../components/RollBubbleManager';
+import RollResultsTable from '../../components/RollResultsTable';
 import Sidebar from '../../components/Sidebar';
+import useLocalStorage from '../../hooks/useLocalStorage';
+
+import { DiceBlock, DiceState, DiceInterface } from '../../types/dice';
 
 const sum = (x: number, y: number) => x + y;
 
@@ -15,34 +20,20 @@ const diceStates = {
   finished: 'finished',
 };
 
-interface DiceBlock {
-  dice: number[];
-  needs: number;
-}
-
 const makeDiceBlock = (): DiceBlock => ({ dice: [], needs: 0 });
-
-interface DiceInterface {
-  d6: DiceBlock;
-  d8: DiceBlock;
-  d10: DiceBlock;
-  d12: DiceBlock;
-  d20: DiceBlock;
-  d100: DiceBlock;
-}
-
-interface DiceState extends DiceInterface {
-  state: string;
-}
 
 const diceInitialResultsState: DiceState = {
   state: diceStates.pending,
-  d6: { ...makeDiceBlock() },
-  d8: { ...makeDiceBlock() },
-  d10: { ...makeDiceBlock() },
-  d12: { ...makeDiceBlock() },
-  d20: { ...makeDiceBlock() },
-  d100: { ...makeDiceBlock() },
+  dice: {
+    d6: { ...makeDiceBlock() },
+    d8: { ...makeDiceBlock() },
+    d10: { ...makeDiceBlock() },
+    d12: { ...makeDiceBlock() },
+    d20: { ...makeDiceBlock() },
+    d100: { ...makeDiceBlock() },
+  },
+  roller: 'anonymous',
+  rollerIcon: '',
 };
 
 type diceNeedsSubmission = {
@@ -59,25 +50,35 @@ type DiceEvent =
       type: 'submit';
       payload: diceNeedsSubmission;
     }
-  | { type: 'results'; payload: number[] }
-  | { type: 'other-person-roll'; payload: DiceState };
+  | {
+      type: 'compute';
+      payload: { data: number[]; roller: string; rollerIcon: string };
+    }
+  | { type: 'roll'; payload: DiceState };
 
-const computeResults = (acc: DiceState, cur: number): DiceState => {
+const computeResults = (acc: DiceInterface, cur: number): DiceInterface => {
   if (acc.d6.dice.length != acc.d6.needs) {
-    acc.d6.dice.push(cur);
+    acc.d6 = updateDiceBlock(acc.d6, cur);
   } else if (acc.d8.dice.length != acc.d8.needs) {
-    acc.d8.dice.push(cur);
+    acc.d8 = updateDiceBlock(acc.d8, cur);
   } else if (acc.d10.dice.length != acc.d10.needs) {
-    acc.d10.dice.push(cur);
+    acc.d10 = updateDiceBlock(acc.d10, cur);
   } else if (acc.d12.dice.length != acc.d12.needs) {
-    acc.d12.dice.push(cur);
+    acc.d12 = updateDiceBlock(acc.d12, cur);
   } else if (acc.d20.dice.length != acc.d20.needs) {
-    acc.d20.dice.push(cur);
+    acc.d20 = updateDiceBlock(acc.d20, cur);
   } else if (acc.d100.dice.length != acc.d100.needs) {
-    acc.d100.dice.push(cur);
+    acc.d100 = updateDiceBlock(acc.d100, cur);
   }
   return acc;
 };
+
+function updateDiceBlock(diceBlock: DiceBlock, num: number): DiceBlock {
+  return {
+    dice: [...diceBlock.dice, num],
+    needs: diceBlock.needs,
+  };
+}
 
 const assignNeeds = (needs: { needs: number }): DiceBlock =>
   Object.assign({}, makeDiceBlock(), needs);
@@ -95,17 +96,22 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
   switch (event.type) {
     case 'submit':
       return {
-        state: diceStates.rolling,
+        state: diceStates.pending,
         ...diceInitialResultsState,
-        ...makeDiceNeeds(event.payload),
+        dice: { ...makeDiceNeeds(event.payload) },
       };
-    case 'results':
-      return event.payload.reduce(computeResults, {
-        ...state,
-        state: diceStates.finished,
+    case 'compute':
+      const newDice = event.payload.data.reduce(computeResults, {
+        ...state.dice,
       });
-    case 'other-person-roll':
-      return { ...event.payload };
+      return {
+        dice: newDice,
+        state: diceStates.rolling,
+        roller: event.payload.roller,
+        rollerIcon: event.payload.rollerIcon,
+      };
+    case 'roll':
+      return { ...event.payload, state: diceStates.finished };
   }
 };
 
@@ -117,6 +123,9 @@ export default function Home() {
     diceReducer,
     diceInitialResultsState
   );
+  const [rolls, setRolls] = React.useState([]);
+  const [userIcon] = useLocalStorage('icon', '');
+  const [storedUsername] = useLocalStorage('username', '');
 
   const roll = ({ d6, d8, d10, d12, d20, d100 }: diceNeedsSubmission) => {
     dispatch({ type: 'submit', payload: { d6, d8, d10, d12, d20, d100 } });
@@ -129,16 +138,29 @@ export default function Home() {
       })
       .then((res) => res.json())
       .then(({ nums }) => {
-        dispatch({ type: 'results', payload: nums.data });
+        dispatch({
+          type: 'compute',
+          payload: {
+            data: nums.data,
+            roller: storedUsername,
+            rollerIcon: userIcon,
+          },
+        });
       });
   };
 
+  // connect to socket
   React.useEffect(() => {
     if (name) {
       const ioSocket = io(`/${name}`);
       setSocket(ioSocket);
-      ioSocket.on('other-person-roll', ({ state }) => {
-        dispatch({ type: 'other-person-roll', payload: state });
+      ioSocket.on('roll', ({ state }) => {
+        /**
+         * Note: every socket receives this, including the person that emitted it
+         */
+        dispatch({ type: 'roll', payload: state });
+        // add to history of rolls
+        setRolls((cur) => [...cur, state]);
       });
       return () => {
         ioSocket.close();
@@ -146,13 +168,16 @@ export default function Home() {
     }
   }, [name]);
 
+  // emit rolls
   React.useEffect(() => {
-    if (state.state === 'finished') {
+    if (state.state === 'rolling') {
       if (socket && socket.connected) {
-        socket.emit('other-person-roll', { state });
+        socket.emit('roll', { state });
       }
     }
   }, [state.state]);
+
+  console.log(state);
 
   return (
     <Flex
@@ -168,68 +193,8 @@ export default function Home() {
         <Flex justifyContent="center">
           <Heading as="h2">Results</Heading>
         </Flex>
-        <Flex flexWrap="wrap" justifyContent="space-between">
-          <Flex
-            flexDirection="column"
-            alignItems="center"
-            minWidth={128}
-            height={128}>
-            <Heading as="h3">D6</Heading>
-            {state.d6.dice.map((num, i) => (
-              <p key={`d6-${i}`}>{(num % 6) + 1}</p>
-            ))}
-          </Flex>
-          <Flex
-            flexDirection="column"
-            alignItems="center"
-            minWidth={128}
-            height={128}>
-            <Heading as="h3">D8</Heading>
-            {state.d8.dice.map((num, i) => (
-              <p key={`d8-${i}`}>{(num % 8) + 1}</p>
-            ))}
-          </Flex>
-          <Flex
-            flexDirection="column"
-            alignItems="center"
-            minWidth={128}
-            height={128}>
-            <Heading as="h3">D10</Heading>
-            {state.d10.dice.map((num, i) => (
-              <p key={`d10-${i}`}>{(num % 10) + 1}</p>
-            ))}
-          </Flex>
-          <Flex
-            flexDirection="column"
-            alignItems="center"
-            minWidth={128}
-            height={128}>
-            <Heading as="h3">D12</Heading>
-            {state.d12.dice.map((num, i) => (
-              <p key={`d12-${i}`}>{(num % 12) + 1}</p>
-            ))}
-          </Flex>
-          <Flex
-            flexDirection="column"
-            alignItems="center"
-            minWidth={128}
-            height={128}>
-            <Heading as="h3">D20</Heading>
-            {state.d20.dice.map((num, i) => (
-              <p key={`d20-${i}`}>{(num % 20) + 1}</p>
-            ))}
-          </Flex>
-          <Flex
-            flexDirection="column"
-            alignItems="center"
-            minWidth={128}
-            height={128}>
-            <Heading as="h3">D100</Heading>
-            {state.d100.dice.map((num, i) => (
-              <p key={`d100-${i}`}>{(num % 100) + 1}</p>
-            ))}
-          </Flex>
-        </Flex>
+        <RollResultsTable roll={state} />
+        <RollBubbleManager rolls={rolls} />
       </Box>
       <UserSetupModal />
     </Flex>

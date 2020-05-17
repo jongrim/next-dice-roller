@@ -16,8 +16,8 @@ app.prepare().then(() => {
     const room = io.of(name);
     room.on('connection', (socket) => {
       console.log(`a user connected to ${name}`);
-      socket.on('other-person-roll', (data) => {
-        room.emit('other-person-roll', data);
+      socket.on('roll', (data) => {
+        room.emit('roll', data);
       });
     });
   }

@@ -48,7 +48,10 @@ const AddRollModal = ({ isOpen, onDismiss }) => {
             </Box>
           );
         })}
-        <Button type="button" onClick={() => setDice(dice.concat('6'))} mt={2}>
+        <Button
+          type="button"
+          onClick={() => setDice(dice.concat(['6']))}
+          mt={2}>
           Add another die
         </Button>
         <Label htmlFor="modifier" mt={4}>

@@ -47,7 +47,6 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                       [`d${cur}`]: acc[`d${cur}`] ? acc[`d${cur}`] + 1 : 1,
                     };
                   }, {});
-                  console.log({ needs });
                   onSubmit(needs);
                 }}>
                 Roll
@@ -68,7 +67,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         onDismiss={(e, roll) => {
           e.preventDefault();
           if (roll) {
-            setRolls(rolls.concat(roll));
+            setRolls(rolls.concat([roll]));
           }
           setAddRollIsOpen(false);
         }}

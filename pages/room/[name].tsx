@@ -52,7 +52,13 @@ type DiceEvent =
     }
   | {
       type: 'compute';
-      payload: { data: number[]; roller: string; rollerIcon: string };
+      payload: {
+        data: number[];
+        roller: string;
+        rollerIcon: string;
+        name?: string;
+        modifier?: string;
+      };
     }
   | { type: 'roll'; payload: DiceState };
 
@@ -109,6 +115,8 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
         state: diceStates.rolling,
         roller: event.payload.roller,
         rollerIcon: event.payload.rollerIcon,
+        name: event.payload.name,
+        modifier: event.payload.modifier,
       };
     case 'roll':
       return { ...event.payload, state: diceStates.finished };
@@ -127,7 +135,10 @@ export default function Home() {
   const [userIcon] = useLocalStorage('icon', '');
   const [storedUsername] = useLocalStorage('username', '');
 
-  const roll = ({ d6, d8, d10, d12, d20, d100 }: diceNeedsSubmission) => {
+  const roll = (
+    { d6, d8, d10, d12, d20, d100 }: diceNeedsSubmission,
+    { name, modifier } = { name: '', modifier: '0' }
+  ) => {
     dispatch({ type: 'submit', payload: { d6, d8, d10, d12, d20, d100 } });
     window
       .fetch('/api/random', {
@@ -144,6 +155,8 @@ export default function Home() {
             data: nums.data,
             roller: storedUsername,
             rollerIcon: userIcon,
+            name,
+            modifier,
           },
         });
       });
@@ -177,8 +190,6 @@ export default function Home() {
     }
   }, [state.state]);
 
-  console.log(state);
-
   return (
     <Flex
       as="main"
@@ -186,10 +197,13 @@ export default function Home() {
       pt="60px"
       px={2}
       flexDirection={['column', 'row', 'row']}>
-      <Box as="section" width={['100%', 1 / 4, 1 / 4]}>
+      <Box
+        as="section"
+        width={['100%', 1 / 4, 1 / 4]}
+        sx={{ order: [2, 1, 1] }}>
         <DiceSelectionForm onSubmit={roll} />
       </Box>
-      <Box as="section" mt={4} flex="1">
+      <Box as="section" mt={4} flex="1" sx={{ order: [1, 2, 2] }}>
         <Flex justifyContent="center">
           <Heading as="h2">Results</Heading>
         </Flex>

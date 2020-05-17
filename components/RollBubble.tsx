@@ -53,7 +53,7 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
     return new Promise((resolve) => {
       TweenMax.to(element.current || {}, 0.5, {
         visibility: 'visible',
-        y: -25,
+        y: 25,
         backdropFilter: 'blur(2px)',
         ease: Elastic.easeOut.config(1, 1),
         onComplete: resolve,
@@ -63,6 +63,10 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
   const hide = React.useCallback(() => {
     return new Promise((resolve) => {
       TweenMax.to(element.current || {}, 0.5, {
+        position: 'absolute',
+        width: 0,
+        height: 0,
+        bottom: '50px',
         visibility: 'hidden',
         backdropFilter: 'blur(0px)',
         ease: Elastic.easeOut.config(1, 1),
@@ -78,8 +82,13 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
     },
   });
 
+  let rollName = '';
+  if (roll.name) {
+    rollName += ` ${roll.name}`;
+  }
+
   return (
-    <Card ref={element} sx={{ visibility: 'hidden' }} width="200px" my={2}>
+    <Card ref={element} sx={{ visibility: 'hidden' }} my={2}>
       <Flex alignItems="center">
         <Image
           src={`/SVG/${roll.rollerIcon}`}
@@ -88,7 +97,7 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
           mr={1}
         />
         <Text>
-          <b>{roll.roller}</b> rolled!
+          <b>{roll.roller}</b> rolled{rollName}!
         </Text>
       </Flex>
     </Card>

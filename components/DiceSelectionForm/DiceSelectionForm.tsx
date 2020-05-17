@@ -13,13 +13,20 @@ type diceNeedsSubmission = {
   d100: number;
 };
 
+type configuredRoll = {
+  rollName: string;
+  dice: number[];
+  modifier: string;
+};
+
+type rollInfo = { name: string; modifier: string };
 interface DiceSelectionFormProps {
-  onSubmit: (needs: diceNeedsSubmission) => void;
+  onSubmit: (needs: diceNeedsSubmission, meta?: rollInfo) => void;
 }
 
 const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   const [addRollIsOpen, setAddRollIsOpen] = React.useState(false);
-  const [rolls, setRolls] = React.useState([]);
+  const [rolls, setRolls] = React.useState<configuredRoll[]>([]);
 
   const [d6, setD6] = React.useState('');
   const [d8, setD8] = React.useState('');
@@ -47,7 +54,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                       [`d${cur}`]: acc[`d${cur}`] ? acc[`d${cur}`] + 1 : 1,
                     };
                   }, {});
-                  onSubmit(needs);
+                  onSubmit(needs as diceNeedsSubmission, {
+                    name: roll.rollName,
+                    modifier: roll.modifier,
+                  });
                 }}>
                 Roll
               </Button>

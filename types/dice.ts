@@ -17,4 +17,6 @@ export interface DiceState {
   dice: DiceInterface;
   roller: string;
   rollerIcon: string;
+  name?: string;
+  modifier?: string;
 }

@@ -63,10 +63,7 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
   const hide = React.useCallback(() => {
     return new Promise((resolve) => {
       TweenMax.to(element.current || {}, 0.5, {
-        position: 'absolute',
-        width: 0,
-        height: 0,
-        bottom: '50px',
+        display: 'none',
         visibility: 'hidden',
         backdropFilter: 'blur(0px)',
         ease: Elastic.easeOut.config(1, 1),

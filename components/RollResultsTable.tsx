@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Flex, Heading, Text } from 'rebass';
 import { DiceState } from '../types/dice';
+import { rollTotal } from '../utils/rollMath';
 
 const RollResultsTable = ({ roll }: { roll: DiceState }) => {
   return (
-    <Flex flexDirection="column" alignItems="center" flex="1">
+    <Flex flexDirection="column" alignItems="center" flex="1 0 0%">
       <Heading as="h2">Results</Heading>
       <Flex flexWrap="wrap" justifyContent="space-around">
         {Object.entries(roll.dice).map(([key, val], i) => {
@@ -15,14 +16,13 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                 flexDirection="column"
                 alignItems="center"
                 minWidth={128}
-                height={128}
               >
                 <Heading as="h3">{key}</Heading>
-                {val.dice.map((num, i) => (
-                  <p key={`${key}-${i}`}>
-                    {(num % parseInt(key.substr(1, 1), 10)) + 1}
-                  </p>
-                ))}
+                <Text>
+                  {val.dice
+                    .map((num) => (num % parseInt(key.substr(1), 10)) + 1)
+                    .join(' + ')}
+                </Text>
                 <Text
                   mt={1}
                   pt={1}
@@ -31,16 +31,25 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                   })}
                 >
                   {val.dice.reduce((sum, cur) => {
-                    const num = (cur % parseInt(key.substr(1, 1), 10)) + 1;
+                    const num = (cur % parseInt(key.substr(1), 10)) + 1;
                     return sum + num;
                   }, 0)}
-                  {roll.modifier ? ` + ${roll.modifier}` : ''}
                 </Text>
               </Flex>
             );
           }
           return null;
         })}
+      </Flex>
+      {roll.modifier && (
+        <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
+          <Heading as="h3">Roll Modifier</Heading>
+          <Text>{roll.modifier}</Text>
+        </Flex>
+      )}
+      <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
+        <Heading as="h2">Total</Heading>
+        <Text>{rollTotal(roll)}</Text>
       </Flex>
     </Flex>
   );

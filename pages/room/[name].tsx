@@ -1,7 +1,8 @@
 import * as React from 'react';
+import Link from 'next/link';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Flex } from 'rebass';
+import { Box, Flex, Image, Link as RebassLink } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 
 import UserSetupModal, { UserContext } from '../../components/UserSetupModal';
@@ -9,7 +10,6 @@ import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionF
 import RollBubbleManager from '../../components/RollBubbleManager';
 import RollResultsTable from '../../components/RollResultsTable';
 import RollHistory from '../../components/RollHistory';
-import useLocalStorage from '../../hooks/useLocalStorage';
 
 import { DiceBlock, DiceState, DiceInterface } from '../../types/dice';
 
@@ -39,12 +39,12 @@ const diceInitialResultsState: DiceState = {
 };
 
 type diceNeedsSubmission = {
-  d6: number;
-  d8: number;
-  d10: number;
-  d12: number;
-  d20: number;
-  d100: number;
+  d6?: number;
+  d8?: number;
+  d10?: number;
+  d12?: number;
+  d20?: number;
+  d100?: number;
 };
 
 type DiceEvent =
@@ -78,7 +78,7 @@ const computeResults = (acc: DiceInterface, cur: number): DiceInterface => {
   } else if (acc.d100.dice.length != acc.d100.needs) {
     acc.d100 = updateDiceBlock(acc.d100, cur);
   }
-  return acc;
+  return { ...acc };
 };
 
 function updateDiceBlock(diceBlock: DiceBlock, num: number): DiceBlock {
@@ -91,7 +91,14 @@ function updateDiceBlock(diceBlock: DiceBlock, num: number): DiceBlock {
 const assignNeeds = (needs: { needs: number }): DiceBlock =>
   Object.assign({}, makeDiceBlock(), needs);
 
-const makeDiceNeeds = ({ d6, d8, d10, d12, d20, d100 }): DiceInterface => ({
+const makeDiceNeeds = ({
+  d6,
+  d8,
+  d10,
+  d12,
+  d20,
+  d100,
+}: diceNeedsSubmission): DiceInterface => ({
   d6: assignNeeds({ needs: d6 }),
   d8: assignNeeds({ needs: d8 }),
   d10: assignNeeds({ needs: d10 }),
@@ -138,7 +145,14 @@ export default function Home() {
   const { storedUsername, userIcon } = React.useContext(UserContext);
 
   const roll = (
-    { d6, d8, d10, d12, d20, d100 }: diceNeedsSubmission,
+    {
+      d6 = 0,
+      d8 = 0,
+      d10 = 0,
+      d12 = 0,
+      d20 = 0,
+      d100 = 0,
+    }: diceNeedsSubmission,
     { name, modifier } = { name: '', modifier: '0' }
   ) => {
     dispatch({ type: 'submit', payload: { d6, d8, d10, d12, d20, d100 } });
@@ -193,26 +207,57 @@ export default function Home() {
   }, [state.state]);
 
   return (
-    <Flex
-      as="main"
-      flex="1"
-      pt="60px"
-      px={2}
-      flexDirection={['column', 'row', 'row']}
-    >
-      <Box
-        as="section"
-        width={['100%', 1 / 4, 1 / 4]}
-        sx={{ order: [2, 1, 1] }}
+    <>
+      <Flex
+        height="60px"
+        width="100%"
+        px={3}
+        bg="muted"
+        justifyContent="flex-end"
+        alignItems="center"
+        sx={{
+          boxShadow: `
+  0 0.1px 2.2px rgba(0, 0, 0, 0.02),
+  0 0.1px 5.3px rgba(0, 0, 0, 0.028),
+  0 0.3px 10px rgba(0, 0, 0, 0.035),
+  0 0.4px 17.9px rgba(0, 0, 0, 0.042),
+  0 0.8px 33.4px rgba(0, 0, 0, 0.05),
+  0 2px 80px rgba(0, 0, 0, 0.07)`,
+        }}
       >
-        <DiceSelectionForm onSubmit={roll} />
-      </Box>
-      <Flex as="section" mt={4} flex="1" sx={{ order: [1, 2, 2] }}>
-        <RollResultsTable roll={state} />
-        <RollHistory rolls={rolls} />
+        <Link href="/about">
+          <a href="/about" target="_blank">
+            <Image src="/help-circle.svg" alt="help" />
+          </a>
+        </Link>
       </Flex>
-      <RollBubbleManager rolls={rolls} />
-      <UserSetupModal />
-    </Flex>
+      <Flex
+        as="main"
+        flex="1"
+        minHeight="0"
+        p={3}
+        flexDirection={['column', 'row', 'row']}
+      >
+        <Box
+          as="section"
+          width={['100%', 1 / 2, 1 / 3]}
+          sx={{ order: [2, 1, 1] }}
+        >
+          <DiceSelectionForm onSubmit={roll} />
+        </Box>
+        <Flex
+          as="section"
+          flex="1"
+          sx={{ order: [1, 2, 2] }}
+          flexDirection={['column', 'column', 'row']}
+          height="100%"
+        >
+          <RollResultsTable roll={state} />
+          <RollHistory rolls={rolls} />
+        </Flex>
+        <RollBubbleManager rolls={rolls} />
+        <UserSetupModal />
+      </Flex>
+    </>
   );
 }

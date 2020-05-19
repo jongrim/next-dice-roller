@@ -10,10 +10,10 @@ export const rollTotal = (roll: DiceState): number => {
   return Object.entries(roll.dice)
     .map(([key, val]) => {
       if (val.dice.length > 0) {
-        return diceTypeTotal(val.dice, key.substr(1, 1));
+        return diceTypeTotal(val.dice, key.substr(1));
       } else {
         return 0;
       }
     })
-    .reduce((sum, cur) => sum + cur, Number.parseInt(roll.modifier, 10));
+    .reduce((sum, cur) => sum + cur, Number.parseInt(roll.modifier || '0', 10));
 };

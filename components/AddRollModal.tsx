@@ -7,7 +7,7 @@ const AddRollModal = ({ isOpen, onDismiss }) => {
   const [error, setErrorMessage] = React.useState('');
   const [rollName, setRollName] = React.useState('');
   const [dice, setDice] = React.useState(['6']);
-  const [modifier, setModifier] = React.useState('');
+  const [modifier, setModifier] = React.useState('0');
   const submit = (e) => {
     if (dice.length === 0 || dice.some((d) => !d)) {
       setErrorMessage('You must add dice to the role');
@@ -21,8 +21,13 @@ const AddRollModal = ({ isOpen, onDismiss }) => {
   };
   return (
     <Dialog isOpen={isOpen} onDismiss={onDismiss} aria-label="Add a new roll">
-      <Box as="form">
+      <Heading as="h3">Create a configured roll</Heading>
+      <Text fontSize={1}>
+        Configured rolls can be easily rolled repeatedly from the main screen
+      </Text>
+      <Box as="form" mt={3}>
         <Label htmlFor="rollName">Roll Name</Label>
+        <Text fontSize={1}>Name this roll</Text>
         <Input
           placeholder="Go Aggro"
           value={rollName}
@@ -31,45 +36,48 @@ const AddRollModal = ({ isOpen, onDismiss }) => {
           onChange={(e) => setRollName(e.target.value)}
           mt={2}
         />
-        <Heading as="h5" fontSize={2} mt={3}>
-          Add Dice
-        </Heading>
-        {dice.map((d, i) => {
-          return (
-            <Box mt={2} key={`die-${i}`}>
-              <Label htmlFor={`die-${i}-type`}>Die {i + 1} Type</Label>
-              <Select
-                name={`die-${i}-type`}
-                id={`die-${i}-type`}
-                mt={2}
-                defaultValue="6"
-                value={d}
-                onChange={(e) => {
-                  const newDice = dice.slice();
-                  newDice[i] = e.target.value;
-                  setDice(newDice);
-                }}
-              >
-                <option value="6">6</option>
-                <option value="8">8</option>
-                <option value="10">10</option>
-                <option value="12">12</option>
-                <option value="20">20</option>
-                <option value="100">100</option>
-              </Select>
-            </Box>
-          );
-        })}
-        <Button
-          type="button"
-          onClick={() => setDice(dice.concat(['6']))}
-          mt={2}
-        >
-          Add another die
-        </Button>
-        <Label htmlFor="modifier" mt={4}>
+        <Box mt={3}>
+          <Heading as="h5">Add Dice</Heading>
+          <Text fontSize={1}>
+            Add the types of dice this roll uses (example: 2d6)
+          </Text>
+          {dice.map((d, i) => {
+            return (
+              <Box mt={2} key={`die-${i}`}>
+                <Label htmlFor={`die-${i}-type`}>Die {i + 1} Type</Label>
+                <Select
+                  name={`die-${i}-type`}
+                  id={`die-${i}-type`}
+                  mt={2}
+                  value={d}
+                  onChange={(e) => {
+                    const newDice = dice.slice();
+                    newDice[i] = e.target.value;
+                    setDice(newDice);
+                  }}
+                >
+                  <option value="6">6</option>
+                  <option value="8">8</option>
+                  <option value="10">10</option>
+                  <option value="12">12</option>
+                  <option value="20">20</option>
+                  <option value="100">100</option>
+                </Select>
+              </Box>
+            );
+          })}
+          <Button
+            type="button"
+            onClick={() => setDice(dice.concat(['6']))}
+            mt={2}
+          >
+            Add another die
+          </Button>
+        </Box>
+        <Label htmlFor="modifier" mt={3}>
           Modifier
         </Label>
+        <Text fontSize={1}>Applied to the roll total</Text>
         <Input
           placeholder="Go Aggro"
           type="number"

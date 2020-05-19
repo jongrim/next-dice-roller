@@ -35,14 +35,19 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   const [d20, setD20] = React.useState('');
   const [d100, setD100] = React.useState('');
   return (
-    <Flex py={2} flexDirection="column">
+    <Flex flexDirection="column">
       <Heading as="h3" fontSize={3}>
         Your Configured Rolls
       </Heading>
       <Box mt={2}>
         {rolls.map((roll) => {
           return (
-            <Flex justifyContent="space-between" alignItems="center" mb={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+              key={roll.rollName}
+            >
               <Text key={roll.rollName}>{roll.rollName}</Text>
               <Button
                 type="button"

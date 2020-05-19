@@ -38,11 +38,46 @@ const icons = [
   'Werewolf.svg',
 ];
 
-const UserSetupModal = () => {
+interface UserContextInterface {
+  storedUsername: string;
+  userIcon: string;
+  setStoredUsername: (arg0: string) => void;
+  setUserIcon: (arg0: string) => void;
+}
+
+export const UserContext = React.createContext<UserContextInterface>({
+  storedUsername: '',
+  userIcon: '',
+  setStoredUsername: () => {},
+  setUserIcon: () => {},
+});
+
+export const UserProvider = ({ children }) => {
   const [userIcon, setUserIcon] = useLocalStorage('icon', '');
   const [storedUsername, setStoredUsername] = useLocalStorage('username', '');
+
+  return (
+    <UserContext.Provider
+      value={{
+        storedUsername,
+        setStoredUsername,
+        userIcon,
+        setUserIcon,
+      }}
+    >
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+const UserSetupModal = () => {
+  const {
+    storedUsername,
+    setStoredUsername,
+    userIcon,
+    setUserIcon,
+  } = React.useContext(UserContext);
   const [isOpen, setIsOpen] = React.useState(false);
-  const [username, setUsername] = React.useState('');
 
   React.useEffect(() => {
     if (!storedUsername) {
@@ -54,7 +89,8 @@ const UserSetupModal = () => {
     <Dialog
       isOpen={isOpen}
       onDismiss={() => setIsOpen(false)}
-      aria-label="Form to setup username and select icon">
+      aria-label="Form to setup username and select icon"
+    >
       <Box py={2}>
         <Heading as="h2" fontSize={[3, 4, 5]}>
           Set your username and icon
@@ -68,8 +104,8 @@ const UserSetupModal = () => {
         <Input
           name="username"
           id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={storedUsername}
+          onChange={(e) => setStoredUsername(e.target.value)}
           mt={2}
         />
       </Box>
@@ -81,13 +117,15 @@ const UserSetupModal = () => {
           justifyContent="center"
           height="350px"
           mt={2}
-          sx={{ overflow: 'scroll', border: '1px #f6f6f6 solid' }}>
+          sx={{ overflow: 'scroll', border: '1px #f6f6f6 solid' }}
+        >
           {icons.map((i) => (
             <Flex
               width={1 / 5}
               key={i}
               flexDirection="column"
-              alignItems="center">
+              alignItems="center"
+            >
               <Image
                 src={`/SVG/${i}`}
                 alt={`icon - ${i}`}
@@ -107,9 +145,9 @@ const UserSetupModal = () => {
         mt={2}
         width="100%"
         onClick={() => {
-          setStoredUsername(username);
           setIsOpen(false);
-        }}>
+        }}
+      >
         Done
       </Button>
     </Dialog>

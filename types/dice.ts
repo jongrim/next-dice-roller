@@ -19,4 +19,5 @@ export interface DiceState {
   rollerIcon: string;
   name?: string;
   modifier?: string;
+  id: string;
 }

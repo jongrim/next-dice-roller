@@ -1,13 +1,14 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Flex, Heading } from 'rebass';
+import { Box, Flex } from 'rebass';
+import { v4 as uuidv4 } from 'uuid';
 
-import UserSetupModal from '../../components/UserSetupModal';
+import UserSetupModal, { UserContext } from '../../components/UserSetupModal';
 import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
 import RollBubbleManager from '../../components/RollBubbleManager';
 import RollResultsTable from '../../components/RollResultsTable';
-import Sidebar from '../../components/Sidebar';
+import RollHistory from '../../components/RollHistory';
 import useLocalStorage from '../../hooks/useLocalStorage';
 
 import { DiceBlock, DiceState, DiceInterface } from '../../types/dice';
@@ -34,6 +35,7 @@ const diceInitialResultsState: DiceState = {
   },
   roller: 'anonymous',
   rollerIcon: '',
+  id: '',
 };
 
 type diceNeedsSubmission = {
@@ -117,6 +119,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
         rollerIcon: event.payload.rollerIcon,
         name: event.payload.name,
         modifier: event.payload.modifier,
+        id: uuidv4(),
       };
     case 'roll':
       return { ...event.payload, state: diceStates.finished };
@@ -132,8 +135,7 @@ export default function Home() {
     diceInitialResultsState
   );
   const [rolls, setRolls] = React.useState([]);
-  const [userIcon] = useLocalStorage('icon', '');
-  const [storedUsername] = useLocalStorage('username', '');
+  const { storedUsername, userIcon } = React.useContext(UserContext);
 
   const roll = (
     { d6, d8, d10, d12, d20, d100 }: diceNeedsSubmission,
@@ -196,20 +198,20 @@ export default function Home() {
       flex="1"
       pt="60px"
       px={2}
-      flexDirection={['column', 'row', 'row']}>
+      flexDirection={['column', 'row', 'row']}
+    >
       <Box
         as="section"
         width={['100%', 1 / 4, 1 / 4]}
-        sx={{ order: [2, 1, 1] }}>
+        sx={{ order: [2, 1, 1] }}
+      >
         <DiceSelectionForm onSubmit={roll} />
       </Box>
-      <Box as="section" mt={4} flex="1" sx={{ order: [1, 2, 2] }}>
-        <Flex justifyContent="center">
-          <Heading as="h2">Results</Heading>
-        </Flex>
+      <Flex as="section" mt={4} flex="1" sx={{ order: [1, 2, 2] }}>
         <RollResultsTable roll={state} />
-        <RollBubbleManager rolls={rolls} />
-      </Box>
+        <RollHistory rolls={rolls} />
+      </Flex>
+      <RollBubbleManager rolls={rolls} />
       <UserSetupModal />
     </Flex>
   );

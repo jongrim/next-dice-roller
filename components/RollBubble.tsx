@@ -41,7 +41,7 @@ const RollBubbleMachine = Machine<RollBubbleMachineSchema, RollBubbleEvent>({
     },
     visible: {
       after: {
-        3000: 'hiding',
+        5000: 'hiding',
       },
     },
   },
@@ -53,7 +53,7 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
     return new Promise((resolve) => {
       TweenMax.to(element.current || {}, 0.5, {
         visibility: 'visible',
-        y: 25,
+        y: -25,
         backdropFilter: 'blur(2px)',
         ease: Elastic.easeOut.config(1, 1),
         onComplete: resolve,

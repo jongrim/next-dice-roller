@@ -42,7 +42,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
       <Box mt={2}>
         {rolls.map((roll) => {
           return (
-            <Flex justifyContent="space-between" alignItems="center">
+            <Flex justifyContent="space-between" alignItems="center" mb={2}>
               <Text key={roll.rollName}>{roll.rollName}</Text>
               <Button
                 type="button"
@@ -58,7 +58,8 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                     name: roll.rollName,
                     modifier: roll.modifier,
                   });
-                }}>
+                }}
+              >
                 Roll
               </Button>
             </Flex>
@@ -68,7 +69,8 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           width="100%"
           type="button"
           onClick={() => setAddRollIsOpen(true)}
-          mt={2}>
+          mt={2}
+        >
           Add a Roll
         </Button>
       </Box>
@@ -85,7 +87,8 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
       <Box
         as="form"
         sx={(styles) => ({ borderTop: `1px ${styles.colors.text} solid` })}
-        mt={3}>
+        mt={3}
+      >
         <Heading as="h3" fontSize={3} mt={2}>
           Assorted Dice
         </Heading>
@@ -176,7 +179,8 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               d20: d20 ? Number.parseInt(d20, 10) : 0,
               d100: d100 ? Number.parseInt(d100, 10) : 0,
             });
-          }}>
+          }}
+        >
           Roll dice
         </Button>
       </Box>

@@ -6,10 +6,11 @@ import { DiceState } from '../types/dice';
 const RollBubbleManager = ({ rolls }: { rolls: DiceState[] }) => {
   return (
     <Flex
-      sx={{ position: 'absolute', top: '15px', right: '50px' }}
-      flexDirection="column-reverse">
+      sx={{ position: 'absolute', bottom: '15px', right: '50px' }}
+      flexDirection="column-reverse"
+    >
       {rolls.map((roll, i) => (
-        <RollBubble key={`${roll.roller}-roll-${i}`} roll={roll} />
+        <RollBubble key={`${roll.id}`} roll={roll} />
       ))}
     </Flex>
   );

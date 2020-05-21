@@ -18,12 +18,13 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                 minWidth={128}
               >
                 <Heading as="h3">{key}</Heading>
-                <Text>
+                <Text fontSize={3}>
                   {val.dice
                     .map((num) => (num % parseInt(key.substr(1), 10)) + 1)
                     .join(' + ')}
                 </Text>
                 <Text
+                  fontSize={3}
                   mt={1}
                   pt={1}
                   sx={(styles) => ({
@@ -44,12 +45,12 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
       {roll.modifier && (
         <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
           <Heading as="h3">Roll Modifier</Heading>
-          <Text>{roll.modifier}</Text>
+          <Text fontSize={3}>{roll.modifier}</Text>
         </Flex>
       )}
       <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
-        <Heading as="h2">Total</Heading>
-        <Text>{rollTotal(roll)}</Text>
+        <Heading as="h3">Total</Heading>
+        <Text fontSize={3}>{rollTotal(roll)}</Text>
       </Flex>
     </Flex>
   );

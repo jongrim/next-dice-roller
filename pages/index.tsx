@@ -16,11 +16,9 @@ export default function Home() {
           mt={5}
           justifyContent="center"
           alignItems="center"
-          flexDirection={['column', 'column', 'row']}>
-          <Box
-            width={['380px']}
-            sx={{ order: [2, 2, 1] }}
-            textAlign={['center', 'center', 'left']}>
+          flexDirection={['column', 'column', 'row']}
+        >
+          <Box width={['380px']} sx={{ order: [2, 2, 1] }}>
             <Heading as="h1" fontSize={[5, 6, 7]}>
               Roll With Me
             </Heading>
@@ -50,7 +48,8 @@ export default function Home() {
                 .then(({ name }) => {
                   Router.push(`/room/${name}`);
                 });
-            }}>
+            }}
+          >
             Make a new room
           </Button>
         </Flex>

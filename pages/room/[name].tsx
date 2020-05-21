@@ -2,10 +2,12 @@ import * as React from 'react';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Flex, Image, Link as RebassLink } from 'rebass';
+import { Box, Button, Flex, Image } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Tooltip } from 'react-tippy';
 
-import UserSetupModal, { UserContext } from '../../components/UserSetupModal';
+import UserSetupModal from '../../components/UserSetupModal';
 import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
 import RollBubbleManager from '../../components/RollBubbleManager';
 import RollResultsTable from '../../components/RollResultsTable';
@@ -142,7 +144,8 @@ export default function Home() {
     diceInitialResultsState
   );
   const [rolls, setRolls] = React.useState([]);
-  const { storedUsername, userIcon } = React.useContext(UserContext);
+  const [userIcon, setUserIcon] = React.useState('');
+  const [storedUsername, setStoredUsername] = React.useState('');
 
   const roll = (
     {
@@ -189,7 +192,7 @@ export default function Home() {
          */
         dispatch({ type: 'roll', payload: state });
         // add to history of rolls
-        setRolls((cur) => [...cur, state]);
+        setRolls((cur) => [state, ...cur]);
       });
       return () => {
         ioSocket.close();
@@ -225,11 +228,31 @@ export default function Home() {
   0 2px 80px rgba(0, 0, 0, 0.07)`,
         }}
       >
-        <Link href="/about">
-          <a href="/about" target="_blank">
-            <Image src="/help-circle.svg" alt="help" />
-          </a>
-        </Link>
+        <Box mr="auto">
+          <Link href="/">
+            <a href="/" target="_blank">
+              <Image src="/home.svg" alt="Home" />
+            </a>
+          </Link>
+        </Box>
+        <Tooltip arrow title="Copy room URL">
+          <CopyToClipboard
+            text={`https://obscure-ridge-20711.herokuapp.com/${name}`}
+          >
+            <Button variant="clear" onClick={() => {}}>
+              <Image src="/copy.svg" alt="copy" />
+            </Button>
+          </CopyToClipboard>
+        </Tooltip>
+        <Box ml={2}>
+          <Tooltip arrow title="About">
+            <Link href="/about">
+              <a href="/about" target="_blank">
+                <Image src="/help-circle.svg" alt="help" />
+              </a>
+            </Link>
+          </Tooltip>
+        </Box>
       </Flex>
       <Flex
         as="main"
@@ -256,7 +279,12 @@ export default function Home() {
           <RollHistory rolls={rolls} />
         </Flex>
         <RollBubbleManager rolls={rolls} />
-        <UserSetupModal />
+        <UserSetupModal
+          storedUsername={storedUsername}
+          setStoredUsername={setStoredUsername}
+          userIcon={userIcon}
+          setUserIcon={setUserIcon}
+        />
       </Flex>
     </>
   );

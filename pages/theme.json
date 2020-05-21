@@ -21,7 +21,9 @@
     "background": "#fff",
     "primary": "#609",
     "secondary": "#306",
-    "muted": "#f6f6f6"
+    "muted": "#f6f6f6",
+    "danger": "#C20114",
+    "special": "#3075AB"
   },
   "forms": {
     "label": {
@@ -118,13 +120,38 @@
       "bg": "transparent",
       "color": "text",
       "cursor": "pointer",
-      "border": "1px #000 solid"
+      "border": "1px #000 solid",
+      ":disabled": {
+        "bg": "muted",
+        "cursor": "default",
+        "border": "1px #f6f6f6 solid"
+      }
+    },
+    "clear": {
+      "bg": "transparent",
+      "color": "text",
+      "cursor": "pointer"
+    },
+    "secondary": {
+      "bg": "secondary",
+      "color": "white",
+      "cursor": "pointer"
+    },
+    "danger": {
+      "bg": "danger",
+      "color": "white",
+      "cursor": "pointer"
+    },
+    "special": {
+      "bg": "special",
+      "color": "white",
+      "cursor": "pointer"
     }
   },
   "variants": {
     "card": {
       "padding": 2,
-      "border": "1px muted solid",
+      "border": "1px #f6f6f6 solid",
       "borderRadius": "12px",
       "boxShadow": "0 0px 0.7px rgba(0, 0, 0, 0.042), 0 0px 1.7px rgba(0, 0, 0, 0.061), 0 0px 3.1px rgba(0, 0, 0, 0.075), 0 0px 5.6px rgba(0, 0, 0, 0.089), 0 0px 10.4px rgba(0, 0, 0, 0.108), 0 0px 25px rgba(0, 0, 0, 0.15)"
     }

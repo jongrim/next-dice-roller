@@ -3,8 +3,6 @@ import { Dialog } from '@reach/dialog';
 import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 
-import useLocalStorage from '../hooks/useLocalStorage';
-
 const icons = [
   'Adventure_Map.svg',
   'Crystal_Shard.svg',
@@ -38,45 +36,19 @@ const icons = [
   'Werewolf.svg',
 ];
 
-interface UserContextInterface {
+interface UserSetupModalProps {
   storedUsername: string;
   userIcon: string;
   setStoredUsername: (arg0: string) => void;
   setUserIcon: (arg0: string) => void;
 }
 
-export const UserContext = React.createContext<UserContextInterface>({
-  storedUsername: '',
-  userIcon: '',
-  setStoredUsername: () => {},
-  setUserIcon: () => {},
-});
-
-export const UserProvider = ({ children }) => {
-  const [userIcon, setUserIcon] = useLocalStorage('icon', '');
-  const [storedUsername, setStoredUsername] = useLocalStorage('username', '');
-
-  return (
-    <UserContext.Provider
-      value={{
-        storedUsername,
-        setStoredUsername,
-        userIcon,
-        setUserIcon,
-      }}
-    >
-      {children}
-    </UserContext.Provider>
-  );
-};
-
-const UserSetupModal = () => {
-  const {
-    storedUsername,
-    setStoredUsername,
-    userIcon,
-    setUserIcon,
-  } = React.useContext(UserContext);
+const UserSetupModal: React.FC<UserSetupModalProps> = ({
+  storedUsername,
+  setStoredUsername,
+  userIcon,
+  setUserIcon,
+}) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -131,7 +103,7 @@ const UserSetupModal = () => {
                 alt={`icon - ${i}`}
                 height="80px"
                 p={2}
-                onClick={(e) => setUserIcon(i)}
+                onClick={() => setUserIcon(i)}
                 sx={{
                   backgroundColor: userIcon === i ? '#eee' : 'background',
                   cursor: 'pointer',

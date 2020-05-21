@@ -3,11 +3,18 @@ import { Dialog } from '@reach/dialog';
 import { Box, Button, Heading, Text } from 'rebass';
 import { Label, Input, Select } from '@rebass/forms';
 
-const AddRollModal = ({ isOpen, onDismiss }) => {
+import { configuredRoll } from './DiceSelectionForm/DiceSelectionForm';
+
+interface AddRollModalProps {
+  isOpen: boolean;
+  onDismiss: (e: React.SyntheticEvent, roll?: configuredRoll) => void;
+}
+
+const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
   const [error, setErrorMessage] = React.useState('');
   const [rollName, setRollName] = React.useState('');
   const [dice, setDice] = React.useState(['6']);
-  const [modifier, setModifier] = React.useState('0');
+  const [modifier, setModifier] = React.useState('');
   const submit = (e) => {
     if (dice.length === 0 || dice.some((d) => !d)) {
       setErrorMessage('You must add dice to the role');
@@ -39,7 +46,8 @@ const AddRollModal = ({ isOpen, onDismiss }) => {
         <Box mt={3}>
           <Heading as="h5">Add Dice</Heading>
           <Text fontSize={1}>
-            Add the types of dice this roll uses (example: 2d6)
+            Add dice to the roll. Use the dropdown to choose the die type. Click
+            the "Add another die" button to add more dice to this roll.
           </Text>
           {dice.map((d, i) => {
             return (
@@ -79,7 +87,7 @@ const AddRollModal = ({ isOpen, onDismiss }) => {
         </Label>
         <Text fontSize={1}>Applied to the roll total</Text>
         <Input
-          placeholder="Go Aggro"
+          placeholder="0"
           type="number"
           step={1}
           value={modifier}

@@ -24,11 +24,14 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
         </Text>
       </Flex>
       <Box flex="1" minHeight="0" height="100%" sx={{ overflow: 'scroll' }}>
-        {rolls.reverse().map((roll) => (
+        {rolls.map((roll) => (
           <Box key={`roll-${roll.id}`}>
             <Tooltip
               arrow
               theme="light"
+              position="bottom"
+              distance={-30}
+              trigger="click"
               html={
                 <Box sx={{ overflow: 'scroll' }}>
                   {Object.entries(roll.dice).map(([key, val], i) => {

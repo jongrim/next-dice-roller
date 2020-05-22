@@ -4,6 +4,7 @@ export interface DiceBlock {
 }
 
 export interface DiceInterface {
+  d4: DiceBlock;
   d6: DiceBlock;
   d8: DiceBlock;
   d10: DiceBlock;

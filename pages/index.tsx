@@ -8,8 +8,12 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Roll Together</title>
+        <title>Roll With Me</title>
         <link rel="icon" href="/favicon.ico" />
+        <meta
+          name="description"
+          content="Roll dice with friends using an easy web application where everyone can see the results in real time."
+        />
       </Head>
       <Flex as="main" flexDirection="column" flex="1">
         <Flex

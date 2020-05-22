@@ -6,14 +6,14 @@ const About = () => {
     <Flex flexDirection="column" flex="1" alignItems="center" p={3}>
       <Box width="100%" maxWidth="960px">
         <Heading as="h1" fontSize={5}>
-          About Roll Dice With Me
+          About Roll With Me
         </Heading>
         <Text>
-          Roll Dice With Me is a collaborative online dice roller. You can use
-          it to simulate rolling dice for various games. The results of each
-          roll are shared to every person connected to the room and will be
-          viewed in real time. Each user is also able to view each roll made
-          since they joined the room.
+          Roll With Me is a collaborative online dice roller. You can use it to
+          simulate rolling dice for various games. The results of each roll are
+          shared to every person connected to the room and will be viewed in
+          real time. Each user is also able to view each roll made since they
+          joined the room.
         </Text>
         <Heading id="setting-up-a-room" as="h2" mt={3} fontSize={4}>
           Setting up a room
@@ -36,10 +36,10 @@ const About = () => {
           Dice selection
         </Heading>
         <Text>
-          A powerful feature of Roll Dice With Me is being able to set up your
-          rolls for quick access. This is available in the "Your Configured
-          Rolls" area. To add a roll, click "Add a Roll" and complete the form
-          that appears. You can name the roll, such as after the stat or move it
+          A powerful feature of Roll With Me is being able to set up your rolls
+          for quick access. This is available in the "Your Configured Rolls"
+          area. To add a roll, click "Add a Roll" and complete the form that
+          appears. You can name the roll, such as after the stat or move it
           represents, select the type of dice that roll uses, and add any static
           modifiers that apply to the roll. When finished, click "Done". Your
           configured roll is now available on the main screen. You can roll it

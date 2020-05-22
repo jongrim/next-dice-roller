@@ -28,6 +28,7 @@ const makeDiceBlock = (): DiceBlock => ({ dice: [], needs: 0 });
 const diceInitialResultsState: DiceState = {
   state: diceStates.pending,
   dice: {
+    d4: { ...makeDiceBlock() },
     d6: { ...makeDiceBlock() },
     d8: { ...makeDiceBlock() },
     d10: { ...makeDiceBlock() },
@@ -41,6 +42,7 @@ const diceInitialResultsState: DiceState = {
 };
 
 type diceNeedsSubmission = {
+  d4?: number;
   d6?: number;
   d8?: number;
   d10?: number;
@@ -94,6 +96,7 @@ const assignNeeds = (needs: { needs: number }): DiceBlock =>
   Object.assign({}, makeDiceBlock(), needs);
 
 const makeDiceNeeds = ({
+  d4,
   d6,
   d8,
   d10,
@@ -101,6 +104,7 @@ const makeDiceNeeds = ({
   d20,
   d100,
 }: diceNeedsSubmission): DiceInterface => ({
+  d4: assignNeeds({ needs: d4 }),
   d6: assignNeeds({ needs: d6 }),
   d8: assignNeeds({ needs: d8 }),
   d10: assignNeeds({ needs: d10 }),

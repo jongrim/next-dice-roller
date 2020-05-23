@@ -6,34 +6,35 @@ context('Rolling dice', () => {
     cy.findByText('Done').click();
   });
 
-  it('can roll dice through assorted dice', () => {
-    const dice = [
-      {
-        type: 'd6',
-        modifier: '0',
-      },
-      {
-        type: 'd8',
-        modifier: '2',
-      },
-      {
-        type: 'd10',
-        modifier: '0',
-      },
-      {
-        type: 'd12',
-        modifier: '3',
-      },
-      {
-        type: 'd20',
-        modifier: '0',
-      },
-      {
-        type: 'd100',
-        modifier: '-5',
-      },
-    ];
-    dice.forEach((die) => {
+  const dice = [
+    {
+      type: 'd6',
+      modifier: '0',
+    },
+    {
+      type: 'd8',
+      modifier: '2',
+    },
+    {
+      type: 'd10',
+      modifier: '0',
+    },
+    {
+      type: 'd12',
+      modifier: '3',
+    },
+    {
+      type: 'd20',
+      modifier: '0',
+    },
+    {
+      type: 'd100',
+      modifier: '-5',
+    },
+  ];
+
+  dice.forEach((die) => {
+    it(`can roll ${die.type} through assorted dice`, () => {
       cy.findByLabelText(`Number of ${die.type}`).type('2');
       cy.findByLabelText('Modifier').click().type(die.modifier);
       cy.findByText('Roll dice').click();
@@ -60,7 +61,9 @@ context('Rolling dice', () => {
       cy.findByTestId(`roll-bubble-2${die.type} + ${die.modifier}`).within(
         () => {
           cy.findByText(`cypress`);
-          cy.findByText(`rolled 2${die.type} + ${die.modifier}!`);
+          cy.findByTestId('roll-bubble-roll-name').within(() => {
+            cy.findByText(`rolled 2${die.type} + ${die.modifier}!`);
+          });
         }
       );
       cy.findByLabelText(`Number of ${die.type}`).clear();

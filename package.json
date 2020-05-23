@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "cross-env NODE_ENV=production node server.js",
     "test": "jest",
-    "cy": "yarn run cypress open"
+    "cy": "yarn run cypress open",
+    "cypress:ci": "yarn start & wait-on http://localhost:3000 && yarn run cypress run"
   },
   "dependencies": {
     "@reach/dialog": "^0.10.2",
@@ -47,9 +48,15 @@
     "eslint-plugin-react": "^7.20.0",
     "jest": "^26.0.1",
     "nodemon": "^2.0.3",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "wait-on": "^5.0.0"
   },
   "engines": {
-    "node": ">12.X"
+    "node": ">=12.X"
+  },
+  "jest": {
+    "testMatch": [
+      "**/*.test.[jt]s?(x)"
+    ]
   }
 }

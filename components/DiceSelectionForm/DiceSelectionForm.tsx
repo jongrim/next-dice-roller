@@ -379,6 +379,20 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           mt={2}
           onClick={(e) => {
             e.preventDefault();
+            const dice = {
+              d6: d6 ? Number.parseInt(d6, 10) : 0,
+              d8: d8 ? Number.parseInt(d8, 10) : 0,
+              d10: d10 ? Number.parseInt(d10, 10) : 0,
+              d12: d12 ? Number.parseInt(d12, 10) : 0,
+              d20: d20 ? Number.parseInt(d20, 10) : 0,
+              d100: d100 ? Number.parseInt(d100, 10) : 0,
+            };
+            const modifier = assortedModifier || '0';
+            const name = Object.entries(dice)
+              .filter(([key, val]) => val !== 0)
+              .map(([key, val]) => `${val}${key}`)
+              .join(', ')
+              .concat(` + ${modifier}`);
             onSubmit(
               {
                 d6: d6 ? Number.parseInt(d6, 10) : 0,
@@ -388,7 +402,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                 d20: d20 ? Number.parseInt(d20, 10) : 0,
                 d100: d100 ? Number.parseInt(d100, 10) : 0,
               },
-              { name: 'Ad Hoc', modifier: assortedModifier || '0' }
+              { name, modifier }
             );
           }}
         >

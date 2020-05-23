@@ -6,7 +6,8 @@
     "dev": "nodemon server.js",
     "build": "next build",
     "start": "cross-env NODE_ENV=production node server.js",
-    "test": "jest"
+    "test": "jest",
+    "cy": "yarn run cypress open"
   },
   "dependencies": {
     "@reach/dialog": "^0.10.2",
@@ -34,11 +35,14 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.9.0",
+    "@testing-library/cypress": "^6.0.0",
     "@types/node": "^13.13.5",
     "@types/react": "^16.9.34",
     "@types/socket.io-client": "^1.4.32",
+    "@types/testing-library__cypress": "^5.0.5",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
+    "cypress": "^4.6.0",
     "eslint": "^7.0.0",
     "eslint-plugin-react": "^7.20.0",
     "jest": "^26.0.1",

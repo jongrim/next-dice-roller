@@ -93,7 +93,7 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
           sx={{ width: 48, height: 48, borderRadius: 999 }}
           mr={1}
         />
-        <Text>
+        <Text data-testid={`roll-bubble-${roll.name}`}>
           <b>{roll.roller}</b> rolled{rollName}!
         </Text>
       </Flex>

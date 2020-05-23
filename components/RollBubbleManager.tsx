@@ -6,6 +6,7 @@ import { DiceState } from '../types/dice';
 const RollBubbleManager = ({ rolls }: { rolls: DiceState[] }) => {
   return (
     <Flex
+      data-testid="roll-bubbles"
       sx={{ position: 'absolute', bottom: '15px', right: '50px' }}
       flexDirection="column-reverse"
     >

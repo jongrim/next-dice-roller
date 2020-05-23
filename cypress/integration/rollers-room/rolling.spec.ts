@@ -1,6 +1,5 @@
 context('Rolling dice', () => {
   beforeEach(() => {
-    cy.viewport(1200, 800);
     cy.visit('http://localhost:3000/');
     cy.findByText('Make a new room').click();
     cy.findByLabelText('Username').type('cypress');

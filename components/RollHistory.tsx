@@ -24,45 +24,48 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
         </Text>
       </Flex>
       <Box flex="1" minHeight="0" height="100%" sx={{ overflow: 'scroll' }}>
-        {rolls.map((roll) => (
-          <Box key={`roll-${roll.id}`}>
-            <Tooltip
-              arrow
-              theme="light"
-              position="bottom"
-              distance={-30}
-              trigger="click"
-              html={
-                <Box sx={{ overflow: 'scroll' }}>
-                  {Object.entries(roll.dice).map(([key, val], i) => {
-                    if (val.dice.length > 0) {
-                      return (
-                        <Box key={`rollHistory-${roll.id}-${i}`}>
-                          <Text fontSize={2}>{key}</Text>
-                          <Flex alignItems="center">
-                            <Text key={`${key}-${i}`}>
-                              {val.dice
-                                .map(
-                                  (num) =>
-                                    (num % parseInt(key.substr(1), 10)) + 1
-                                )
-                                .join(', ')}
-                            </Text>
-                          </Flex>
-                        </Box>
-                      );
-                    }
-                    return null;
-                  })}
-                  {roll.modifier && (
-                    <Box>
-                      <Text>Roll Modifier</Text>
-                      <Text>{roll.modifier}</Text>
-                    </Box>
-                  )}
-                </Box>
-              }
-            >
+        {rolls.map((roll, i) => (
+          <Tooltip
+            arrow
+            key={`roll-${roll.id}`}
+            theme="light"
+            position="bottom"
+            distance={-30}
+            trigger="click"
+            html={
+              <Box
+                data-testid={`roll-history-popup-${i}`}
+                sx={{ overflow: 'scroll' }}
+              >
+                {Object.entries(roll.dice).map(([key, val], i) => {
+                  if (val.dice.length > 0) {
+                    return (
+                      <Box key={`rollHistory-${roll.id}-${i}`}>
+                        <Text fontSize={2}>{key}</Text>
+                        <Flex alignItems="center">
+                          <Text key={`${key}-${i}`}>
+                            {val.dice
+                              .map(
+                                (num) => (num % parseInt(key.substr(1), 10)) + 1
+                              )
+                              .join(', ')}
+                          </Text>
+                        </Flex>
+                      </Box>
+                    );
+                  }
+                  return null;
+                })}
+                {roll.modifier && (
+                  <Box>
+                    <Text>Roll Modifier</Text>
+                    <Text>{roll.modifier}</Text>
+                  </Box>
+                )}
+              </Box>
+            }
+          >
+            <Box data-testid={`roll-history-item-${i}`}>
               <Flex
                 py={2}
                 sx={{
@@ -80,8 +83,8 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
                   {rollTotal(roll)}
                 </Text>
               </Flex>
-            </Tooltip>
-          </Box>
+            </Box>
+          </Tooltip>
         ))}
       </Box>
     </Flex>

@@ -5,7 +5,13 @@ import { rollTotal } from '../utils/rollMath';
 
 const RollResultsTable = ({ roll }: { roll: DiceState }) => {
   return (
-    <Flex flexDirection="column" alignItems="center" flex="1 0 0%">
+    <Flex
+      as="section"
+      data-testid="roll-results-column"
+      flexDirection="column"
+      alignItems="center"
+      flex="1 0 0%"
+    >
       <Heading as="h2">Results</Heading>
       <Flex flexWrap="wrap" justifyContent="space-around">
         {Object.entries(roll.dice).map(([key, val], i) => {
@@ -18,7 +24,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                 minWidth={128}
               >
                 <Heading as="h3">{key}</Heading>
-                <Text fontSize={3}>
+                <Text data-testid={`dice-results-${key}`} fontSize={3}>
                   {val.dice
                     .map((num) => (num % parseInt(key.substr(1), 10)) + 1)
                     .join(' + ')}

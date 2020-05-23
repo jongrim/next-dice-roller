@@ -273,7 +273,6 @@ export default function Home() {
           <DiceSelectionForm onSubmit={roll} />
         </Box>
         <Flex
-          as="section"
           flex="1"
           sx={{ order: [1, 2, 2] }}
           flexDirection={['column', 'column', 'row']}

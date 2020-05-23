@@ -53,5 +53,10 @@
   },
   "engines": {
     "node": ">=12.X"
+  },
+  "jest": {
+    "testMatch": [
+      "**/*.test.[jt]s?(x)"
+    ]
   }
 }

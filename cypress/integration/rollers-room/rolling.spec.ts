@@ -60,7 +60,9 @@ context('Rolling dice', () => {
       cy.findByTestId(`roll-bubble-2${die.type} + ${die.modifier}`).within(
         () => {
           cy.findByText(`cypress`);
-          cy.findByText(`rolled 2${die.type} + ${die.modifier}!`);
+          cy.findByTestId('roll-bubble-roll-name').within(() => {
+            cy.findByText(`rolled 2${die.type} + ${die.modifier}!`);
+          });
         }
       );
       cy.findByLabelText(`Number of ${die.type}`).clear();

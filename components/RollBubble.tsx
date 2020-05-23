@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { TweenMax, Elastic } from 'gsap';
-import { Card, Flex, Image, Text } from 'rebass';
+import { Box, Card, Flex, Image, Text } from 'rebass';
 import { DiceState } from '../types/dice';
 
 interface RollBubbleMachineSchema {
@@ -93,9 +93,10 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
           sx={{ width: 48, height: 48, borderRadius: 999 }}
           mr={1}
         />
-        <Text data-testid={`roll-bubble-${roll.name}`}>
-          <b>{roll.roller}</b> rolled{rollName}!
-        </Text>
+        <Box data-testid={`roll-bubble-${roll.name}`}>
+          <Text fontWeight="bold">{roll.roller}</Text>
+          <Text data-testid="roll-bubble-roll-name">{` rolled${rollName}!`}</Text>
+        </Box>
       </Flex>
     </Card>
   );

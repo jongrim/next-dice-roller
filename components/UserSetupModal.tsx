@@ -1,55 +1,19 @@
 import * as React from 'react';
 import { Dialog } from '@reach/dialog';
-import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
+import { Box, Button, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
-
-const icons = [
-  'Adventure_Map.svg',
-  'Crystal_Shard.svg',
-  'Food.svg',
-  'Knight.svg',
-  'Potion.svg',
-  'Treant.svg',
-  'Armor.svg',
-  'Destructive_Magic.svg',
-  'Grim_Reaper.svg',
-  'Medusa.svg',
-  'Sorceress.svg',
-  'Unicorn.svg',
-  'Bow_Arrow.svg',
-  'Dragon_Egg.svg',
-  'Helmet.svg',
-  'Monster.svg',
-  'Spell_Book.svg',
-  'Viking.svg',
-  'Castle.svg',
-  'Elf.svg',
-  'Item_Bag.svg',
-  'Orc.svg',
-  'Spell_Scroll.svg',
-  'Villager.svg',
-  'Centaur.svg',
-  'Fairy.svg',
-  'King.svg',
-  'Poison_Spider.svg',
-  'Sword.svg',
-  'Werewolf.svg',
-];
 
 interface UserSetupModalProps {
   storedUsername: string;
-  userIcon: string;
   setStoredUsername: (arg0: string) => void;
-  setUserIcon: (arg0: string) => void;
 }
 
 const UserSetupModal: React.FC<UserSetupModalProps> = ({
   storedUsername,
   setStoredUsername,
-  userIcon,
-  setUserIcon,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [error, setError] = React.useState('');
 
   React.useEffect(() => {
     if (!storedUsername) {
@@ -60,18 +24,24 @@ const UserSetupModal: React.FC<UserSetupModalProps> = ({
   return (
     <Dialog
       isOpen={isOpen}
-      onDismiss={() => setIsOpen(false)}
+      onDismiss={() => {
+        if (storedUsername) {
+          setIsOpen(false);
+        } else {
+          setError('Please enter a username for this room');
+        }
+      }}
       aria-label="Form to setup username and select icon"
     >
       <Box py={2}>
         <Heading as="h2" fontSize={[3, 4, 5]}>
-          Set your username and icon
+          Set your username
         </Heading>
         <Text fontSize={2}>
-          This can be changed anytime from your profile page
+          Your username is specific to this room and set each time you enter
         </Text>
       </Box>
-      <Box mt={2}>
+      <Box as="form" mt={2}>
         <Label htmlFor="username">Username</Label>
         <Input
           name="username"
@@ -79,49 +49,29 @@ const UserSetupModal: React.FC<UserSetupModalProps> = ({
           value={storedUsername}
           onChange={(e) => setStoredUsername(e.target.value)}
           mt={2}
+          required
         />
-      </Box>
-      <Box mt={2}>
-        <Label htmlFor="icon">User Icon</Label>
-        <Input type="hidden" name="icon" value={userIcon} />
-        <Flex
-          flexWrap="wrap"
-          justifyContent="center"
-          height="350px"
+        {error && (
+          <Text fontSize={1} color="danger" mt={1}>
+            {error}
+          </Text>
+        )}
+        <Button
           mt={2}
-          sx={{ overflow: 'scroll', border: '1px #f6f6f6 solid' }}
+          width="100%"
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            if (storedUsername) {
+              setIsOpen(false);
+            } else {
+              setError('Please enter a username for this room');
+            }
+          }}
         >
-          {icons.map((i) => (
-            <Flex
-              width={1 / 5}
-              key={i}
-              flexDirection="column"
-              alignItems="center"
-            >
-              <Image
-                src={`/SVG/${i}`}
-                alt={`icon - ${i}`}
-                height="80px"
-                p={2}
-                onClick={() => setUserIcon(i)}
-                sx={{
-                  backgroundColor: userIcon === i ? '#eee' : 'background',
-                  cursor: 'pointer',
-                }}
-              />
-            </Flex>
-          ))}
-        </Flex>
+          Done
+        </Button>
       </Box>
-      <Button
-        mt={2}
-        width="100%"
-        onClick={() => {
-          setIsOpen(false);
-        }}
-      >
-        Done
-      </Button>
     </Dialog>
   );
 };

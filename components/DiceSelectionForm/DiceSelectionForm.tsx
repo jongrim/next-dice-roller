@@ -157,7 +157,14 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   }, [setStoredRolls]);
 
   return (
-    <Flex flexDirection="column">
+    <Flex
+      flexDirection="column"
+      sx={(styles) => ({
+        borderTop: [`1px ${styles.colors.text} solid`, 'none', 'none'],
+      })}
+      mt={[2, 0, 0]}
+      pt={[2, 0, 0]}
+    >
       <Heading as="h3" fontSize={3}>
         Your Configured Rolls
       </Heading>

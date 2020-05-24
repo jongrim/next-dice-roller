@@ -6,7 +6,17 @@ import { rollTotal } from '../utils/rollMath';
 
 const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
   return (
-    <Flex flexDirection="column" flex="1 0 0%" minHeight="0">
+    <Flex
+      flexDirection="column"
+      flex="1 0 0%"
+      minHeight="0"
+      maxHeight="100vh"
+      sx={(styles) => ({
+        borderTop: [`1px ${styles.colors.text} solid`, 'none', 'none'],
+      })}
+      mt={[2, 0, 0]}
+      pt={[2, 0, 0]}
+    >
       <Heading as="h2" textAlign="center">
         Rolls Since Joining
       </Heading>

@@ -7,7 +7,13 @@ const RollBubbleManager = ({ rolls }: { rolls: DiceState[] }) => {
   return (
     <Flex
       data-testid="roll-bubbles"
-      sx={{ position: 'absolute', bottom: '15px', right: '50px' }}
+      sx={{
+        position: 'absolute',
+        top: ['280px', 'auto', 'auto'],
+        left: ['5px', 'auto', 'auto'],
+        bottom: ['auto', '15px', '15px'],
+        right: ['auto', '50px', '50px'],
+      }}
       flexDirection="column-reverse"
     >
       {rolls.map((roll, i) => (

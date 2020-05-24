@@ -2,9 +2,9 @@ import * as React from 'react';
 import { AppProps } from 'next/app';
 import { ThemeProvider } from 'emotion-theming';
 import theme from './theme.json';
-import './App.css';
 import '@reach/dialog/styles.css';
 import 'react-tippy/dist/tippy.css';
+import './App.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -17,6 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             display: flex;
             flex-direction: column;
             height: 100%;
+            align-items: center;
           }
         `}</style>
       </div>

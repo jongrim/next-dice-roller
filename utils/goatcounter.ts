@@ -6,8 +6,6 @@ declare global {
   }
 }
 
-window.goatcounter = window.goatcounter || {};
-
 export function emitEvent({
   path,
   title,

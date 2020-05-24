@@ -9,13 +9,7 @@ import { TweenMax, Elastic } from 'gsap';
 import AddRollModal from '../AddRollModal';
 import LoadRollsModal from '../LoadRollsModal';
 
-const emitEvent = dynamic(
-  // @ts-ignore
-  () => import('../../utils/goatcounter').then((mod) => mod.emitEvent),
-  {
-    ssr: false,
-  }
-);
+import { emitEvent } from '../../utils/goatcounter';
 
 interface SaveRollsAnimationMachine {
   states: {

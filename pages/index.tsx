@@ -9,7 +9,7 @@ export default function Home() {
     <>
       <Head>
         <title>Roll With Me</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.png" />
         <meta
           name="description"
           content="Roll dice with friends using an easy web application where everyone can see the results in real time."

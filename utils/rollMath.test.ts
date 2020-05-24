@@ -32,7 +32,6 @@ test('rollTotal adds up the roll total', () => {
     modifier: '2',
     state: 'finished',
     roller: 'test',
-    rollerIcon: 'icon',
     id: 'id',
   };
   expect(rollTotal(roll)).toBe(10);
@@ -69,7 +68,6 @@ test('works with empty modifier', () => {
     modifier: '',
     state: 'finished',
     roller: 'test',
-    rollerIcon: 'icon',
     id: 'id',
   };
   expect(rollTotal(roll)).toBe(14);

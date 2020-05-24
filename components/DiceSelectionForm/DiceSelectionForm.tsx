@@ -1,4 +1,5 @@
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 import { Machine } from 'xstate';
@@ -7,6 +8,8 @@ import { TweenMax, Elastic } from 'gsap';
 
 import AddRollModal from '../AddRollModal';
 import LoadRollsModal from '../LoadRollsModal';
+
+import { emitEvent } from '../../utils/goatcounter';
 
 interface SaveRollsAnimationMachine {
   states: {
@@ -173,6 +176,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                   type="button"
                   variant="ghost"
                   onClick={() => {
+                    emitEvent({
+                      path: 'roll-saved-roll',
+                      title: 'roll saved roll',
+                    });
                     const needs = roll.dice.reduce((acc, cur) => {
                       return {
                         ...acc,
@@ -192,6 +199,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                   type="button"
                   variant="danger"
                   onClick={() => {
+                    emitEvent({
+                      path: 'remove-saved-roll',
+                      title: 'remove saved roll',
+                    });
                     setRolls(rolls.filter((_, index) => index !== i));
                   }}
                 >
@@ -204,7 +215,13 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         <Button
           width="100%"
           type="button"
-          onClick={() => setAddRollIsOpen(true)}
+          onClick={() => {
+            emitEvent({
+              path: 'open-add-roll-modal',
+              title: 'open add roll modal',
+            });
+            setAddRollIsOpen(true);
+          }}
           mt={2}
         >
           Add a Roll
@@ -215,6 +232,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             width="48%"
             type="button"
             onClick={() => {
+              emitEvent({
+                path: 'save-rolls',
+                title: 'save rolls',
+              });
               dispatch('ANIMATE');
               window.localStorage.setItem('rolls', JSON.stringify(rolls));
             }}
@@ -246,6 +267,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             width="48%"
             type="button"
             onClick={() => {
+              emitEvent({
+                path: 'open-load-rolls-modal',
+                title: 'open load rolls modal',
+              });
               setLoadRollIsOpen(true);
             }}
           >
@@ -258,8 +283,16 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         onDismiss={(e, roll?: configuredRoll) => {
           e.preventDefault();
           if (roll) {
+            emitEvent({
+              path: 'add-roll',
+              title: 'add roll',
+            });
             setRolls(rolls.concat([roll]));
           }
+          emitEvent({
+            path: 'close-roll-modal',
+            title: 'close roll modal',
+          });
           setAddRollIsOpen(false);
         }}
       />
@@ -379,6 +412,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           mt={2}
           onClick={(e) => {
             e.preventDefault();
+            emitEvent({
+              path: 'roll-assorted',
+              title: 'roll assorted',
+            });
             const dice = {
               d6: d6 ? Number.parseInt(d6, 10) : 0,
               d8: d8 ? Number.parseInt(d8, 10) : 0,

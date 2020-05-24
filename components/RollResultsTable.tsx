@@ -6,11 +6,11 @@ import { rollTotal } from '../utils/rollMath';
 const RollResultsTable = ({ roll }: { roll: DiceState }) => {
   return (
     <Flex
-      as="section"
       data-testid="roll-results-column"
       flexDirection="column"
       alignItems="center"
       flex="1 0 0%"
+      minHeight="265px"
     >
       <Heading as="h2">Results</Heading>
       <Flex flexWrap="wrap" justifyContent="space-around">
@@ -21,7 +21,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                 key={`roll-${roll.id}-${i}`}
                 flexDirection="column"
                 alignItems="center"
-                minWidth={128}
+                minWidth={90}
               >
                 <Heading as="h3">{key}</Heading>
                 <Text data-testid={`dice-results-${key}`} fontSize={3}>

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 import { Machine } from 'xstate';
@@ -8,7 +9,13 @@ import { TweenMax, Elastic } from 'gsap';
 import AddRollModal from '../AddRollModal';
 import LoadRollsModal from '../LoadRollsModal';
 
-import { emitEvent } from '../../utils/goatcounter';
+const emitEvent = dynamic(
+  // @ts-ignore
+  () => import('../../utils/goatcounter').then((mod) => mod.emitEvent),
+  {
+    ssr: false,
+  }
+);
 
 interface SaveRollsAnimationMachine {
   states: {

@@ -37,7 +37,6 @@ const diceInitialResultsState: DiceState = {
     d100: { ...makeDiceBlock() },
   },
   roller: 'anonymous',
-  rollerIcon: '',
   id: '',
 };
 
@@ -61,7 +60,6 @@ type DiceEvent =
       payload: {
         data: number[];
         roller: string;
-        rollerIcon: string;
         name?: string;
         modifier?: string;
       };
@@ -129,7 +127,6 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
         dice: newDice,
         state: diceStates.rolling,
         roller: event.payload.roller,
-        rollerIcon: event.payload.rollerIcon,
         name: event.payload.name,
         modifier: event.payload.modifier,
         id: uuidv4(),
@@ -148,7 +145,6 @@ export default function Home() {
     diceInitialResultsState
   );
   const [rolls, setRolls] = React.useState([]);
-  const [userIcon, setUserIcon] = React.useState('');
   const [storedUsername, setStoredUsername] = React.useState('');
 
   const roll = (
@@ -177,7 +173,6 @@ export default function Home() {
           payload: {
             data: nums.data,
             roller: storedUsername,
-            rollerIcon: userIcon,
             name,
             modifier,
           },
@@ -262,31 +257,38 @@ export default function Home() {
         as="main"
         flex="1"
         minHeight="0"
+        maxWidth="1280px"
         p={3}
-        flexDirection={['column', 'row', 'row']}
+        flexDirection={['column', 'column', 'row']}
       >
-        <Box
-          as="section"
-          width={['100%', 1 / 2, 1 / 3]}
-          sx={{ order: [2, 1, 1] }}
-        >
-          <DiceSelectionForm onSubmit={roll} />
-        </Box>
         <Flex
-          flex="1"
-          sx={{ order: [1, 2, 2] }}
-          flexDirection={['column', 'column', 'row']}
-          height="100%"
+          flex="2"
+          sx={{ order: 1 }}
+          flexDirection={['column', 'row', 'row']}
         >
-          <RollResultsTable roll={state} />
+          <Box
+            as="section"
+            width={['100%', 1 / 2, 1 / 2]}
+            sx={{ order: [2, 1, 1] }}
+          >
+            <DiceSelectionForm onSubmit={roll} />
+          </Box>
+          <Flex
+            as="section"
+            flex="1"
+            sx={{ order: [1, 2, 2] }}
+            flexDirection="column"
+          >
+            <RollResultsTable roll={state} />
+          </Flex>
+        </Flex>
+        <Flex as="section" flex="1" sx={{ order: 2 }} flexDirection="column">
           <RollHistory rolls={rolls} />
         </Flex>
         <RollBubbleManager rolls={rolls} />
         <UserSetupModal
           storedUsername={storedUsername}
           setStoredUsername={setStoredUsername}
-          userIcon={userIcon}
-          setUserIcon={setUserIcon}
         />
       </Flex>
     </>

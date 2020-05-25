@@ -57,7 +57,7 @@ const UserSetupModal: React.FC<UserSetupModalProps> = ({
           </Text>
         )}
         <Button
-          mt={2}
+          mt={3}
           width="100%"
           type="submit"
           onClick={(e) => {

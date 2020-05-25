@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { AppProps } from 'next/app';
+import Head from 'next/head';
 import { ThemeProvider } from 'emotion-theming';
 import theme from './theme.json';
 import '@reach/dialog/styles.css';
@@ -9,6 +10,10 @@ import './App.css';
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider theme={theme}>
+      <Head>
+        <title>Roll With Me</title>
+        <link rel="icon" href="/favicon.png" />
+      </Head>
       <div className="container">
         <Component {...pageProps} />
         <style jsx>{`

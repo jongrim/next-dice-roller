@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Dialog } from '@reach/dialog';
-import { Box, Button, Heading, Text } from 'rebass';
+import { Box, Button, Flex, Heading, Text } from 'rebass';
 import { Label, Input, Select } from '@rebass/forms';
+import { v4 as uuidv4 } from 'uuid';
 
 import { configuredRoll } from './DiceSelectionForm/DiceSelectionForm';
 
@@ -15,12 +16,13 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
   const [rollName, setRollName] = React.useState('');
   const [dice, setDice] = React.useState(['6']);
   const [modifier, setModifier] = React.useState('');
-  const submit = (e) => {
+  const submit = (e: React.SyntheticEvent) => {
     if (dice.length === 0 || dice.some((d) => !d)) {
-      setErrorMessage('You must add dice to the role');
+      e.preventDefault();
+      setErrorMessage('We need dice to be able to roll! Please add some now.');
       return;
     }
-    const roll = { rollName, dice, modifier };
+    const roll = { rollName, dice, modifier, id: uuidv4() };
     setRollName('');
     setDice(['6']);
     setModifier('');
@@ -31,10 +33,11 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
       <Heading as="h3">Create a configured roll</Heading>
       <Text fontSize={1}>
         Configured rolls can be easily rolled repeatedly from the main screen
+        and saved for future sessions
       </Text>
-      <Box as="form" mt={3}>
+      <Box as="form" data-testid="add-roll-form" mt={3}>
         <Label htmlFor="rollName">Roll Name</Label>
-        <Text fontSize={1}>Name this roll</Text>
+        <Text fontSize={1}>What should we call this roll?</Text>
         <Input
           placeholder="Go Aggro"
           value={rollName}
@@ -45,32 +48,48 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
         />
         <Box mt={3}>
           <Heading as="h5">Add Dice</Heading>
+          <Text fontSize={1}>What kind of dice make up this roll?</Text>
           <Text fontSize={1}>
-            Add dice to the roll. Use the dropdown to choose the die type. Click
-            the "Add another die" button to add more dice to this roll.
+            Click the "Add another die" button to add more dice, and for each
+            select how many sides it has.
           </Text>
+          {error && <Text color="danger">{error}</Text>}
           {dice.map((d, i) => {
             return (
               <Box mt={2} key={`die-${i}`}>
                 <Label htmlFor={`die-${i}-type`}>Die {i + 1} Type</Label>
-                <Select
-                  name={`die-${i}-type`}
-                  id={`die-${i}-type`}
-                  mt={2}
-                  value={d}
-                  onChange={(e) => {
-                    const newDice = dice.slice();
-                    newDice[i] = e.target.value;
-                    setDice(newDice);
-                  }}
-                >
-                  <option value="6">6</option>
-                  <option value="8">8</option>
-                  <option value="10">10</option>
-                  <option value="12">12</option>
-                  <option value="20">20</option>
-                  <option value="100">100</option>
-                </Select>
+                <Flex alignItems="center">
+                  <Box flex="1">
+                    <Select
+                      name={`die-${i}-type`}
+                      id={`die-${i}-type`}
+                      value={d}
+                      onChange={(e) => {
+                        const newDice = dice.slice();
+                        newDice[i] = e.target.value;
+                        setDice(newDice);
+                      }}
+                    >
+                      <option value="6">6</option>
+                      <option value="8">8</option>
+                      <option value="10">10</option>
+                      <option value="12">12</option>
+                      <option value="20">20</option>
+                      <option value="100">100</option>
+                    </Select>
+                  </Box>
+                  <Button
+                    ml={2}
+                    variant="danger"
+                    onClick={() => {
+                      setDice((diceArray) =>
+                        diceArray.filter((_, index) => index !== i)
+                      );
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </Flex>
               </Box>
             );
           })}
@@ -85,7 +104,9 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
         <Label htmlFor="modifier" mt={3}>
           Modifier
         </Label>
-        <Text fontSize={1}>Applied to the roll total</Text>
+        <Text fontSize={1}>
+          Is there a modifier applied to the total roll? If so, add it here.
+        </Text>
         <Input
           placeholder="0"
           type="number"
@@ -96,7 +117,7 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
           onChange={(e) => setModifier(e.target.value)}
           mt={2}
         />
-        <Button onClick={submit} mt={4}>
+        <Button onClick={submit} mt={3}>
           Done
         </Button>
       </Box>

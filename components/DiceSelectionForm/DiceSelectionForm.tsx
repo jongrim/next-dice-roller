@@ -1,62 +1,12 @@
 import * as React from 'react';
-import dynamic from 'next/dynamic';
 import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
-import { Machine } from 'xstate';
-import { useMachine } from '@xstate/react';
-import { TweenMax, Elastic } from 'gsap';
 
 import AddRollModal from '../AddRollModal';
 import LoadRollsModal from '../LoadRollsModal';
+import SaveRollButton from './SaveRollButton';
 
 import { emitEvent } from '../../utils/goatcounter';
-
-interface SaveRollsAnimationMachine {
-  states: {
-    static: {};
-    animatingIn: {};
-    waiting: {};
-    animatingOut: {};
-  };
-}
-
-type SaveRollsAnimationEvents = { type: 'ANIMATE' };
-
-const SaveRollsAnimationMachine = Machine<
-  SaveRollsAnimationMachine,
-  SaveRollsAnimationEvents
->({
-  id: 'saveRollsAnimation',
-  initial: 'static',
-  states: {
-    static: {
-      on: {
-        ANIMATE: 'animatingIn',
-      },
-    },
-    animatingIn: {
-      invoke: {
-        src: 'showSaveIcon',
-        onDone: {
-          target: 'waiting',
-        },
-      },
-    },
-    animatingOut: {
-      invoke: {
-        src: 'hideSaveIcon',
-        onDone: {
-          target: 'static',
-        },
-      },
-    },
-    waiting: {
-      after: {
-        3000: 'animatingOut',
-      },
-    },
-  },
-});
 
 type diceNeedsSubmission = {
   d6: number;
@@ -67,11 +17,12 @@ type diceNeedsSubmission = {
   d100: number;
 };
 
-export type configuredRoll = {
+export interface configuredRoll {
   rollName: string;
   dice: string[];
   modifier: string;
-};
+  id: string;
+}
 
 type rollInfo = { name: string; modifier: string };
 interface DiceSelectionFormProps {
@@ -79,53 +30,9 @@ interface DiceSelectionFormProps {
 }
 
 const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
-  const saveText = React.useRef(null);
-  const saveIcon = React.useRef(null);
-  const showSaveIcon = React.useCallback(() => {
-    return new Promise((resolve) => {
-      const hideSaveText = () =>
-        TweenMax.to(saveText.current, 1, {
-          visibility: 'hidden',
-        });
-      TweenMax.to(saveText.current, 0.5, {
-        visibility: 'hidden',
-        scale: 0.6,
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: hideSaveText,
-      });
-      TweenMax.to(saveIcon.current, 0.5, {
-        visibility: 'visible',
-        scale: 1,
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: resolve,
-      }).delay(0.3);
-    });
-  }, []);
-  const hideSaveIcon = React.useCallback(() => {
-    return new Promise((resolve) => {
-      TweenMax.to(saveText.current, 1, {
-        visibility: 'visible',
-        scale: 1,
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: resolve,
-      });
-      TweenMax.to(saveIcon.current, 0.5, {
-        visibility: 'hidden',
-        scale: 0.6,
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: resolve,
-      });
-    });
-  }, []);
-
-  const [current, dispatch] = useMachine(SaveRollsAnimationMachine, {
-    services: {
-      showSaveIcon,
-      hideSaveIcon,
-    },
-  });
-
-  const [storedRolls, setStoredRolls] = React.useState<configuredRoll[]>([]);
+  const [storedRollIds, setStoredRollIds] = React.useState<
+    configuredRoll['id'][]
+  >([]);
   const [addRollIsOpen, setAddRollIsOpen] = React.useState(false);
   const [loadRollIsOpen, setLoadRollIsOpen] = React.useState(false);
   const [rolls, setRolls] = React.useState<configuredRoll[]>([]);
@@ -150,11 +57,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   };
 
   React.useEffect(() => {
-    const localRolls = window.localStorage.getItem('rolls');
+    const localRolls = window.localStorage.getItem('rollIds');
     if (localRolls) {
-      setStoredRolls(JSON.parse(localRolls));
+      setStoredRollIds(JSON.parse(localRolls));
     }
-  }, [setStoredRolls]);
+  }, [setStoredRollIds]);
 
   return (
     <Flex
@@ -165,23 +72,32 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
       mt={[2, 0, 0]}
       pt={[2, 0, 0]}
     >
-      <Heading as="h3" fontSize={3}>
-        Your Configured Rolls
-      </Heading>
+      <Heading as="h3">Your Configured Rolls</Heading>
       <Box mt={2}>
-        {rolls.map((roll, i) => {
+        {rolls.length === 0 && (
+          <Box>
+            <Text fontSize={2}>You haven't created any rolls yet.</Text>
+            <Text fontSize={2}>
+              Configured rolls can be quickly rolled and saved for reuse in
+              future sessions. Click "Create a roll" below to get started.
+            </Text>
+          </Box>
+        )}
+        {rolls.map((roll) => {
           return (
             <Flex
-              justifyContent="space-between"
               alignItems="center"
+              justifyContent="space-between"
+              flexWrap="wrap"
               mb={2}
-              key={roll.rollName}
+              key={roll.id}
+              data-testid={`configured-roll-${roll.rollName}`}
             >
               <Text key={roll.rollName}>{roll.rollName}</Text>
-              <Box>
+              <Flex>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="secondary"
                   onClick={() => {
                     emitEvent({
                       path: 'roll-saved-roll',
@@ -201,6 +117,19 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                 >
                   Roll
                 </Button>
+                <SaveRollButton
+                  alreadySaved={storedRollIds.includes(roll.id)}
+                  roll={roll}
+                  saveRoll={(roll) => {
+                    const newRollIdsArray = storedRollIds.concat(roll.id);
+                    window.localStorage.setItem(roll.id, JSON.stringify(roll));
+                    window.localStorage.setItem(
+                      'rollIds',
+                      JSON.stringify(newRollIdsArray)
+                    );
+                    setStoredRollIds(newRollIdsArray);
+                  }}
+                />
                 <Button
                   ml={2}
                   type="button"
@@ -210,66 +139,37 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                       path: 'remove-saved-roll',
                       title: 'remove saved roll',
                     });
-                    setRolls(rolls.filter((_, index) => index !== i));
+                    setRolls(rolls.filter((r) => r.id !== roll.id));
+                    if (storedRollIds.includes(roll.id)) {
+                      setStoredRollIds((stored) =>
+                        stored.filter((id) => id !== roll.id)
+                      );
+                      window.localStorage.removeItem(roll.id);
+                    }
                   }}
                 >
-                  Remove
+                  Delete
                 </Button>
-              </Box>
+              </Flex>
             </Flex>
           );
         })}
-        <Button
-          width="100%"
-          type="button"
-          onClick={() => {
-            emitEvent({
-              path: 'open-add-roll-modal',
-              title: 'open add roll modal',
-            });
-            setAddRollIsOpen(true);
-          }}
-          mt={2}
-        >
-          Add a Roll
-        </Button>
-        <Flex mt={2} justifyContent="space-between">
+        <Flex justifyContent="space-between" alignItems="center" mt={3}>
           <Button
-            variant="ghost"
             width="48%"
             type="button"
             onClick={() => {
               emitEvent({
-                path: 'save-rolls',
-                title: 'save rolls',
+                path: 'open-add-roll-modal',
+                title: 'open add roll modal',
               });
-              dispatch('ANIMATE');
-              window.localStorage.setItem('rolls', JSON.stringify(rolls));
-            }}
-            sx={{
-              position: 'relative',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
+              setAddRollIsOpen(true);
             }}
           >
-            <Text ref={saveText} sx={{ position: 'absolute' }}>
-              Save Rolls
-            </Text>
-            <Image
-              src="/check.svg"
-              alt="saved"
-              height="18px"
-              ref={saveIcon}
-              sx={{
-                position: 'absolute',
-                visibility: 'hidden',
-                transform: 'scale(0.6, 0.6)',
-              }}
-            />
+            Create a Roll
           </Button>
           <Button
-            disabled={storedRolls.length === 0}
+            disabled={storedRollIds.length === 0}
             variant="ghost"
             width="48%"
             type="button"
@@ -281,7 +181,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               setLoadRollIsOpen(true);
             }}
           >
-            Load Rolls
+            Load Saved Rolls
           </Button>
         </Flex>
       </Box>
@@ -304,14 +204,19 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         }}
       />
       {loadRollIsOpen && (
-        <LoadRollsModal isOpen={loadRollIsOpen} onDismiss={handleLoadRolls} />
+        <LoadRollsModal
+          isOpen={loadRollIsOpen}
+          onDismiss={handleLoadRolls}
+          loadedRolls={rolls}
+          storedRollIds={storedRollIds}
+        />
       )}
       <Box
         as="form"
         sx={(styles) => ({ borderTop: `1px ${styles.colors.text} solid` })}
         mt={3}
       >
-        <Heading as="h3" fontSize={3} mt={2}>
+        <Heading as="h3" mt={2}>
           Assorted Dice
         </Heading>
         <Flex justifyContent="space-between" flexWrap="wrap">
@@ -416,7 +321,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         </Flex>
         <Button
           width="100%"
-          mt={2}
+          mt={3}
           onClick={(e) => {
             e.preventDefault();
             emitEvent({
@@ -450,7 +355,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             );
           }}
         >
-          Roll dice
+          Roll the Dice
         </Button>
       </Box>
     </Flex>

@@ -14,8 +14,8 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
       sx={(styles) => ({
         borderTop: [`1px ${styles.colors.text} solid`, 'none', 'none'],
       })}
-      mt={[2, 0, 0]}
-      pt={[2, 0, 0]}
+      mt={[2, 2, 0]}
+      pt={[2, 2, 0]}
     >
       <Heading as="h2" textAlign="center">
         Rolls Since Joining

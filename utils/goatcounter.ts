@@ -7,7 +7,7 @@ declare global {
   }
 }
 
-if (process.browser && window && window.goatcounter) {
+if (typeof window !== 'undefined' && window.goatcounter) {
   if (window.location.hash === '#skipgc') {
     window.localStorage.setItem('skipgc', 't');
   }

@@ -1,6 +1,5 @@
 context('Rolling dice', () => {
   beforeEach(() => {
-    cy.viewport('iphone-6');
     cy.visit('http://localhost:3000/');
     // scaffolding some saved rolls
     window.localStorage.setItem(

@@ -152,10 +152,6 @@ context('Rolling dice', () => {
     cy.findByTestId('configured-roll-Kick Some Ass').within(() => {
       cy.findByText('Roll').click();
     });
-    cy.findByTestId('roll-history-item-0').within(() => {
-      cy.contains('Kick Some Ass');
-      cy.contains('cypress');
-    });
     // test removing
     cy.findByTestId('configured-roll-Go Aggro').within(() => {
       cy.findByText('Delete').click();

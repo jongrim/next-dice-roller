@@ -21,6 +21,14 @@ context('Rolling dice', () => {
 
   const dice = [
     {
+      type: 'd2',
+      modifier: '1',
+    },
+    {
+      type: 'd4',
+      modifier: '-1',
+    },
+    {
       type: 'd6',
       modifier: '0',
     },

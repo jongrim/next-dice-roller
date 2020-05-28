@@ -4,6 +4,14 @@ import { DiceState } from '../types/dice';
 test('rollTotal adds up the roll total', () => {
   const roll: DiceState = {
     dice: {
+      d2: {
+        dice: [],
+        needs: 0,
+      },
+      d4: {
+        dice: [],
+        needs: 0,
+      },
       d6: {
         dice: [8, 2, 43],
         needs: 3,

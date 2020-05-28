@@ -7,15 +7,7 @@ import LoadRollsModal from '../LoadRollsModal';
 import SaveRollButton from './SaveRollButton';
 
 import { emitEvent } from '../../utils/goatcounter';
-
-type diceNeedsSubmission = {
-  d6: number;
-  d8: number;
-  d10: number;
-  d12: number;
-  d20: number;
-  d100: number;
-};
+import { diceNeedsSubmission } from '../../types/dice';
 
 export interface configuredRoll {
   rollName: string;
@@ -37,6 +29,8 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   const [loadRollIsOpen, setLoadRollIsOpen] = React.useState(false);
   const [rolls, setRolls] = React.useState<configuredRoll[]>([]);
 
+  const [d2, setD2] = React.useState('');
+  const [d4, setD4] = React.useState('');
   const [d6, setD6] = React.useState('');
   const [d8, setD8] = React.useState('');
   const [d10, setD10] = React.useState('');
@@ -221,6 +215,34 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         </Heading>
         <Flex justifyContent="space-between" flexWrap="wrap">
           <Box width={1 / 4} mt={2} mr={1}>
+            <Label fontSize={2} htmlFor="d2">
+              Number of d2
+            </Label>
+            <Input
+              type="number"
+              name="d2"
+              id="d2"
+              min="1"
+              max="20"
+              onChange={(e) => setD2(e.target.value)}
+              value={d2}
+            />
+          </Box>
+          <Box width={1 / 4} mt={2} mr={1}>
+            <Label fontSize={2} htmlFor="d4">
+              Number of d4
+            </Label>
+            <Input
+              type="number"
+              name="d4"
+              id="d4"
+              min="1"
+              max="20"
+              onChange={(e) => setD4(e.target.value)}
+              value={d4}
+            />
+          </Box>
+          <Box width={1 / 4} mt={2} mr={1}>
             <Label fontSize={2} htmlFor="d6">
               Number of d6
             </Label>
@@ -329,6 +351,8 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               title: 'roll assorted',
             });
             const dice = {
+              d2: d2 ? Number.parseInt(d2, 10) : 0,
+              d4: d4 ? Number.parseInt(d4, 10) : 0,
               d6: d6 ? Number.parseInt(d6, 10) : 0,
               d8: d8 ? Number.parseInt(d8, 10) : 0,
               d10: d10 ? Number.parseInt(d10, 10) : 0,
@@ -342,17 +366,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               .map(([key, val]) => `${val}${key}`)
               .join(', ')
               .concat(` + ${modifier}`);
-            onSubmit(
-              {
-                d6: d6 ? Number.parseInt(d6, 10) : 0,
-                d8: d8 ? Number.parseInt(d8, 10) : 0,
-                d10: d10 ? Number.parseInt(d10, 10) : 0,
-                d12: d12 ? Number.parseInt(d12, 10) : 0,
-                d20: d20 ? Number.parseInt(d20, 10) : 0,
-                d100: d100 ? Number.parseInt(d100, 10) : 0,
-              },
-              { name, modifier }
-            );
+            onSubmit(dice, { name, modifier });
           }}
         >
           Roll the Dice

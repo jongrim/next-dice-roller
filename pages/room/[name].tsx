@@ -2,7 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Button, Flex, Image } from 'rebass';
+import { Box, Button, Flex, Image, Text } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Tooltip } from 'react-tippy';
@@ -157,6 +157,7 @@ export default function Home() {
     diceInitialResultsState
   );
   const [rolls, setRolls] = React.useState([]);
+  const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
 
   const roll = (
@@ -202,8 +203,20 @@ export default function Home() {
   // connect to socket
   React.useEffect(() => {
     if (name) {
-      const ioSocket = io(`/${name}`);
+      const ioSocket = io(`/${name}`, { reconnectionAttempts: 5 });
       setSocket(ioSocket);
+      ioSocket.on('connect_error', () => {
+        console.log('connect error');
+      });
+      ioSocket.on('reconnecting', () => {
+        console.log('reconnecting');
+      });
+      ioSocket.on('reconnect_failed', () => {
+        console.log('reconnect failed');
+      });
+      ioSocket.on('update-users', (users) => {
+        setConnectedUsers(users);
+      });
       ioSocket.on('roll', ({ state }) => {
         /**
          * Note: every socket receives this, including the person that emitted it
@@ -262,7 +275,30 @@ export default function Home() {
             </Button>
           </CopyToClipboard>
         </Tooltip>
-        <Box ml={2}>
+        <Box px={3}>
+          <Tooltip
+            arrow
+            html={
+              socket?.connected ? (
+                <Flex flexDirection="column">
+                  <Text>Connected Users</Text>
+                  {connectedUsers.map((user) => (
+                    <Text key={user.id}>{user.username}</Text>
+                  ))}
+                </Flex>
+              ) : (
+                <Text>Not connected</Text>
+              )
+            }
+          >
+            {socket?.connected ? (
+              <Image src="/phone-on.svg" alt="connected" />
+            ) : (
+              <Image src="/phone-off.svg" alt="not connected" />
+            )}
+          </Tooltip>
+        </Box>
+        <Box pl={3}>
           <Tooltip arrow title="About">
             <Link href="/about">
               <a href="/about" target="_blank">
@@ -308,6 +344,9 @@ export default function Home() {
         <UserSetupModal
           storedUsername={storedUsername}
           setStoredUsername={setStoredUsername}
+          onDone={() => {
+            socket?.emit('register-user', storedUsername);
+          }}
         />
       </Flex>
     </>

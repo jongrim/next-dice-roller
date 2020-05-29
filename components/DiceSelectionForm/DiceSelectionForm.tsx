@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, Flex, Heading, Image, Text } from 'rebass';
+import { Box, Button, Flex, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 
 import AddRollModal from '../AddRollModal';
@@ -213,8 +213,12 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         <Heading as="h3" mt={2}>
           Assorted Dice
         </Heading>
-        <Flex justifyContent="space-between" flexWrap="wrap">
-          <Box width={1 / 4} mt={2} mr={1}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="flex-end"
+          flexWrap="wrap"
+        >
+          <Box width="30%" mt={2} mr={1}>
             <Label fontSize={2} htmlFor="d2">
               Number of d2
             </Label>
@@ -228,7 +232,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d2}
             />
           </Box>
-          <Box width={1 / 4} mt={2} mr={1}>
+          <Box width="30%" mt={2} mr={1}>
             <Label fontSize={2} htmlFor="d4">
               Number of d4
             </Label>
@@ -242,7 +246,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d4}
             />
           </Box>
-          <Box width={1 / 4} mt={2} mr={1}>
+          <Box width="30%" mt={2}>
             <Label fontSize={2} htmlFor="d6">
               Number of d6
             </Label>
@@ -256,7 +260,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d6}
             />
           </Box>
-          <Box width={1 / 4} mt={2} mr={1}>
+          <Box width="30%" mt={2} mr={1}>
             <Label fontSize={2} htmlFor="d8">
               Number of d8
             </Label>
@@ -270,7 +274,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d8}
             />
           </Box>
-          <Box width={1 / 4} mt={2} mr={1}>
+          <Box width="30%" mt={2} mr={1}>
             <Label fontSize={2} htmlFor="d10">
               Number of d10
             </Label>
@@ -284,7 +288,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d10}
             />
           </Box>
-          <Box width={1 / 4} mt={2} mr={1}>
+          <Box width="30%" mt={2}>
             <Label fontSize={2} htmlFor="d12">
               Number of d12
             </Label>
@@ -298,7 +302,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d12}
             />
           </Box>
-          <Box width={1 / 4} mt={2} mr={1}>
+          <Box flex="1 0 40%" mt={2} mr={1}>
             <Label fontSize={2} htmlFor="d20">
               Number of d20
             </Label>
@@ -312,7 +316,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d20}
             />
           </Box>
-          <Box width={1 / 4} mt={2} mr={1}>
+          <Box flex="1 0 40%" mt={2} ml={1}>
             <Label fontSize={2} htmlFor="d100">
               Number of d100
             </Label>

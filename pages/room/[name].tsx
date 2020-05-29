@@ -1,8 +1,9 @@
 import * as React from 'react';
 import Link from 'next/link';
+import Router from 'next/router';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Button, Flex, Image } from 'rebass';
+import { Box, Button, Flex, Image, Text } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Tooltip } from 'react-tippy';
@@ -13,7 +14,12 @@ import RollBubbleManager from '../../components/RollBubbleManager';
 import RollResultsTable from '../../components/RollResultsTable';
 import RollHistory from '../../components/RollHistory';
 
-import { DiceBlock, DiceState, DiceInterface } from '../../types/dice';
+import {
+  DiceBlock,
+  DiceState,
+  DiceInterface,
+  diceNeedsSubmission,
+} from '../../types/dice';
 
 const sum = (x: number, y: number) => x + y;
 
@@ -28,6 +34,7 @@ const makeDiceBlock = (): DiceBlock => ({ dice: [], needs: 0 });
 const diceInitialResultsState: DiceState = {
   state: diceStates.pending,
   dice: {
+    d2: { ...makeDiceBlock() },
     d4: { ...makeDiceBlock() },
     d6: { ...makeDiceBlock() },
     d8: { ...makeDiceBlock() },
@@ -38,16 +45,6 @@ const diceInitialResultsState: DiceState = {
   },
   roller: 'anonymous',
   id: '',
-};
-
-type diceNeedsSubmission = {
-  d4?: number;
-  d6?: number;
-  d8?: number;
-  d10?: number;
-  d12?: number;
-  d20?: number;
-  d100?: number;
 };
 
 type DiceEvent =
@@ -66,19 +63,32 @@ type DiceEvent =
     }
   | { type: 'roll'; payload: DiceState };
 
-const computeResults = (acc: DiceInterface, cur: number): DiceInterface => {
-  if (acc.d6.dice.length != acc.d6.needs) {
-    acc.d6 = updateDiceBlock(acc.d6, cur);
-  } else if (acc.d8.dice.length != acc.d8.needs) {
-    acc.d8 = updateDiceBlock(acc.d8, cur);
-  } else if (acc.d10.dice.length != acc.d10.needs) {
-    acc.d10 = updateDiceBlock(acc.d10, cur);
-  } else if (acc.d12.dice.length != acc.d12.needs) {
-    acc.d12 = updateDiceBlock(acc.d12, cur);
-  } else if (acc.d20.dice.length != acc.d20.needs) {
-    acc.d20 = updateDiceBlock(acc.d20, cur);
-  } else if (acc.d100.dice.length != acc.d100.needs) {
-    acc.d100 = updateDiceBlock(acc.d100, cur);
+const diceNeedsMet = (dieBlock: DiceBlock) =>
+  dieBlock.dice.length == dieBlock.needs;
+const not = (fn) => (...args) => !fn(...args);
+const diceNeedsNotMet = not(diceNeedsMet);
+
+export const computeResults = (
+  acc: DiceInterface,
+  cur: number
+): DiceInterface => {
+  const { d2, d4, d6, d8, d10, d12, d20, d100 } = acc;
+  if (diceNeedsNotMet(d2)) {
+    acc.d2 = updateDiceBlock(d2, cur);
+  } else if (diceNeedsNotMet(d4)) {
+    acc.d4 = updateDiceBlock(d4, cur);
+  } else if (diceNeedsNotMet(d6)) {
+    acc.d6 = updateDiceBlock(d6, cur);
+  } else if (diceNeedsNotMet(d8)) {
+    acc.d8 = updateDiceBlock(d8, cur);
+  } else if (diceNeedsNotMet(d10)) {
+    acc.d10 = updateDiceBlock(d10, cur);
+  } else if (diceNeedsNotMet(d12)) {
+    acc.d12 = updateDiceBlock(d12, cur);
+  } else if (diceNeedsNotMet(d20)) {
+    acc.d20 = updateDiceBlock(d20, cur);
+  } else if (diceNeedsNotMet(d100)) {
+    acc.d100 = updateDiceBlock(d100, cur);
   }
   return { ...acc };
 };
@@ -94,6 +104,7 @@ const assignNeeds = (needs: { needs: number }): DiceBlock =>
   Object.assign({}, makeDiceBlock(), needs);
 
 const makeDiceNeeds = ({
+  d2,
   d4,
   d6,
   d8,
@@ -102,6 +113,7 @@ const makeDiceNeeds = ({
   d20,
   d100,
 }: diceNeedsSubmission): DiceInterface => ({
+  d2: assignNeeds({ needs: d2 }),
   d4: assignNeeds({ needs: d4 }),
   d6: assignNeeds({ needs: d6 }),
   d8: assignNeeds({ needs: d8 }),
@@ -123,6 +135,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
       const newDice = event.payload.data.reduce(computeResults, {
         ...state.dice,
       });
+      console.log(newDice);
       return {
         dice: newDice,
         state: diceStates.rolling,
@@ -145,10 +158,14 @@ export default function Home() {
     diceInitialResultsState
   );
   const [rolls, setRolls] = React.useState([]);
+  const [connected, setConnected] = React.useState(false);
+  const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
 
   const roll = (
     {
+      d2 = 0,
+      d4 = 0,
       d6 = 0,
       d8 = 0,
       d10 = 0,
@@ -158,12 +175,17 @@ export default function Home() {
     }: diceNeedsSubmission,
     { name, modifier } = { name: '', modifier: '0' }
   ) => {
-    dispatch({ type: 'submit', payload: { d6, d8, d10, d12, d20, d100 } });
+    dispatch({
+      type: 'submit',
+      payload: { d2, d4, d6, d8, d10, d12, d20, d100 },
+    });
     window
       .fetch('/api/random', {
         method: 'POST',
         body: JSON.stringify({
-          size: [d6, d8, d10, d12, d20, d100].filter(Boolean).reduce(sum, 0),
+          size: [d2, d4, d6, d8, d10, d12, d20, d100]
+            .filter(Boolean)
+            .reduce(sum, 0),
         }),
       })
       .then((res) => res.json())
@@ -183,8 +205,22 @@ export default function Home() {
   // connect to socket
   React.useEffect(() => {
     if (name) {
-      const ioSocket = io(`/${name}`);
+      const ioSocket = io(`/${name}`, { reconnectionAttempts: 5 });
       setSocket(ioSocket);
+      ioSocket.on('connect', () => setConnected(true));
+      ioSocket.on('disconnect', () => setConnected(false));
+      ioSocket.on('connect_error', () => {
+        console.log('connect error');
+      });
+      ioSocket.on('reconnecting', () => {
+        console.log('reconnecting');
+      });
+      ioSocket.on('reconnect_failed', () => {
+        console.log('reconnect failed');
+      });
+      ioSocket.on('update-users', (users) => {
+        setConnectedUsers(users);
+      });
       ioSocket.on('roll', ({ state }) => {
         /**
          * Note: every socket receives this, including the person that emitted it
@@ -243,7 +279,45 @@ export default function Home() {
             </Button>
           </CopyToClipboard>
         </Tooltip>
-        <Box ml={2}>
+        <Box px={3}>
+          <Tooltip
+            arrow
+            html={
+              connected ? (
+                <Flex flexDirection="column">
+                  <Text>Connected Users</Text>
+                  {connectedUsers.map((user) => (
+                    <Text key={user.id}>{user.username}</Text>
+                  ))}
+                </Flex>
+              ) : (
+                <Flex flexDirection="column" maxWidth="128px">
+                  <Text>Not connected</Text>
+                  <Text>Click the icon to make a new room</Text>
+                </Flex>
+              )
+            }
+          >
+            {connected ? (
+              <Image src="/phone-on.svg" alt="connected" />
+            ) : (
+              <Button
+                variant="clear"
+                onClick={() => {
+                  window
+                    .fetch('/api/new-room', { method: 'POST' })
+                    .then((res) => res.json())
+                    .then(({ name }) => {
+                      Router.push(`/room/${name}`);
+                    });
+                }}
+              >
+                <Image src="/phone-off.svg" alt="not connected" />
+              </Button>
+            )}
+          </Tooltip>
+        </Box>
+        <Box pl={3}>
           <Tooltip arrow title="About">
             <Link href="/about">
               <a href="/about" target="_blank">
@@ -289,6 +363,9 @@ export default function Home() {
         <UserSetupModal
           storedUsername={storedUsername}
           setStoredUsername={setStoredUsername}
+          onDone={() => {
+            socket?.emit('register-user', storedUsername);
+          }}
         />
       </Flex>
     </>

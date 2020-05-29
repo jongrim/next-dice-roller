@@ -11,7 +11,7 @@
     "cypress:ci": "yarn start & wait-on http://localhost:3000 && yarn run cypress run"
   },
   "dependencies": {
-    "@reach/dialog": "^0.10.2",
+    "@reach/dialog": "^0.10.3",
     "@rebass/forms": "^4.0.6",
     "@rebass/preset": "^4.0.5",
     "@types/jest": "^25.2.3",
@@ -22,7 +22,7 @@
     "emotion-theming": "^10.0.27",
     "express": "^4.17.1",
     "gsap": "^3.2.6",
-    "next": "9.3.6",
+    "next": "9.4.4",
     "random-words": "^1.1.1",
     "react": "16.13.1",
     "react-copy-to-clipboard": "^5.0.2",

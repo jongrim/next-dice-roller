@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
+import Router from 'next/router';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
 import { Box, Button, Flex, Image, Text } from 'rebass';
@@ -157,6 +158,7 @@ export default function Home() {
     diceInitialResultsState
   );
   const [rolls, setRolls] = React.useState([]);
+  const [connected, setConnected] = React.useState(false);
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
 
@@ -205,6 +207,8 @@ export default function Home() {
     if (name) {
       const ioSocket = io(`/${name}`, { reconnectionAttempts: 5 });
       setSocket(ioSocket);
+      ioSocket.on('connect', () => setConnected(true));
+      ioSocket.on('disconnect', () => setConnected(false));
       ioSocket.on('connect_error', () => {
         console.log('connect error');
       });
@@ -279,7 +283,7 @@ export default function Home() {
           <Tooltip
             arrow
             html={
-              socket?.connected ? (
+              connected ? (
                 <Flex flexDirection="column">
                   <Text>Connected Users</Text>
                   {connectedUsers.map((user) => (
@@ -287,14 +291,29 @@ export default function Home() {
                   ))}
                 </Flex>
               ) : (
-                <Text>Not connected</Text>
+                <Flex flexDirection="column" maxWidth="128px">
+                  <Text>Not connected</Text>
+                  <Text>Click the icon to make a new room</Text>
+                </Flex>
               )
             }
           >
-            {socket?.connected ? (
+            {connected ? (
               <Image src="/phone-on.svg" alt="connected" />
             ) : (
-              <Image src="/phone-off.svg" alt="not connected" />
+              <Button
+                variant="clear"
+                onClick={() => {
+                  window
+                    .fetch('/api/new-room', { method: 'POST' })
+                    .then((res) => res.json())
+                    .then(({ name }) => {
+                      Router.push(`/room/${name}`);
+                    });
+                }}
+              >
+                <Image src="/phone-off.svg" alt="not connected" />
+              </Button>
             )}
           </Tooltip>
         </Box>

@@ -14,10 +14,22 @@ app.prepare().then(() => {
 
   function setupIoRoom(name) {
     const room = io.of(name);
+    let roomUsers = [];
+    const updateUsers = (newUsers) => {
+      roomUsers = newUsers;
+    };
     room.on('connection', (socket) => {
       console.log(`a user connected to ${name}`);
+      socket.on('register-user', (data) => {
+        updateUsers(roomUsers.concat({ username: data, id: socket.id }));
+        room.emit('update-users', roomUsers);
+      });
       socket.on('roll', (data) => {
         room.emit('roll', data);
+      });
+      socket.on('disconnecting', (reason) => {
+        updateUsers(roomUsers.filter(({ id }) => id !== socket.id));
+        room.emit('update-users', roomUsers);
       });
     });
   }

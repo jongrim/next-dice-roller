@@ -70,6 +70,8 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
                         setDice(newDice);
                       }}
                     >
+                      <option value="2">2</option>
+                      <option value="4">4</option>
                       <option value="6">6</option>
                       <option value="8">8</option>
                       <option value="10">10</option>

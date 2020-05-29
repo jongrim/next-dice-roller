@@ -4,11 +4,13 @@ import { Box, Button, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 
 interface UserSetupModalProps {
+  onDone: () => void;
   storedUsername: string;
   setStoredUsername: (arg0: string) => void;
 }
 
 const UserSetupModal: React.FC<UserSetupModalProps> = ({
+  onDone,
   storedUsername,
   setStoredUsername,
 }) => {
@@ -21,16 +23,20 @@ const UserSetupModal: React.FC<UserSetupModalProps> = ({
     }
   }, []);
 
+  const finish = (e) => {
+    e.preventDefault();
+    if (storedUsername) {
+      setIsOpen(false);
+      onDone();
+    } else {
+      setError('Please enter a username for this room');
+    }
+  };
+
   return (
     <Dialog
       isOpen={isOpen}
-      onDismiss={() => {
-        if (storedUsername) {
-          setIsOpen(false);
-        } else {
-          setError('Please enter a username for this room');
-        }
-      }}
+      onDismiss={finish}
       aria-label="Form to setup username and select icon"
     >
       <Box py={2}>
@@ -56,19 +62,7 @@ const UserSetupModal: React.FC<UserSetupModalProps> = ({
             {error}
           </Text>
         )}
-        <Button
-          mt={3}
-          width="100%"
-          type="submit"
-          onClick={(e) => {
-            e.preventDefault();
-            if (storedUsername) {
-              setIsOpen(false);
-            } else {
-              setError('Please enter a username for this room');
-            }
-          }}
-        >
+        <Button mt={3} width="100%" type="submit" onClick={finish}>
           Done
         </Button>
       </Box>

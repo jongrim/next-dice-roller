@@ -58,8 +58,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   }, [setStoredRollIds]);
 
   return (
-    <Flex
-      flexDirection="column"
+    <Box
       sx={(styles) => ({
         borderTop: [`1px ${styles.colors.text} solid`, 'none', 'none'],
       })}
@@ -376,7 +375,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           Roll the Dice
         </Button>
       </Box>
-    </Flex>
+    </Box>
   );
 };
 

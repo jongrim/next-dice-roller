@@ -30,7 +30,6 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
       flexDirection="column"
       alignItems="center"
       flex="1 0 0%"
-      minHeight="265px"
     >
       <Flex>
         <Heading as="h2" mr={2}>

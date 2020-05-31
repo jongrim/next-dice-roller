@@ -6,14 +6,10 @@ import { rollTotal } from '../utils/rollMath';
 
 const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
   return (
-    <Flex
-      flexDirection="column"
+    <Box
       flex="1 0 0%"
       minHeight="0"
-      maxHeight="100vh"
-      sx={(styles) => ({
-        borderTop: [`1px ${styles.colors.text} solid`, 'none', 'none'],
-      })}
+      maxHeight={['80vh', '100vh', '100vh']}
       mt={[2, 2, 0]}
       pt={[2, 2, 0]}
     >
@@ -33,7 +29,15 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
           Roll Total
         </Text>
       </Flex>
-      <Box flex="1" minHeight="0" height="100%" sx={{ overflow: 'scroll' }}>
+      <Box
+        flex="1"
+        minHeight="0"
+        height={['60vh', '90vh', '80vh']}
+        sx={(styles) => ({
+          overflow: 'scroll',
+          borderBottom: `1px ${styles.colors.muted} solid`,
+        })}
+      >
         {rolls.map((roll, i) => (
           <Tooltip
             arrow
@@ -97,7 +101,7 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
           </Tooltip>
         ))}
       </Box>
-    </Flex>
+    </Box>
   );
 };
 

@@ -135,7 +135,6 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
       const newDice = event.payload.data.reduce(computeResults, {
         ...state.dice,
       });
-      console.log(newDice);
       return {
         dice: newDice,
         state: diceStates.rolling,
@@ -352,6 +351,7 @@ export default function Home() {
             flex="1"
             sx={{ order: [1, 2, 2] }}
             flexDirection="column"
+            minHeight="265px"
           >
             <RollResultsTable roll={state} />
           </Flex>

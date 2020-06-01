@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Flex, Heading, Text } from 'rebass';
+import { Box, Flex, Heading, Image, Text } from 'rebass';
 
 const About = () => {
   return (
@@ -15,24 +15,50 @@ const About = () => {
           real time. Each user is also able to view each roll made since they
           joined the room.
         </Text>
-        <Heading id="setting-up-a-room" as="h2" mt={3} fontSize={4}>
-          Setting up a room
+        <Text mt={2}>
+          Note that rooms are not permanent. Once everyone disconects the room
+          is destroyed on the server. Create a new room when you return and use
+          the configured rolls feature to save and quickly load rolls when you
+          return.
+        </Text>
+        <Box as="section" mt={3}>
+          <Heading as="h2">Help Topics</Heading>
+          <ul>
+            <li>
+              <a href="#creating-a-room">Creating a room</a>
+            </li>
+            <li>
+              <a href="#room-layout">Features of a room</a>
+            </li>
+            <li>
+              <a href="#code-and-issues">Source code and issues</a>
+            </li>
+          </ul>
+        </Box>
+        <Heading id="creating-a-room" as="h2" mt={5} fontSize={4}>
+          Creating a room
         </Heading>
         <Text>
-          To create a new room, go to the homepage and click the "Create a new
-          room" button. You will be redirected to a new page with a new address.
-          Copy this address and send it to whoever you would like to join.
+          From the homepage, you can create a new room by clicking the "Create a
+          new room" button. You will be redirected to a new page with a new
+          address. Copy this address and send it to whoever you would like to
+          join.
+          <br />
+          You can also create a new room directly from an old room's URL if you
+          notice you are not connected anymore. Click the disconnected icon and
+          it will create a room and redirect you to it.
         </Text>
-        <Heading id="room-layout" as="h2" mt={3} fontSize={4}>
+        <Heading id="room-layout" as="h2" mt={5} fontSize={4}>
           Features of a room
         </Heading>
-        <Text>The room is made of three parts.</Text>
+        <Text>The room is made of four parts.</Text>
         <ol>
           <li>The dice selection area</li>
           <li>Current roll results</li>
           <li>History of rolls since joining</li>
+          <li>The menu bar</li>
         </ol>
-        <Heading id="dice-selection" as="h3" mt={2} fontSize={3}>
+        <Heading id="dice-selection" as="h3" mt={4} fontSize={3}>
           Dice selection
         </Heading>
         <Text>
@@ -50,7 +76,7 @@ const About = () => {
           under "Assorted Dice". After you enter the quantity you would like to
           roll of each dice type, click "Roll dice".
         </Text>
-        <Heading id="current-roll-results" as="h3" mt={2} fontSize={3}>
+        <Heading id="current-roll-results" as="h3" mt={4} fontSize={3}>
           Current roll results
         </Heading>
         <Text>
@@ -58,15 +84,99 @@ const About = () => {
           the most recent roll. It will display the sum of each die type (d6,
           d8, d10, etc) and the total of all dice plus any static modifiers.
         </Text>
-        <Heading id="historical-roll-results" as="h3" mt={2} fontSize={3}>
+        <Text>
+          You can also toggle the view of the results by clicking the gear icon
+          next to "Results". If you do not want to see the dice added together,
+          you can select list view which will display the individual dice
+          values.
+        </Text>
+        <Heading id="historical-roll-results" as="h3" mt={4} fontSize={3}>
           History of rolls since joining
         </Heading>
         <Text>
           This area displays all of the rolls made since you joined the room. It
-          says who rolled it, if it was named, and what the total was. To view
-          information on all of the die values in that roll, you can click on
-          the roll and a popup will display detailed info of each die involved
-          in that roll.
+          says who rolled it, the name of the roll, and what the total was. To
+          view information on all of the die values in that roll, you can click
+          on the roll and a popup will display detailed info of each die
+          involved in that roll.
+        </Text>
+        <Heading id="menu-bar" as="h3" mt={4} fontSize={3}>
+          The menu bar
+        </Heading>
+        <Image src="/menu-bar.png" alt="menu bar screenshot" />
+        <Text>
+          The menu bar includes buttons to take you to home, copy the room URL,
+          see who's connected to the room - or create a new room if you're
+          disconnected, and get to this about page.
+        </Text>
+        <Flex
+          flexDirection="column"
+          mx="auto"
+          maxWidth={['100%', '80%', '67%']}
+        >
+          <Flex
+            mt={2}
+            pb={1}
+            sx={(styles) => ({
+              borderBottom: `1px ${styles.colors.primary} solid`,
+            })}
+          >
+            <Text fontWeight="bold" width="35%">
+              Home
+            </Text>
+            <Text width="65%">take you to the home page</Text>
+          </Flex>
+          <Flex
+            mt={2}
+            pb={1}
+            sx={(styles) => ({
+              borderBottom: `1px ${styles.colors.primary} solid`,
+            })}
+          >
+            <Text fontWeight="bold" width="35%">
+              Copy room URL
+            </Text>
+            <Text width="65%">click to copy the current room URL</Text>
+          </Flex>
+          <Flex
+            mt={2}
+            pb={1}
+            sx={(styles) => ({
+              borderBottom: `1px ${styles.colors.primary} solid`,
+            })}
+          >
+            <Text fontWeight="bold" width="35%">
+              Connectivity status
+            </Text>
+            <Text width="65%">
+              if connected, displays the names of those currently connected. If
+              disconnected, click to quickly create a new room and go to it.
+            </Text>
+          </Flex>
+          <Flex
+            mt={2}
+            pb={1}
+            sx={(styles) => ({
+              borderBottom: `1px ${styles.colors.primary} solid`,
+            })}
+          >
+            <Text fontWeight="bold" width="35%">
+              Help
+            </Text>
+            <Text width="65%">leads to this "About" page</Text>
+          </Flex>
+        </Flex>
+        <Heading id="code-and-issues" as="h2" mt={5} fontSize={4}>
+          Code and issues
+        </Heading>
+        <Text mt={3}>
+          You can find the source code for Roll With Me on{' '}
+          <a href="https://github.com/jongrim/next-dice-roller">GitHub</a>.
+        </Text>
+        <Text mt={2}>
+          If you encounter any issues using this software, you are welcome to
+          report it on GitHub using the "issues" feature, or send me a message
+          on <a href="https://twitter.com/jonjongrim">Twitter</a>.
         </Text>
       </Box>
     </Flex>

@@ -21,7 +21,7 @@
     "cross-env": "^7.0.2",
     "emotion-theming": "^10.0.27",
     "express": "^4.17.1",
-    "gsap": "^3.2.6",
+    "gsap": "^3.3.1",
     "next": "9.4.4",
     "random-words": "^1.1.1",
     "react": "16.13.1",

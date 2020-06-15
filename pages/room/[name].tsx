@@ -204,7 +204,10 @@ export default function Home() {
   // connect to socket
   React.useEffect(() => {
     if (name) {
-      const ioSocket = io(`/${name}`, { reconnectionAttempts: 5 });
+      const ioSocket = io(`/${name}`, {
+        reconnectionAttempts: 5,
+        query: { name },
+      });
       setSocket(ioSocket);
       ioSocket.on('connect', () => setConnected(true));
       ioSocket.on('disconnect', () => setConnected(false));
@@ -270,9 +273,7 @@ export default function Home() {
           </Link>
         </Box>
         <Tooltip arrow title="Copy room URL">
-          <CopyToClipboard
-            text={`https://obscure-ridge-20711.herokuapp.com/${name}`}
-          >
+          <CopyToClipboard text={`https://rollwithme.xyz/${name}`}>
             <Button variant="clear" onClick={() => {}}>
               <Image src="/copy.svg" alt="copy" />
             </Button>

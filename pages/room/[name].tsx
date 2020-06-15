@@ -273,7 +273,7 @@ export default function Home() {
           </Link>
         </Box>
         <Tooltip arrow title="Copy room URL">
-          <CopyToClipboard text={`https://rollwithme.xyz/${name}`}>
+          <CopyToClipboard text={`https://rollwithme.xyz/room/${name}`}>
             <Button variant="clear" onClick={() => {}}>
               <Image src="/copy.svg" alt="copy" />
             </Button>

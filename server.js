@@ -12,8 +12,14 @@ app.prepare().then(() => {
   const http = require('http').createServer(server);
   const io = require('socket.io')(http);
 
+  let rooms = [];
+  const updateRooms = (newRooms) => {
+    rooms = newRooms;
+  };
+
   function setupIoRoom(name) {
     const room = io.of(name);
+    rooms.push(name);
     let roomUsers = [];
     const updateUsers = (newUsers) => {
       roomUsers = newUsers;
@@ -30,9 +36,20 @@ app.prepare().then(() => {
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));
         room.emit('update-users', roomUsers);
+        if (roomUsers.length === 0) {
+          updateRooms(rooms.filter((room) => room !== name));
+          console.info(`removed ${name}`);
+        }
       });
     });
   }
+
+  io.on('connection', (socket) => {
+    console.log('a connection attempt for ', socket.handshake.query.name);
+    if (!rooms.includes(socket.handshake.query.name)) {
+      setupIoRoom(socket.handshake.query.name);
+    }
+  });
 
   server.all('/api/new-room', (req, res) => {
     console.log('request for new room');
@@ -40,6 +57,11 @@ app.prepare().then(() => {
     setupIoRoom(newRoom);
     res.status(201);
     res.json({ name: newRoom });
+  });
+
+  server.all('/api/active-rooms', (req, res) => {
+    res.status(200);
+    res.json({ count: rooms.length });
   });
 
   server.all('*', (req, res) => {

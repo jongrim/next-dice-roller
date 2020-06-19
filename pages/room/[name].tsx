@@ -321,7 +321,7 @@ export default function Home() {
           checked={theme.label === 'dark'}
         />
         <Tooltip arrow title="Copy room URL">
-          <CopyToClipboard text={`https://rollwithme.xyz/${name}`}>
+          <CopyToClipboard text={`https://rollwithme.xyz/room/${name}`}>
             <Button variant="clear" onClick={() => {}}>
               <CopySvg />
             </Button>

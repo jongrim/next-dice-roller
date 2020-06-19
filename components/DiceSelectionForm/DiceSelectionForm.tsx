@@ -65,12 +65,16 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
       mt={[2, 0, 0]}
       pt={[2, 0, 0]}
     >
-      <Heading as="h3">Your Configured Rolls</Heading>
+      <Heading as="h3" color="text">
+        Your Configured Rolls
+      </Heading>
       <Box mt={2}>
         {rolls.length === 0 && (
           <Box>
-            <Text fontSize={2}>You haven't created any rolls yet.</Text>
-            <Text fontSize={2}>
+            <Text color="text" fontSize={2}>
+              You haven't created any rolls yet.
+            </Text>
+            <Text color="text" fontSize={2}>
               Configured rolls can be quickly rolled and saved for reuse in
               future sessions. Click "Create a roll" below to get started.
             </Text>
@@ -86,11 +90,13 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               key={roll.id}
               data-testid={`configured-roll-${roll.rollName}`}
             >
-              <Text key={roll.rollName}>{roll.rollName}</Text>
+              <Text color="text" key={roll.rollName}>
+                {roll.rollName}
+              </Text>
               <Flex>
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="special"
                   onClick={() => {
                     emitEvent({
                       path: 'roll-saved-roll',
@@ -132,13 +138,16 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                       path: 'remove-saved-roll',
                       title: 'remove saved roll',
                     });
+                    const newRollIds = storedRollIds.filter(
+                      (id) => id !== roll.id
+                    );
+                    setStoredRollIds(newRollIds);
+                    window.localStorage.removeItem(roll.id);
+                    window.localStorage.setItem(
+                      'rollIds',
+                      JSON.stringify(newRollIds)
+                    );
                     setRolls(rolls.filter((r) => r.id !== roll.id));
-                    if (storedRollIds.includes(roll.id)) {
-                      setStoredRollIds((stored) =>
-                        stored.filter((id) => id !== roll.id)
-                      );
-                      window.localStorage.removeItem(roll.id);
-                    }
                   }}
                 >
                   Delete
@@ -209,7 +218,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         sx={(styles) => ({ borderTop: `1px ${styles.colors.text} solid` })}
         mt={3}
       >
-        <Heading as="h3" mt={2}>
+        <Heading color="text" as="h3" mt={2}>
           Assorted Dice
         </Heading>
         <Flex
@@ -218,10 +227,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           flexWrap="wrap"
         >
           <Box width="30%" mt={2} mr={1}>
-            <Label fontSize={2} htmlFor="d2">
+            <Label color="text" fontSize={2} htmlFor="d2">
               Number of d2
             </Label>
             <Input
+              color="text"
               type="number"
               name="d2"
               id="d2"
@@ -232,10 +242,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box width="30%" mt={2} mr={1}>
-            <Label fontSize={2} htmlFor="d4">
+            <Label color="text" fontSize={2} htmlFor="d4">
               Number of d4
             </Label>
             <Input
+              color="text"
               type="number"
               name="d4"
               id="d4"
@@ -246,10 +257,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box width="30%" mt={2}>
-            <Label fontSize={2} htmlFor="d6">
+            <Label color="text" fontSize={2} htmlFor="d6">
               Number of d6
             </Label>
             <Input
+              color="text"
               type="number"
               name="d6"
               id="d6"
@@ -260,10 +272,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box width="30%" mt={2} mr={1}>
-            <Label fontSize={2} htmlFor="d8">
+            <Label color="text" fontSize={2} htmlFor="d8">
               Number of d8
             </Label>
             <Input
+              color="text"
               type="number"
               name="d8"
               id="d8"
@@ -274,10 +287,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box width="30%" mt={2} mr={1}>
-            <Label fontSize={2} htmlFor="d10">
+            <Label color="text" fontSize={2} htmlFor="d10">
               Number of d10
             </Label>
             <Input
+              color="text"
               type="number"
               name="d10"
               id="d10"
@@ -288,10 +302,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box width="30%" mt={2}>
-            <Label fontSize={2} htmlFor="d12">
+            <Label color="text" fontSize={2} htmlFor="d12">
               Number of d12
             </Label>
             <Input
+              color="text"
               type="number"
               name="d12"
               id="d12"
@@ -302,10 +317,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box flex="1 0 40%" mt={2} mr={1}>
-            <Label fontSize={2} htmlFor="d20">
+            <Label color="text" fontSize={2} htmlFor="d20">
               Number of d20
             </Label>
             <Input
+              color="text"
               type="number"
               name="d20"
               id="d20"
@@ -316,10 +332,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box flex="1 0 40%" mt={2} ml={1}>
-            <Label fontSize={2} htmlFor="d100">
+            <Label color="text" fontSize={2} htmlFor="d100">
               Number of d100
             </Label>
             <Input
+              color="text"
               type="number"
               name="d100"
               id="d100"
@@ -330,10 +347,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
           <Box mt={2} width="100%">
-            <Label fontSize={2} htmlFor="assorted-modifier">
+            <Label color="text" fontSize={2} htmlFor="assorted-modifier">
               Modifier
             </Label>
             <Input
+              color="text"
               placeholder="0"
               name="assorted-modifier"
               id="assorted-modifier"

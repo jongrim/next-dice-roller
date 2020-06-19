@@ -6,6 +6,7 @@ import { TweenMax, Elastic } from 'gsap';
 
 import { emitEvent } from '../../utils/goatcounter';
 import { configuredRoll } from './DiceSelectionForm';
+import CheckSvg from './CheckSvg';
 
 interface SaveRollsAnimationMachine {
   states: {
@@ -131,20 +132,10 @@ const SaveRollButton: React.FC<SaveRollButtonInterface> = ({
         alignItems: 'center',
       }}
     >
-      <Text ref={saveText} sx={{ position: 'absolute' }}>
+      <Text color="text" ref={saveText} sx={{ position: 'absolute' }}>
         {alreadySaved ? 'Saved' : 'Save'}
       </Text>
-      <Image
-        src="/check.svg"
-        alt="saved"
-        height="18px"
-        ref={saveIcon}
-        sx={{
-          position: 'absolute',
-          visibility: 'hidden',
-          transform: 'scale(0.6, 0.6)',
-        }}
-      />
+      <CheckSvg ref={saveIcon} />
     </Button>
   );
 };

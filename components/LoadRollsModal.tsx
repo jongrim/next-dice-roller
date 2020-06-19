@@ -25,6 +25,7 @@ const LoadRollsModal: React.FC<LoadRollsModalProps> = ({
       isOpen={isOpen}
       onDismiss={onDismiss}
       aria-label="Load saved rolls"
+      //@ts-ignore
       style={{ backgroundColor: theme.colors.background }}
     >
       <Heading color="text" as="h3">

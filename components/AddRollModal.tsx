@@ -35,6 +35,7 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
       isOpen={isOpen}
       onDismiss={onDismiss}
       aria-label="Add a new roll"
+      // @ts-ignore
       style={{ backgroundColor: theme.colors.background }}
     >
       <Heading color="text" as="h3">

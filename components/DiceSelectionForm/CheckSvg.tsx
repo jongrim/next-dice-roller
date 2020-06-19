@@ -19,6 +19,7 @@ const CheckSvg = React.forwardRef((props, ref) => {
         height="24"
         viewBox="0 0 24 24"
         fill="none"
+        //@ts-ignore
         stroke={theme.colors.text}
         strokeWidth="2"
         strokeLinecap="round"

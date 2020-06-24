@@ -38,10 +38,16 @@ export default function Home() {
             sx={{ width: '15%', order: [1, 1, 2] }}
           />
         </Flex>
-        <Flex justifyContent="center" alignItems="center">
+        <Flex alignItems="center" flexDirection="column" my={3}>
+          <Text fontWeight="bold">Black Lives Matter</Text>
+          <Text>
+            Please support initiatives like the{' '}
+            <a href="https://eji.org/">Equal Justice Initiative</a>
+          </Text>
+        </Flex>
+        <Flex justifyContent="center" alignItems="center" mt={1}>
           <Button
             variant="primary"
-            mt={4}
             minWidth="250px"
             width="33%"
             height="3rem"

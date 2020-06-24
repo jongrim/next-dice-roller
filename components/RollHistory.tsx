@@ -13,19 +13,19 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
       mt={[2, 2, 0]}
       pt={[2, 2, 0]}
     >
-      <Heading as="h2" textAlign="center">
+      <Heading color="text" as="h2" textAlign="center">
         Rolls Since Joining
       </Heading>
       <Flex
         sx={(styles) => ({ borderBottom: `1px ${styles.colors.text} solid` })}
       >
-        <Text textAlign="center" width={1 / 3}>
+        <Text color="text" textAlign="center" width={1 / 3}>
           Roller
         </Text>
-        <Text textAlign="center" width={1 / 3}>
+        <Text color="text" textAlign="center" width={1 / 3}>
           Roll Name
         </Text>
-        <Text textAlign="center" width={1 / 3}>
+        <Text color="text" textAlign="center" width={1 / 3}>
           Roll Total
         </Text>
       </Flex>
@@ -55,9 +55,11 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
                   if (val.dice.length > 0) {
                     return (
                       <Box key={`rollHistory-${roll.id}-${i}`}>
-                        <Text fontSize={2}>{key}</Text>
+                        <Text color="text" fontSize={2}>
+                          {key}
+                        </Text>
                         <Flex alignItems="center">
-                          <Text key={`${key}-${i}`}>
+                          <Text color="text" key={`${key}-${i}`}>
                             {val.dice
                               .map(
                                 (num) => (num % parseInt(key.substr(1), 10)) + 1
@@ -72,8 +74,8 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
                 })}
                 {roll.modifier && (
                   <Box>
-                    <Text>Roll Modifier</Text>
-                    <Text>{roll.modifier}</Text>
+                    <Text color="text">Roll Modifier</Text>
+                    <Text color="text">{roll.modifier}</Text>
                   </Box>
                 )}
               </Box>
@@ -87,13 +89,13 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
                   ':hover': { backgroundColor: 'muted' },
                 }}
               >
-                <Text textAlign="center" width={1 / 3}>
+                <Text color="text" textAlign="center" width={1 / 3}>
                   {roll.roller}
                 </Text>
-                <Text textAlign="center" width={1 / 3}>
+                <Text color="text" textAlign="center" width={1 / 3}>
                   {roll.name}
                 </Text>
-                <Text textAlign="center" width={1 / 3}>
+                <Text color="text" textAlign="center" width={1 / 3}>
                   {rollTotal(roll)}
                 </Text>
               </Flex>

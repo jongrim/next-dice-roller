@@ -14,7 +14,7 @@ export default function Home() {
           content="Roll dice with friends using an easy web application where everyone can see the results in real time."
         />
       </Head>
-      <Flex as="main" flexDirection="column" flex="1" pb={2}>
+      <Flex as="main" flexDirection="column" flex="1" pb={2} bg="background">
         <Flex
           mt={5}
           px={2}
@@ -23,7 +23,7 @@ export default function Home() {
           flexDirection={['column', 'column', 'row']}
         >
           <Box maxWidth="380px" sx={{ order: [2, 2, 1] }}>
-            <Heading as="h1" fontSize={[5, 6, 7]}>
+            <Heading color="text" as="h1" fontSize={[5, 6, 7]}>
               Roll With Me
             </Heading>
             <Text>

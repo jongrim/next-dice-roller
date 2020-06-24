@@ -146,7 +146,13 @@ context('Rolling dice', () => {
     });
     // test saving
     cy.findByTestId('configured-roll-Go Aggro').within(() => {
-      cy.findByText('Save').click();
+      cy.findByText('Save')
+        .click()
+        .then(() => {
+          expect(
+            JSON.parse(window.localStorage.getItem('rollIds')).length
+          ).to.eq(3);
+        });
     });
     // test loading
     cy.findByText('Load Saved Rolls').click();
@@ -162,7 +168,13 @@ context('Rolling dice', () => {
     });
     // test removing
     cy.findByTestId('configured-roll-Go Aggro').within(() => {
-      cy.findByText('Delete').click();
+      cy.findByText('Delete')
+        .click()
+        .then(() => {
+          expect(
+            JSON.parse(window.localStorage.getItem('rollIds')).length
+          ).to.eq(2);
+        });
     });
     cy.findByText('Load Saved Rolls').click();
     cy.findByTestId('load-rolls-form').within(() => {

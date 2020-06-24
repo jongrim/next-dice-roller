@@ -1,9 +1,12 @@
 import * as React from 'react';
-import { Box, Flex, Heading, Image, Text } from 'rebass';
+import { Flex, Heading, Image, Text } from 'rebass';
 import { Label, Select } from '@rebass/forms';
 import { Tooltip } from 'react-tippy';
 import { DiceState } from '../types/dice';
 import { rollTotal } from '../utils/rollMath';
+import { useTheme } from 'emotion-theming';
+
+import SettingsSvg from './SettingsSvg';
 
 type modes = 'sum' | 'list';
 
@@ -23,6 +26,7 @@ const diceDisplayString = (mode: modes, dice: number[]): string => {
 
 const RollResultsTable = ({ roll }: { roll: DiceState }) => {
   const [mode, setMode] = React.useState<modes>(modes.sum);
+  const theme = useTheme();
 
   return (
     <Flex
@@ -32,11 +36,13 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
       flex="1 0 0%"
     >
       <Flex>
-        <Heading as="h2" mr={2}>
+        <Heading color="text" as="h2" mr={2}>
           Results
         </Heading>
         <Tooltip
           interactive
+          // @ts-ignore
+          theme={theme.name === 'dark' ? 'light' : 'dark'}
           trigger="click"
           title="test"
           tabIndex={0}
@@ -60,15 +66,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
             </Flex>
           }
         >
-          <Image
-            alignSelf="flex-start"
-            src="/settings.svg"
-            alt="roll results settings"
-            width="18px"
-            sx={{
-              cursor: 'pointer',
-            }}
-          />
+          <SettingsSvg />
         </Tooltip>
       </Flex>
       <Flex flexWrap="wrap" justifyContent="space-around">
@@ -81,8 +79,14 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                 alignItems="center"
                 minWidth={90}
               >
-                <Heading as="h3">{key}</Heading>
-                <Text data-testid={`dice-results-${key}`} fontSize={3}>
+                <Heading color="text" as="h3">
+                  {key}
+                </Heading>
+                <Text
+                  color="text"
+                  data-testid={`dice-results-${key}`}
+                  fontSize={3}
+                >
                   {diceDisplayString(
                     mode,
                     val.dice.map(
@@ -92,6 +96,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                 </Text>
                 {mode === modes.sum && (
                   <Text
+                    color="text"
                     fontSize={3}
                     mt={1}
                     pt={1}
@@ -113,14 +118,22 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
       </Flex>
       {roll.modifier && (
         <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
-          <Heading as="h3">Roll Modifier</Heading>
-          <Text fontSize={3}>{roll.modifier}</Text>
+          <Heading color="text" as="h3">
+            Roll Modifier
+          </Heading>
+          <Text color="text" fontSize={3}>
+            {roll.modifier}
+          </Text>
         </Flex>
       )}
       {mode === modes.sum && (
         <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
-          <Heading as="h3">Total</Heading>
-          <Text fontSize={3}>{rollTotal(roll)}</Text>
+          <Heading color="text" as="h3">
+            Total
+          </Heading>
+          <Text color="text" fontSize={3}>
+            {rollTotal(roll)}
+          </Text>
         </Flex>
       )}
     </Flex>

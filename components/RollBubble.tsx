@@ -87,9 +87,14 @@ const RollBubble = ({ roll }: { roll: DiceState }) => {
   return (
     <Card ref={element} sx={{ visibility: 'hidden' }} my={2}>
       <Flex alignItems="center">
-        <Box data-testid={`roll-bubble-${roll.name}`}>
-          <Text fontWeight="bold">{roll.roller}</Text>
-          <Text data-testid="roll-bubble-roll-name">{` rolled${rollName}!`}</Text>
+        <Box bg="background" data-testid={`roll-bubble-${roll.name}`}>
+          <Text color="text" fontWeight="bold">
+            {roll.roller}
+          </Text>
+          <Text
+            color="text"
+            data-testid="roll-bubble-roll-name"
+          >{` rolled${rollName}!`}</Text>
         </Box>
       </Flex>
     </Card>

@@ -41,6 +41,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
         </Heading>
         <Tooltip
           interactive
+          // @ts-ignore
           theme={theme.name === 'dark' ? 'light' : 'dark'}
           trigger="click"
           title="test"

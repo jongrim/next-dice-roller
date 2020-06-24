@@ -11,7 +11,7 @@
     "cypress:ci": "yarn start & wait-on http://localhost:3000 && yarn run cypress run"
   },
   "dependencies": {
-    "@reach/dialog": "^0.10.3",
+    "@reach/dialog": "^0.10.4",
     "@rebass/forms": "^4.0.6",
     "@rebass/preset": "^4.0.5",
     "@types/jest": "^26.0.0",

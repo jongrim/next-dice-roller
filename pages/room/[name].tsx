@@ -3,16 +3,27 @@ import Link from 'next/link';
 import Router from 'next/router';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Button, Flex, Image, Text } from 'rebass';
+import { Box, Button, Flex, Text } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Tooltip } from 'react-tippy';
+import { ThemeProvider } from 'emotion-theming';
+
+import lightTheme from '../theme.json';
+import darkTheme from '../darkTheme.json';
 
 import UserSetupModal from '../../components/UserSetupModal';
 import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
 import RollBubbleManager from '../../components/RollBubbleManager';
 import RollResultsTable from '../../components/RollResultsTable';
 import RollHistory from '../../components/RollHistory';
+import useLocalStorage from '../../hooks/useLocalStorage';
+
+import HomeSvg from './HomeSvg';
+import CopySvg from './CopyUrlSvg';
+import ConnectedSvg from './ConnectedSvg';
+import NotConnectedSvg from './NotConnectedSvg';
+import AboutSvg from './AboutSvg';
 
 import {
   DiceBlock,
@@ -20,6 +31,7 @@ import {
   DiceInterface,
   diceNeedsSubmission,
 } from '../../types/dice';
+import { Switch } from '@rebass/forms';
 
 const sum = (x: number, y: number) => x + y;
 
@@ -160,6 +172,29 @@ export default function Home() {
   const [connected, setConnected] = React.useState(false);
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
+  const [theme, setTheme] = React.useState<{ label: string; value: object }>({
+    label: 'light',
+    value: lightTheme,
+  });
+
+  const toggleTheme = () =>
+    setTheme((curTheme) => {
+      if (curTheme.label === 'light') {
+        return { label: 'dark', value: darkTheme };
+      }
+      return { label: 'light', value: lightTheme };
+    });
+
+  React.useEffect(() => {
+    const userTheme = window.localStorage.getItem('theme');
+    if (userTheme === 'dark') {
+      setTheme({ label: 'dark', value: darkTheme });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    window.localStorage.setItem('theme', theme.label);
+  }, [theme]);
 
   const roll = (
     {
@@ -247,35 +282,48 @@ export default function Home() {
   }, [state.state]);
 
   return (
-    <>
+    <ThemeProvider theme={theme.value}>
       <Flex
         height="60px"
         width="100%"
         px={3}
-        bg="muted"
+        bg="background"
         justifyContent="flex-end"
         alignItems="center"
-        sx={{
-          boxShadow: `
-  0 0.1px 2.2px rgba(0, 0, 0, 0.02),
-  0 0.1px 5.3px rgba(0, 0, 0, 0.028),
-  0 0.3px 10px rgba(0, 0, 0, 0.035),
-  0 0.4px 17.9px rgba(0, 0, 0, 0.042),
-  0 0.8px 33.4px rgba(0, 0, 0, 0.05),
-  0 2px 80px rgba(0, 0, 0, 0.07)`,
-        }}
+        sx={(style) => ({
+          borderBottom: `1px ${style.colors.text} solid`,
+        })}
       >
         <Box mr="auto">
           <Link href="/">
             <a href="/" target="_blank">
-              <Image src="/home.svg" alt="Home" />
+              <HomeSvg />
             </a>
           </Link>
         </Box>
+        <Switch
+          mr={3}
+          onClick={toggleTheme}
+          color="text"
+          sx={{
+            borderColor: 'text',
+            borderWidth: '2px',
+            '& > div': {
+              marginTop: '-2px',
+              marginLeft: '-2px',
+              borderColor: 'text',
+              borderWidth: '2px',
+            },
+            '&[aria-checked=true]': {
+              backgroundColor: 'transparent',
+            },
+          }}
+          checked={theme.label === 'dark'}
+        />
         <Tooltip arrow title="Copy room URL">
-          <CopyToClipboard text={`https://rollwithme.xyz/${name}`}>
+          <CopyToClipboard text={`https://rollwithme.xyz/room/${name}`}>
             <Button variant="clear" onClick={() => {}}>
-              <Image src="/copy.svg" alt="copy" />
+              <CopySvg />
             </Button>
           </CopyToClipboard>
         </Tooltip>
@@ -299,7 +347,7 @@ export default function Home() {
             }
           >
             {connected ? (
-              <Image src="/phone-on.svg" alt="connected" />
+              <ConnectedSvg />
             ) : (
               <Button
                 variant="clear"
@@ -312,7 +360,7 @@ export default function Home() {
                     });
                 }}
               >
-                <Image src="/phone-off.svg" alt="not connected" />
+                <NotConnectedSvg />
               </Button>
             )}
           </Tooltip>
@@ -321,54 +369,63 @@ export default function Home() {
           <Tooltip arrow title="About">
             <Link href="/about">
               <a href="/about" target="_blank">
-                <Image src="/help-circle.svg" alt="help" />
+                <AboutSvg />
               </a>
             </Link>
           </Tooltip>
         </Box>
       </Flex>
       <Flex
-        as="main"
+        bg="background"
+        width="100%"
         flex="1"
         minHeight="0"
-        maxWidth="1280px"
+        justifyContent="center"
         p={3}
-        flexDirection={['column', 'column', 'row']}
       >
         <Flex
-          flex="2"
-          sx={{ order: 1 }}
-          flexDirection={['column', 'row', 'row']}
+          as="main"
+          flex="1"
+          minHeight="0"
+          maxWidth="1280px"
+          bg="background"
+          flexDirection={['column', 'column', 'row']}
         >
-          <Box
-            as="section"
-            width={['100%', 1 / 2, 1 / 2]}
-            sx={{ order: [2, 1, 1] }}
-          >
-            <DiceSelectionForm onSubmit={roll} />
-          </Box>
           <Flex
-            as="section"
-            flex="1"
-            sx={{ order: [1, 2, 2] }}
-            flexDirection="column"
-            minHeight="265px"
+            flex="2"
+            sx={{ order: 1 }}
+            flexDirection={['column', 'row', 'row']}
           >
-            <RollResultsTable roll={state} />
+            <Box
+              as="section"
+              width={['100%', 1 / 2, 1 / 2]}
+              sx={{ order: [2, 1, 1] }}
+            >
+              <DiceSelectionForm onSubmit={roll} />
+            </Box>
+            <Flex
+              as="section"
+              flex="1"
+              sx={{ order: [1, 2, 2] }}
+              flexDirection="column"
+              minHeight="265px"
+            >
+              <RollResultsTable roll={state} />
+            </Flex>
           </Flex>
+          <Flex as="section" flex="1" sx={{ order: 2 }} flexDirection="column">
+            <RollHistory rolls={rolls} />
+          </Flex>
+          <RollBubbleManager rolls={rolls} />
+          <UserSetupModal
+            storedUsername={storedUsername}
+            setStoredUsername={setStoredUsername}
+            onDone={() => {
+              socket?.emit('register-user', storedUsername);
+            }}
+          />
         </Flex>
-        <Flex as="section" flex="1" sx={{ order: 2 }} flexDirection="column">
-          <RollHistory rolls={rolls} />
-        </Flex>
-        <RollBubbleManager rolls={rolls} />
-        <UserSetupModal
-          storedUsername={storedUsername}
-          setStoredUsername={setStoredUsername}
-          onDone={() => {
-            socket?.emit('register-user', storedUsername);
-          }}
-        />
       </Flex>
-    </>
+    </ThemeProvider>
   );
 }

@@ -3,6 +3,7 @@ import { Dialog } from '@reach/dialog';
 import { Box, Button, Flex, Heading, Text } from 'rebass';
 import { Label, Input, Select } from '@rebass/forms';
 import { v4 as uuidv4 } from 'uuid';
+import { useTheme } from 'emotion-theming';
 
 import { configuredRoll } from './DiceSelectionForm/DiceSelectionForm';
 
@@ -12,6 +13,7 @@ interface AddRollModalProps {
 }
 
 const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
+  const theme = useTheme();
   const [error, setErrorMessage] = React.useState('');
   const [rollName, setRollName] = React.useState('');
   const [dice, setDice] = React.useState(['6']);
@@ -29,16 +31,29 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
     onDismiss(e, roll);
   };
   return (
-    <Dialog isOpen={isOpen} onDismiss={onDismiss} aria-label="Add a new roll">
-      <Heading as="h3">Create a configured roll</Heading>
-      <Text fontSize={1}>
+    <Dialog
+      isOpen={isOpen}
+      onDismiss={onDismiss}
+      aria-label="Add a new roll"
+      // @ts-ignore
+      style={{ backgroundColor: theme.colors.background }}
+    >
+      <Heading color="text" as="h3">
+        Create a configured roll
+      </Heading>
+      <Text color="text" fontSize={1}>
         Configured rolls can be easily rolled repeatedly from the main screen
         and saved for future sessions
       </Text>
       <Box as="form" data-testid="add-roll-form" mt={3}>
-        <Label htmlFor="rollName">Roll Name</Label>
-        <Text fontSize={1}>What should we call this roll?</Text>
+        <Label color="text" htmlFor="rollName">
+          Roll Name
+        </Label>
+        <Text color="text" fontSize={1}>
+          What should we call this roll?
+        </Text>
         <Input
+          color="text"
           placeholder="Go Aggro"
           value={rollName}
           name="rollName"
@@ -47,9 +62,13 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
           mt={2}
         />
         <Box mt={3}>
-          <Heading as="h5">Add Dice</Heading>
-          <Text fontSize={1}>What kind of dice make up this roll?</Text>
-          <Text fontSize={1}>
+          <Heading color="text" as="h5">
+            Add Dice
+          </Heading>
+          <Text color="text" fontSize={1}>
+            What kind of dice make up this roll?
+          </Text>
+          <Text color="text" fontSize={1}>
             Click the "Add another die" button to add more dice, and for each
             select how many sides it has.
           </Text>
@@ -57,10 +76,13 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
           {dice.map((d, i) => {
             return (
               <Box mt={2} key={`die-${i}`}>
-                <Label htmlFor={`die-${i}-type`}>Die {i + 1} Type</Label>
+                <Label color="text" htmlFor={`die-${i}-type`}>
+                  Die {i + 1} Type
+                </Label>
                 <Flex alignItems="center">
                   <Box flex="1">
                     <Select
+                      color="text"
                       name={`die-${i}-type`}
                       id={`die-${i}-type`}
                       value={d}
@@ -103,13 +125,14 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
             Add another die
           </Button>
         </Box>
-        <Label htmlFor="modifier" mt={3}>
+        <Label color="text" htmlFor="modifier" mt={3}>
           Modifier
         </Label>
-        <Text fontSize={1}>
+        <Text color="text" fontSize={1}>
           Is there a modifier applied to the total roll? If so, add it here.
         </Text>
         <Input
+          color="text"
           placeholder="0"
           type="number"
           step={1}

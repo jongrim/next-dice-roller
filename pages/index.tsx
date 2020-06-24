@@ -39,7 +39,9 @@ export default function Home() {
           />
         </Flex>
         <Flex alignItems="center" flexDirection="column" my={3}>
-          <Text fontWeight="bold">Black Lives Matter</Text>
+          <Text fontWeight="bold" as="h2">
+            Black Lives Matter
+          </Text>
           <Text>
             Please support initiatives like the{' '}
             <a href="https://eji.org/">Equal Justice Initiative</a>

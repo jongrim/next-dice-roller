@@ -14,7 +14,7 @@
     "@reach/dialog": "^0.10.3",
     "@rebass/forms": "^4.0.6",
     "@rebass/preset": "^4.0.5",
-    "@types/jest": "^26.0.0",
+    "@types/jest": "^26.0.3",
     "@types/rebass": "^4.0.6",
     "@types/rebass__forms": "^4.0.2",
     "@xstate/react": "^0.8.1",

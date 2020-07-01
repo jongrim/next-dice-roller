@@ -185,8 +185,15 @@ export default function Home() {
       return { label: 'light', value: lightTheme };
     });
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const userTheme = window.localStorage.getItem('theme');
+    if (!userTheme) {
+      // user doesn't have a set theme, so use system preference
+      const mqList = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mqList.matches) {
+        setTheme({ label: 'dark', value: darkTheme });
+      }
+    }
     if (userTheme === 'dark') {
       setTheme({ label: 'dark', value: darkTheme });
     }
@@ -248,6 +255,9 @@ export default function Home() {
       ioSocket.on('disconnect', () => setConnected(false));
       ioSocket.on('connect_error', () => {
         console.log('connect error');
+      });
+      ioSocket.on('reconnect', () => {
+        console.log('reconnected');
       });
       ioSocket.on('reconnecting', () => {
         console.log('reconnecting');

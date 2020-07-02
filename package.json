@@ -48,7 +48,7 @@
     "eslint-plugin-react": "^7.20.3",
     "jest": "^26.1.0",
     "nodemon": "^2.0.4",
-    "typescript": "^3.9.5",
+    "typescript": "^3.9.6",
     "wait-on": "^5.0.1"
   },
   "engines": {

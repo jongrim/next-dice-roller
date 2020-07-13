@@ -46,7 +46,10 @@ app.prepare().then(() => {
 
   io.on('connection', (socket) => {
     console.log('a connection attempt for ', socket.handshake.query.name);
-    if (!rooms.includes(socket.handshake.query.name)) {
+    if (io.nsps[`/${socket.handshake.query.name}`]) {
+      console.log('namespace exists');
+    } else {
+      console.log('creating room');
       setupIoRoom(socket.handshake.query.name);
     }
   });

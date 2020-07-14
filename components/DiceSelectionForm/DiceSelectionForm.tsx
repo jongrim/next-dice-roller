@@ -38,6 +38,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   const [d20, setD20] = React.useState('');
   const [d100, setD100] = React.useState('');
   const [assortedModifier, setAssortedModifier] = React.useState('');
+  const [assortedLabel, setAssortedLabel] = React.useState('');
 
   const handleLoadRolls = (
     e: React.SyntheticEvent,
@@ -346,7 +347,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               value={d100}
             />
           </Box>
-          <Box mt={2} width="100%">
+          <Box flex={['1 0 100%', '1 0 40%', '1 0 40%']} mt={2} mr={[0, 1, 1]}>
             <Label color="text" fontSize={2} htmlFor="assorted-modifier">
               Modifier
             </Label>
@@ -359,6 +360,19 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               type="number"
               step="1"
               onChange={(e) => setAssortedModifier(e.target.value)}
+            />
+          </Box>
+          <Box flex={['1 0 100%', '1 0 40%', '1 0 40%']} mt={2} ml={[0, 1, 1]}>
+            <Label color="text" fontSize={2} htmlFor="roll name">
+              Name
+            </Label>
+            <Input
+              color="text"
+              placeholder="Open your brain"
+              name="roll name"
+              id="roll name"
+              value={assortedLabel}
+              onChange={(e) => setAssortedLabel(e.target.value)}
             />
           </Box>
         </Flex>
@@ -382,11 +396,13 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               d100: d100 ? Number.parseInt(d100, 10) : 0,
             };
             const modifier = assortedModifier || '0';
-            const name = Object.entries(dice)
-              .filter(([key, val]) => val !== 0)
-              .map(([key, val]) => `${val}${key}`)
-              .join(', ')
-              .concat(` + ${modifier}`);
+            const name =
+              assortedLabel.trim() ||
+              Object.entries(dice)
+                .filter(([key, val]) => val !== 0)
+                .map(([key, val]) => `${val}${key}`)
+                .join(', ')
+                .concat(` + ${modifier}`);
             onSubmit(dice, { name, modifier });
           }}
         >

@@ -1,3 +1,11 @@
+export interface Die {
+  name: string;
+  sides: number;
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
 export interface DiceBlock {
   dice: number[];
   needs: number;
@@ -15,14 +23,7 @@ export type diceNeedsSubmission = {
 };
 
 export interface DiceInterface {
-  d2: DiceBlock;
-  d4: DiceBlock;
-  d6: DiceBlock;
-  d8: DiceBlock;
-  d10: DiceBlock;
-  d12: DiceBlock;
-  d20: DiceBlock;
-  d100: DiceBlock;
+  [key: string]: DiceBlock;
 }
 
 export interface DiceState {

@@ -23,6 +23,7 @@
     "secondary": "#306",
     "muted": "#f6f6f6",
     "danger": "#C20114",
+    "dangerText": "#C20114",
     "special": "#3075AB"
   },
   "forms": {

@@ -72,7 +72,7 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
             Click the "Add another die" button to add more dice, and for each
             select how many sides it has.
           </Text>
-          {error && <Text color="danger">{error}</Text>}
+          {error && <Text color="dangerText">{error}</Text>}
           {dice.map((d, i) => {
             return (
               <Box mt={2} key={`die-${i}`}>

@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Tooltip } from 'react-tippy';
 import { ThemeProvider } from 'emotion-theming';
+import * as R from 'ramda';
 
 import lightTheme from '../theme.json';
 import darkTheme from '../darkTheme.json';
@@ -17,7 +18,6 @@ import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionF
 import RollBubbleManager from '../../components/RollBubbleManager';
 import RollResultsTable from '../../components/RollResultsTable';
 import RollHistory from '../../components/RollHistory';
-import useLocalStorage from '../../hooks/useLocalStorage';
 
 import HomeSvg from './HomeSvg';
 import CopySvg from './CopyUrlSvg';
@@ -75,7 +75,7 @@ type DiceEvent =
     }
   | { type: 'roll'; payload: DiceState };
 
-const diceNeedsMet = (dieBlock: DiceBlock) =>
+const diceNeedsMet = (dieBlock: DiceBlock): boolean =>
   dieBlock.dice.length == dieBlock.needs;
 const not = (fn) => (...args) => !fn(...args);
 const diceNeedsNotMet = not(diceNeedsMet);
@@ -84,25 +84,16 @@ export const computeResults = (
   acc: DiceInterface,
   cur: number
 ): DiceInterface => {
-  const { d2, d4, d6, d8, d10, d12, d20, d100 } = acc;
-  if (diceNeedsNotMet(d2)) {
-    acc.d2 = updateDiceBlock(d2, cur);
-  } else if (diceNeedsNotMet(d4)) {
-    acc.d4 = updateDiceBlock(d4, cur);
-  } else if (diceNeedsNotMet(d6)) {
-    acc.d6 = updateDiceBlock(d6, cur);
-  } else if (diceNeedsNotMet(d8)) {
-    acc.d8 = updateDiceBlock(d8, cur);
-  } else if (diceNeedsNotMet(d10)) {
-    acc.d10 = updateDiceBlock(d10, cur);
-  } else if (diceNeedsNotMet(d12)) {
-    acc.d12 = updateDiceBlock(d12, cur);
-  } else if (diceNeedsNotMet(d20)) {
-    acc.d20 = updateDiceBlock(d20, cur);
-  } else if (diceNeedsNotMet(d100)) {
-    acc.d100 = updateDiceBlock(d100, cur);
-  }
-  return { ...acc };
+  const updated = R.mapObjIndexed(
+    (val, key) =>
+      R.ifElse(
+        diceNeedsNotMet,
+        (d) => updateDiceBlock(d, cur),
+        () => acc[key]
+      )(val),
+    acc
+  );
+  return updated;
 };
 
 function updateDiceBlock(diceBlock: DiceBlock, num: number): DiceBlock {
@@ -115,25 +106,8 @@ function updateDiceBlock(diceBlock: DiceBlock, num: number): DiceBlock {
 const assignNeeds = (needs: { needs: number }): DiceBlock =>
   Object.assign({}, makeDiceBlock(), needs);
 
-const makeDiceNeeds = ({
-  d2,
-  d4,
-  d6,
-  d8,
-  d10,
-  d12,
-  d20,
-  d100,
-}: diceNeedsSubmission): DiceInterface => ({
-  d2: assignNeeds({ needs: d2 }),
-  d4: assignNeeds({ needs: d4 }),
-  d6: assignNeeds({ needs: d6 }),
-  d8: assignNeeds({ needs: d8 }),
-  d10: assignNeeds({ needs: d10 }),
-  d12: assignNeeds({ needs: d12 }),
-  d20: assignNeeds({ needs: d20 }),
-  d100: assignNeeds({ needs: d100 }),
-});
+const makeDiceNeeds = (vals: diceNeedsSubmission): DiceInterface =>
+  R.mapObjIndexed((num: number) => assignNeeds({ needs: num }), vals);
 
 const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
   switch (event.type) {
@@ -213,18 +187,19 @@ export default function Home() {
       d12 = 0,
       d20 = 0,
       d100 = 0,
+      ...customs
     }: diceNeedsSubmission,
     { name, modifier } = { name: '', modifier: '0' }
   ) => {
     dispatch({
       type: 'submit',
-      payload: { d2, d4, d6, d8, d10, d12, d20, d100 },
+      payload: { d2, d4, d6, d8, d10, d12, d20, d100, ...customs },
     });
     window
       .fetch('/api/random', {
         method: 'POST',
         body: JSON.stringify({
-          size: [d2, d4, d6, d8, d10, d12, d20, d100]
+          size: [d2, d4, d6, d8, d10, d12, d20, d100, ...Object.values(customs)]
             .filter(Boolean)
             .reduce(sum, 0),
         }),

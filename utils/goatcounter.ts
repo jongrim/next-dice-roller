@@ -21,7 +21,7 @@ export function emitEvent({
   path: string;
   title: string;
 }): void {
-  if (window.goatcounter.count) {
+  if (window.goatcounter?.count) {
     window.goatcounter.count({
       path,
       title,

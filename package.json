@@ -46,7 +46,7 @@
     "cypress": "^4.11.0",
     "eslint": "^7.5.0",
     "eslint-plugin-react": "^7.20.5",
-    "jest": "^26.1.0",
+    "jest": "^26.2.0",
     "nodemon": "^2.0.4",
     "typescript": "^3.9.7",
     "wait-on": "^5.1.0"

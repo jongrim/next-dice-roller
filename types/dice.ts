@@ -7,19 +7,19 @@ export interface Die {
 }
 
 export interface DiceBlock {
-  dice: number[];
+  results: number[];
   needs: number;
+  sides: number;
+}
+
+export interface DieNeed {
+  needs: number;
+  sides: number;
+  name: string;
 }
 
 export type diceNeedsSubmission = {
-  d2?: number;
-  d4?: number;
-  d6?: number;
-  d8?: number;
-  d10?: number;
-  d12?: number;
-  d20?: number;
-  d100?: number;
+  [key: string]: DieNeed;
 };
 
 export interface DiceInterface {

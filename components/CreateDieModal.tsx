@@ -44,8 +44,8 @@ const CreateDieModal: React.FC<CreateDieModalProps> = ({
         Create a new die
       </Heading>
       <Text color="text" fontSize={1}>
-        Custome dice can be rolled from the "Build a Roll" section or used in
-        configured rolls
+        Custom dice can be rolled from the "Build a Roll" section or used in
+        configured rolls (planned feature)
       </Text>
       <Box as="form" data-testid="create-die-form" mt={3}>
         <Label color="text" htmlFor="dieName">
@@ -79,8 +79,8 @@ const CreateDieModal: React.FC<CreateDieModalProps> = ({
             min={1}
             step={1}
             value={sides}
-            name="modifier"
-            id="modifier"
+            name="sides"
+            id="sides"
             onChange={(e) => setSides(e.target.value)}
             mt={2}
           />

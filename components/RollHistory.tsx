@@ -52,7 +52,7 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
                 sx={{ overflow: 'scroll' }}
               >
                 {Object.entries(roll.dice).map(([key, val], i) => {
-                  if (val.dice.length > 0) {
+                  if (val.results.length > 0) {
                     return (
                       <Box key={`rollHistory-${roll.id}-${i}`}>
                         <Text color="text" fontSize={2}>
@@ -60,10 +60,8 @@ const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
                         </Text>
                         <Flex alignItems="center">
                           <Text color="text" key={`${key}-${i}`}>
-                            {val.dice
-                              .map(
-                                (num) => (num % parseInt(key.substr(1), 10)) + 1
-                              )
+                            {val.results
+                              .map((num) => (num % val.sides) + 1)
                               .join(', ')}
                           </Text>
                         </Flex>

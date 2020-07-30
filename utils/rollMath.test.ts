@@ -5,36 +5,44 @@ test('rollTotal adds up the roll total', () => {
   const roll: DiceState = {
     dice: {
       d2: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 2,
       },
       d4: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 4,
       },
       d6: {
-        dice: [8, 2, 43],
+        results: [8, 2, 43],
         needs: 3,
+        sides: 6,
       },
       d8: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 8,
       },
       d10: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 10,
       },
       d12: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 12,
       },
       d20: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 20,
       },
       d100: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 100,
       },
     },
     modifier: '2',
@@ -49,28 +57,39 @@ test('works with empty modifier', () => {
   const roll: DiceState = {
     dice: {
       d6: {
-        dice: [8, 2, 43],
+        sides: 6,
+        results: [8, 2, 43],
         needs: 3,
       },
       d8: {
-        dice: [],
+        sides: 8,
+        results: [],
         needs: 0,
       },
       d10: {
-        dice: [],
+        sides: 10,
+        results: [],
         needs: 0,
       },
       d12: {
-        dice: [24, 25, 26],
+        sides: 12,
+        results: [24, 25, 26],
         needs: 0,
       },
       d20: {
-        dice: [],
+        sides: 20,
+        results: [],
         needs: 0,
       },
       d100: {
-        dice: [],
+        sides: 100,
+        results: [],
         needs: 0,
+      },
+      RandomDie: {
+        sides: 7,
+        results: [14],
+        needs: 1,
       },
     },
     modifier: '',
@@ -78,5 +97,5 @@ test('works with empty modifier', () => {
     roller: 'test',
     id: 'id',
   };
-  expect(rollTotal(roll)).toBe(14);
+  expect(rollTotal(roll)).toBe(15);
 });

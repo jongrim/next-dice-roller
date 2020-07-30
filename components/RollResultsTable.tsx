@@ -71,7 +71,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
       </Flex>
       <Flex flexWrap="wrap" justifyContent="space-around">
         {Object.entries(roll.dice).map(([key, val], i) => {
-          if (val.dice.length > 0) {
+          if (val.results.length > 0) {
             return (
               <Flex
                 key={`roll-${roll.id}-${i}`}
@@ -89,9 +89,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                 >
                   {diceDisplayString(
                     mode,
-                    val.dice.map(
-                      (num) => (num % parseInt(key.substr(1), 10)) + 1
-                    )
+                    val.results.map((num) => (num % val.sides) + 1)
                   )}
                 </Text>
                 {mode === modes.sum && (
@@ -104,8 +102,8 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
                       borderTop: `1px ${styles.colors.text} solid`,
                     })}
                   >
-                    {val.dice.reduce((sum, cur) => {
-                      const num = (cur % parseInt(key.substr(1), 10)) + 1;
+                    {val.results.reduce((sum, cur) => {
+                      const num = (cur % val.sides) + 1;
                       return sum + num;
                     }, 0)}
                   </Text>

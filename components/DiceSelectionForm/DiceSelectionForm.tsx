@@ -32,7 +32,9 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   const [createDieIsOpen, setCreateDieIsOpen] = React.useState(false);
   const [rolls, setRolls] = React.useState<configuredRoll[]>([]);
   const [customDice, setCustomDice] = React.useState<Die[]>([]);
-  const [customDiceValues, setCustomDiceValues] = React.useState({});
+  const [customDiceValues, setCustomDiceValues] = React.useState<{
+    [key: string]: string;
+  }>({});
 
   const updateCustomDiceValue = (name: string) => (value: string) =>
     setCustomDiceValues((currentValues) => ({
@@ -40,14 +42,6 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
       [name]: value,
     }));
 
-  const [d2, setD2] = React.useState('');
-  const [d4, setD4] = React.useState('');
-  const [d6, setD6] = React.useState('');
-  const [d8, setD8] = React.useState('');
-  const [d10, setD10] = React.useState('');
-  const [d12, setD12] = React.useState('');
-  const [d20, setD20] = React.useState('');
-  const [d100, setD100] = React.useState('');
   const [assortedModifier, setAssortedModifier] = React.useState('');
   const [assortedLabel, setAssortedLabel] = React.useState('');
 
@@ -114,13 +108,22 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                       path: 'roll-saved-roll',
                       title: 'roll saved roll',
                     });
-                    const needs = roll.dice.reduce((acc, cur) => {
-                      return {
-                        ...acc,
-                        [`d${cur}`]: acc[`d${cur}`] ? acc[`d${cur}`] + 1 : 1,
-                      };
-                    }, {});
-                    onSubmit(needs as diceNeedsSubmission, {
+                    const needs: diceNeedsSubmission = roll.dice.reduce(
+                      (acc, cur) => {
+                        return {
+                          ...acc,
+                          [`d${cur}`]: {
+                            needs: acc[`d${cur}`]
+                              ? acc[`d${cur}`].needs + 1
+                              : 1,
+                            sides: parseInt(cur, 10),
+                            name: `d${cur}`,
+                          },
+                        };
+                      },
+                      {}
+                    );
+                    onSubmit(needs, {
                       name: roll.rollName,
                       modifier: roll.modifier,
                     });
@@ -245,14 +248,46 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           }}
         >
           {[
-            { name: 'd2', setter: setD2, value: d2 },
-            { name: 'd4', setter: setD4, value: d4 },
-            { name: 'd6', setter: setD6, value: d6 },
-            { name: 'd8', setter: setD8, value: d8 },
-            { name: 'd10', setter: setD10, value: d10 },
-            { name: 'd12', setter: setD12, value: d12 },
-            { name: 'd20', setter: setD20, value: d20 },
-            { name: 'd100', setter: setD100, value: d100 },
+            {
+              name: 'd2',
+              setter: updateCustomDiceValue('d2'),
+              value: customDiceValues.d2,
+            },
+            {
+              name: 'd4',
+              setter: updateCustomDiceValue('d4'),
+              value: customDiceValues.d4,
+            },
+            {
+              name: 'd6',
+              setter: updateCustomDiceValue('d6'),
+              value: customDiceValues.d6,
+            },
+            {
+              name: 'd8',
+              setter: updateCustomDiceValue('d8'),
+              value: customDiceValues.d8,
+            },
+            {
+              name: 'd10',
+              setter: updateCustomDiceValue('d10'),
+              value: customDiceValues.d10,
+            },
+            {
+              name: 'd12',
+              setter: updateCustomDiceValue('d12'),
+              value: customDiceValues.d12,
+            },
+            {
+              name: 'd20',
+              setter: updateCustomDiceValue('d20'),
+              value: customDiceValues.d20,
+            },
+            {
+              name: 'd100',
+              setter: updateCustomDiceValue('d100'),
+              value: customDiceValues.d100,
+            },
           ].map((die) => (
             <DieInput {...die} key={die.name} />
           ))}
@@ -330,27 +365,24 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               path: 'roll-assorted',
               title: 'roll assorted',
             });
-            const customVals = R.mapObjIndexed(
-              (val) => Number.parseInt(val, 10),
+            const dice: diceNeedsSubmission = R.mapObjIndexed(
+              (val, key) => ({
+                needs: val ? Number.parseInt(val, 10) : 0,
+                sides: customDice.find(({ name }) => name === key)
+                  ? customDice.find(({ name }) => name === key).sides
+                  : parseInt(key.substr(1), 10),
+                name: customDice.find(({ name }) => name === key)
+                  ? customDice.find(({ name }) => name === key).name
+                  : key,
+              }),
               customDiceValues
             );
-            const dice = {
-              d2: d2 ? Number.parseInt(d2, 10) : 0,
-              d4: d4 ? Number.parseInt(d4, 10) : 0,
-              d6: d6 ? Number.parseInt(d6, 10) : 0,
-              d8: d8 ? Number.parseInt(d8, 10) : 0,
-              d10: d10 ? Number.parseInt(d10, 10) : 0,
-              d12: d12 ? Number.parseInt(d12, 10) : 0,
-              d20: d20 ? Number.parseInt(d20, 10) : 0,
-              d100: d100 ? Number.parseInt(d100, 10) : 0,
-              ...customVals,
-            };
             const modifier = assortedModifier || '0';
             const name =
               assortedLabel.trim() ||
               Object.entries(dice)
-                .filter(([key, val]) => val !== 0)
-                .map(([key, val]) => `${val}${key}`)
+                .filter(([key, val]) => val.needs !== 0)
+                .map(([key, val]) => `${val.needs}${val.name}`)
                 .join(', ')
                 .concat(` + ${modifier}`);
             onSubmit(dice, { name, modifier });

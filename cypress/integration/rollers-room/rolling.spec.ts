@@ -1,4 +1,4 @@
-context('Rolling dice', () => {
+describe('Rolling dice', () => {
   beforeEach(() => {
     cy.visit('http://localhost:3000/');
     // scaffolding some saved rolls
@@ -123,6 +123,28 @@ context('Rolling dice', () => {
       cy.findByText('Roll Modifier');
     });
   });
+});
+
+describe('Configuring rolls', () => {
+  beforeEach(() => {
+    cy.visit('http://localhost:3000/');
+    // scaffolding some saved rolls
+    window.localStorage.setItem(
+      'rollIds',
+      '["6bb28328-6a84-4ed2-b045-37c6cbc9a330","b8aa1619-39ac-47af-9fc1-1e4a6681d020"]'
+    );
+    window.localStorage.setItem(
+      '6bb28328-6a84-4ed2-b045-37c6cbc9a330',
+      '{"rollName":"Weird","dice":["6","6"],"modifier":"2","id":"6bb28328-6a84-4ed2-b045-37c6cbc9a330"}'
+    );
+    window.localStorage.setItem(
+      'b8aa1619-39ac-47af-9fc1-1e4a6681d020',
+      '{"rollName":"Kick Some Ass","dice":["6","6"],"modifier":"-1","id":"b8aa1619-39ac-47af-9fc1-1e4a6681d020"}'
+    );
+    cy.findByText('Make a new room').click();
+    cy.findByLabelText('Username').type('cypress');
+    cy.findByText('Done').click();
+  });
 
   it('can use configured rolls', () => {
     // create a configured roll
@@ -179,6 +201,36 @@ context('Rolling dice', () => {
     cy.findByText('Load Saved Rolls').click();
     cy.findByTestId('load-rolls-form').within(() => {
       cy.findByLabelText('Go Aggro').should('not.exist');
+    });
+  });
+});
+
+describe('Making custom dice', () => {
+  beforeEach(() => {
+    cy.visit('http://localhost:3000/room/my-room');
+    cy.findByLabelText('Username').type('cypress');
+    cy.findByText('Done').click();
+  });
+
+  it('can create and roll', () => {
+    // create the die
+    cy.findByText('Create a custom die').click();
+    cy.findByLabelText('Die Name').type('Chaos');
+    cy.findByText('Done').click();
+    // check for message
+    cy.findByText('How many sides does this die have? Please enter it below.');
+    cy.findByLabelText('Number of Sides').type('7');
+    cy.findByText('Done').click();
+
+    // roll it
+    cy.findByLabelText('Number of Chaos').type('3');
+    cy.findByLabelText('Number of d6').click().type('3');
+    cy.findByLabelText('Number of d6').clear();
+    cy.findByText('Roll the Dice').click();
+    cy.findByTestId('roll-results-column').within(() => {
+      // roll results
+      cy.findByText('Chaos');
+      cy.findByTestId(`dice-results-Chaos`);
     });
   });
 });

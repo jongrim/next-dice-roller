@@ -30,6 +30,7 @@ import {
   DiceState,
   DiceInterface,
   diceNeedsSubmission,
+  DieNeed,
 } from '../../types/dice';
 import { Switch } from '@rebass/forms';
 
@@ -41,7 +42,7 @@ const diceStates = {
   finished: 'finished',
 };
 
-const makeDiceBlock = (): DiceBlock => ({ dice: [], needs: 0 });
+const makeDiceBlock = (): DiceBlock => ({ results: [], needs: 0, sides: 1 });
 
 const diceInitialResultsState: DiceState = {
   state: diceStates.pending,
@@ -76,7 +77,7 @@ type DiceEvent =
   | { type: 'roll'; payload: DiceState };
 
 const diceNeedsMet = (dieBlock: DiceBlock): boolean =>
-  dieBlock.dice.length == dieBlock.needs;
+  dieBlock.results.length == dieBlock.needs;
 const not = (fn) => (...args) => !fn(...args);
 const diceNeedsNotMet = not(diceNeedsMet);
 
@@ -84,30 +85,36 @@ export const computeResults = (
   acc: DiceInterface,
   cur: number
 ): DiceInterface => {
-  const updated = R.mapObjIndexed(
-    (val, key) =>
-      R.ifElse(
-        diceNeedsNotMet,
-        (d) => updateDiceBlock(d, cur),
-        () => acc[key]
-      )(val),
-    acc
-  );
+  let numberUsed = false;
+  const updated = R.mapObjIndexed((val, key) => {
+    return R.ifElse(
+      diceNeedsNotMet,
+      (d) => {
+        if (!numberUsed) {
+          numberUsed = true;
+          return updateDiceBlock(d, cur);
+        }
+        return d;
+      },
+      () => acc[key]
+    )(val);
+  }, acc);
   return updated;
 };
 
 function updateDiceBlock(diceBlock: DiceBlock, num: number): DiceBlock {
   return {
-    dice: [...diceBlock.dice, num],
+    ...diceBlock,
+    results: [...diceBlock.results, num],
     needs: diceBlock.needs,
   };
 }
 
-const assignNeeds = (needs: { needs: number }): DiceBlock =>
-  Object.assign({}, makeDiceBlock(), needs);
+const assignNeeds = (die: DiceBlock): DiceBlock =>
+  Object.assign({}, makeDiceBlock(), die);
 
 const makeDiceNeeds = (vals: diceNeedsSubmission): DiceInterface =>
-  R.mapObjIndexed((num: number) => assignNeeds({ needs: num }), vals);
+  R.mapObjIndexed(assignNeeds, vals);
 
 const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
   switch (event.type) {
@@ -121,7 +128,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
       const newDice = event.payload.data.reduce(computeResults, {
         ...state.dice,
       });
-      return {
+      const result = {
         dice: newDice,
         state: diceStates.rolling,
         roller: event.payload.roller,
@@ -129,6 +136,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
         modifier: event.payload.modifier,
         id: uuidv4(),
       };
+      return result;
     case 'roll':
       return { ...event.payload, state: diceStates.finished };
   }
@@ -178,30 +186,21 @@ export default function Home() {
   }, [theme]);
 
   const roll = (
-    {
-      d2 = 0,
-      d4 = 0,
-      d6 = 0,
-      d8 = 0,
-      d10 = 0,
-      d12 = 0,
-      d20 = 0,
-      d100 = 0,
-      ...customs
-    }: diceNeedsSubmission,
+    dice: diceNeedsSubmission,
     { name, modifier } = { name: '', modifier: '0' }
   ) => {
     dispatch({
       type: 'submit',
-      payload: { d2, d4, d6, d8, d10, d12, d20, d100, ...customs },
+      payload: dice,
     });
     window
       .fetch('/api/random', {
         method: 'POST',
         body: JSON.stringify({
-          size: [d2, d4, d6, d8, d10, d12, d20, d100, ...Object.values(customs)]
-            .filter(Boolean)
-            .reduce(sum, 0),
+          // figure out the amount of numbers we need - sum of all quantities
+          size: R.reduce((acc: number, [key, val]: [string, DieNeed]) => {
+            return acc + val.needs;
+          }, 0)(Object.entries(dice)),
         }),
       })
       .then((res) => res.json())

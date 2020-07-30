@@ -1,16 +1,16 @@
 import { DiceState } from '../types/dice';
 
-export const diceTypeTotal = (dice: number[], diceType: string) =>
+export const diceTypeTotal = (dice: number[], diceType: number) =>
   dice.reduce((sum, cur) => {
-    const num = (cur % parseInt(diceType, 10)) + 1;
+    const num = (cur % diceType) + 1;
     return sum + num;
   }, 0);
 
 export const rollTotal = (roll: DiceState): number => {
   return Object.entries(roll.dice)
     .map(([key, val]) => {
-      if (val.dice.length > 0) {
-        return diceTypeTotal(val.dice, key.substr(1));
+      if (val.results.length > 0) {
+        return diceTypeTotal(val.results, val.sides);
       } else {
         return 0;
       }

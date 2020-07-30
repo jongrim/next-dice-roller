@@ -5,45 +5,53 @@ describe('computedResults', () => {
   it('produces correct results', () => {
     const start: DiceInterface = {
       d2: {
-        dice: [],
+        results: [],
         needs: 1,
+        sides: 2,
       },
       d4: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 4,
       },
       d6: {
-        dice: [],
+        results: [],
         needs: 2,
+        sides: 6,
       },
       d8: {
-        dice: [],
+        results: [],
         needs: 2,
+        sides: 8,
       },
       d10: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 10,
       },
       d12: {
-        dice: [],
+        results: [],
         needs: 2,
+        sides: 12,
       },
       d20: {
-        dice: [],
+        results: [],
         needs: 2,
+        sides: 20,
       },
       d100: {
-        dice: [],
+        results: [],
         needs: 0,
+        sides: 100,
       },
     };
     const next = computeResults(start, 1);
-    expect(next.d2.dice).toStrictEqual([1]);
-    expect(next.d6.dice).toStrictEqual([]);
+    expect(next.d2.results).toStrictEqual([1]);
+    expect(next.d6.results).toStrictEqual([]);
 
     const another = computeResults(next, 2);
-    expect(another.d2.dice).toStrictEqual([1]);
-    expect(another.d4.dice).toStrictEqual([]);
-    expect(another.d6.dice).toStrictEqual([2]);
+    expect(another.d2.results).toStrictEqual([1]);
+    expect(another.d4.results).toStrictEqual([]);
+    expect(another.d6.results).toStrictEqual([2]);
   });
 });

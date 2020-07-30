@@ -23,6 +23,7 @@
     "secondary": "#306",
     "muted": "#444",
     "danger": "#C20114",
+    "dangerText": "#F26DF9",
     "special": "#3075AB"
   },
   "forms": {
@@ -134,8 +135,8 @@
       "cursor": "pointer"
     },
     "secondary": {
-      "bg": "muted",
-      "color": "black",
+      "bg": "#44ffd2",
+      "color": "muted",
       "cursor": "pointer"
     },
     "danger": {

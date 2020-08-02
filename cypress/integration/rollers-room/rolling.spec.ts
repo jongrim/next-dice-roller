@@ -57,7 +57,7 @@ describe('Rolling dice', () => {
   dice.forEach((die) => {
     it(`can roll ${die.type} through assorted dice`, () => {
       cy.findByLabelText(`Number of ${die.type}`).type('2');
-      cy.findByLabelText('Modifier').click().type(die.modifier);
+      cy.findByLabelText('Roll Modifier').click().type(die.modifier);
       cy.findByText('Roll the Dice').click();
       cy.findByTestId('roll-results-column').within(() => {
         // roll results
@@ -88,7 +88,7 @@ describe('Rolling dice', () => {
         }
       );
       cy.findByLabelText(`Number of ${die.type}`).clear();
-      cy.findByLabelText('Modifier').clear();
+      cy.findByLabelText('Roll Modifier').clear();
     });
   });
 
@@ -96,7 +96,7 @@ describe('Rolling dice', () => {
     cy.findByLabelText('Number of d6').click().type('3');
     cy.findByLabelText('Number of d10').click().type('4');
     cy.findByLabelText('Number of d20').click().type('5');
-    cy.findByLabelText('Modifier').click().type('2');
+    cy.findByLabelText('Roll Modifier').click().type('2');
     cy.findByText('Roll the Dice').click();
     cy.findByTestId('roll-results-column').within(() => {
       // roll results

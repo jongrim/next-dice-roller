@@ -23,7 +23,7 @@ export default function Home() {
           flexDirection={['column', 'column', 'row']}
         >
           <Box maxWidth="380px" sx={{ order: [2, 2, 1] }}>
-            <Heading color="text" as="h1" fontSize={[5, 6, 7]}>
+            <Heading color="text" as="h1" fontSize={[5, 6, 6]}>
               Roll With Me
             </Heading>
             <Text>
@@ -38,7 +38,7 @@ export default function Home() {
             sx={{ width: '15%', order: [1, 1, 2] }}
           />
         </Flex>
-        <Flex alignItems="center" flexDirection="column" my={3}>
+        <Flex alignItems="center" flexDirection="column" my={3} px={3}>
           <Text fontWeight="bold" as="h2">
             Black Lives Matter
           </Text>

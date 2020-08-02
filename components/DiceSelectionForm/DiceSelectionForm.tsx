@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Box, Button, Flex, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 import * as R from 'ramda';
+import { gsap } from 'gsap';
 
 import AddRollModal from '../AddRollModal';
 import LoadRollsModal from '../LoadRollsModal';
@@ -237,91 +238,16 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         <Heading color="text" as="h3" mt={2}>
           Build a Roll
         </Heading>
-        <Heading color="text" as="h4" mt={2} fontSize={2}>
-          Standard Dice
-        </Heading>
-        <Box
-          sx={{
-            display: 'grid',
-            gridGap: 2, // theme.space[3]
-            gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
-          }}
-        >
-          {[
-            {
-              name: 'd2',
-              setter: updateCustomDiceValue('d2'),
-              value: customDiceValues.d2,
-            },
-            {
-              name: 'd4',
-              setter: updateCustomDiceValue('d4'),
-              value: customDiceValues.d4,
-            },
-            {
-              name: 'd6',
-              setter: updateCustomDiceValue('d6'),
-              value: customDiceValues.d6,
-            },
-            {
-              name: 'd8',
-              setter: updateCustomDiceValue('d8'),
-              value: customDiceValues.d8,
-            },
-            {
-              name: 'd10',
-              setter: updateCustomDiceValue('d10'),
-              value: customDiceValues.d10,
-            },
-            {
-              name: 'd12',
-              setter: updateCustomDiceValue('d12'),
-              value: customDiceValues.d12,
-            },
-            {
-              name: 'd20',
-              setter: updateCustomDiceValue('d20'),
-              value: customDiceValues.d20,
-            },
-            {
-              name: 'd100',
-              setter: updateCustomDiceValue('d100'),
-              value: customDiceValues.d100,
-            },
-          ].map((die) => (
-            <DieInput {...die} key={die.name} />
-          ))}
-        </Box>
-        <Heading color="text" as="h4" mt={2} fontSize={2}>
-          Custom Dice
-        </Heading>
-        <Button
-          width="100%"
-          variant="secondary"
-          type="button"
-          mt={2}
-          onClick={() => {
-            setCreateDieIsOpen(true);
-          }}
-        >
-          Create a custom die
-        </Button>
-        <Box
-          sx={{
-            display: 'grid',
-            gridGap: 2, // theme.space[3]
-            gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
-          }}
-        >
-          {customDice.map((die) => (
-            <DieInput
-              key={die.name}
-              name={die.name}
-              setter={updateCustomDiceValue(die.name)}
-              value={customDiceValues[die.name]}
-            />
-          ))}
-        </Box>
+        <StandardDice
+          customDiceValues={customDiceValues}
+          updateCustomDiceValue={updateCustomDiceValue}
+        />
+        <CustomDice
+          customDice={customDice}
+          customDiceValues={customDiceValues}
+          updateCustomDiceValue={updateCustomDiceValue}
+          setCreateDieIsOpen={setCreateDieIsOpen}
+        />
         <Flex
           justifyContent="space-between"
           alignItems="flex-end"
@@ -329,7 +255,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         >
           <Box flex={['1 0 100%', '1 0 40%', '1 0 40%']} mt={2} mr={[0, 1, 1]}>
             <Label color="text" fontSize={2} htmlFor="assorted-modifier">
-              Modifier
+              Roll Modifier
             </Label>
             <Input
               color="text"
@@ -344,7 +270,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           </Box>
           <Box flex={['1 0 100%', '1 0 40%', '1 0 40%']} mt={2} ml={[0, 1, 1]}>
             <Label color="text" fontSize={2} htmlFor="roll name">
-              Name
+              Roll Name
             </Label>
             <Input
               color="text"
@@ -401,6 +327,206 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
     </Box>
   );
 };
+
+function CustomDice({
+  updateCustomDiceValue,
+  customDiceValues,
+  customDice,
+  setCreateDieIsOpen,
+}) {
+  const node = React.useRef(null);
+  const [open, setOpen] = React.useState(true);
+  return (
+    <>
+      <Box
+        mt={2}
+        sx={{
+          display: 'grid',
+          gridGap: 2, // theme.space[3]
+          gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 0.33fr))',
+        }}
+      >
+        <Heading color="text" as="h4" fontSize={2}>
+          Custom Dice
+        </Heading>
+        <Button
+          sx={{ justifySelf: 'start' }}
+          type="button"
+          variant="clear"
+          p="0px"
+          fontSize={1}
+          onClick={(e) => {
+            const tl = gsap.timeline();
+            if (open) {
+              // timeline to close
+              tl.to(node.current, {
+                opacity: 0.5,
+                duration: 0.25,
+              });
+              tl.to(node.current, {
+                height: '0px',
+                opacity: 0,
+                duration: 0.25,
+              });
+              setOpen(false);
+            } else {
+              tl.to(node.current, {
+                height: 'auto',
+                opacity: 1,
+                duration: 0.4,
+              });
+              setOpen(true);
+            }
+          }}
+        >
+          {open ? 'Hide' : 'Show'}
+        </Button>
+        <Box />
+      </Box>
+      <Box ref={node}>
+        <Button
+          width="100%"
+          variant="secondary"
+          type="button"
+          mt={2}
+          onClick={() => {
+            setCreateDieIsOpen(true);
+          }}
+        >
+          Create a custom die
+        </Button>
+        <Box
+          sx={{
+            display: 'grid',
+            gridGap: 2, // theme.space[3]
+            gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
+          }}
+        >
+          {customDice.map((die) => (
+            <DieInput
+              key={die.name}
+              name={die.name}
+              setter={updateCustomDiceValue(die.name)}
+              value={customDiceValues[die.name]}
+            />
+          ))}
+        </Box>
+      </Box>
+    </>
+  );
+}
+
+function StandardDice({ updateCustomDiceValue, customDiceValues }) {
+  const node = React.useRef(null);
+  const [open, setOpen] = React.useState(true);
+  return (
+    <>
+      <Box
+        mt={2}
+        sx={{
+          display: 'grid',
+          gridGap: 2, // theme.space[3]
+          gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
+        }}
+      >
+        <Heading color="text" as="h4" fontSize={2}>
+          Standard Dice
+        </Heading>
+        <Button
+          sx={{ justifySelf: 'start' }}
+          type="button"
+          variant="clear"
+          p="0px"
+          fontSize={1}
+          onClick={(e) => {
+            const tl = gsap.timeline();
+            if (open) {
+              // timeline to close
+              tl.to(node.current, {
+                opacity: 0.5,
+                duration: 0.25,
+              });
+              tl.to(node.current, {
+                height: '0px',
+                opacity: 0,
+                duration: 0.25,
+              });
+              setOpen(false);
+            } else {
+              tl.to(node.current, {
+                height: '200px',
+                opacity: 0.1,
+                duration: 0.15,
+              });
+              tl.to(node.current, {
+                height: 'auto',
+                opacity: 1,
+                duration: 0.15,
+              });
+              setOpen(true);
+            }
+          }}
+        >
+          {open ? 'Hide' : 'Show'}
+        </Button>
+        <Box />
+      </Box>
+      <Box
+        ref={node}
+        sx={{
+          display: 'grid',
+          gridGap: 2, // theme.space[3]
+          gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
+        }}
+      >
+        {[
+          {
+            name: 'd2',
+            setter: updateCustomDiceValue('d2'),
+            value: customDiceValues.d2,
+          },
+          {
+            name: 'd4',
+            setter: updateCustomDiceValue('d4'),
+            value: customDiceValues.d4,
+          },
+          {
+            name: 'd6',
+            setter: updateCustomDiceValue('d6'),
+            value: customDiceValues.d6,
+          },
+          {
+            name: 'd8',
+            setter: updateCustomDiceValue('d8'),
+            value: customDiceValues.d8,
+          },
+          {
+            name: 'd10',
+            setter: updateCustomDiceValue('d10'),
+            value: customDiceValues.d10,
+          },
+          {
+            name: 'd12',
+            setter: updateCustomDiceValue('d12'),
+            value: customDiceValues.d12,
+          },
+          {
+            name: 'd20',
+            setter: updateCustomDiceValue('d20'),
+            value: customDiceValues.d20,
+          },
+          {
+            name: 'd100',
+            setter: updateCustomDiceValue('d100'),
+            value: customDiceValues.d100,
+          },
+        ].map((die) => (
+          <DieInput {...die} key={die.name} />
+        ))}
+      </Box>
+    </>
+  );
+}
 
 function DieInput({
   name,

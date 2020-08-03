@@ -2,7 +2,9 @@ import * as React from 'react';
 import { Box, Button, Flex, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 import * as R from 'ramda';
-import { gsap } from 'gsap';
+import { TweenLite, Sine } from 'gsap';
+import { Machine } from 'xstate';
+import { useMachine } from '@xstate/react';
 
 import AddRollModal from '../AddRollModal';
 import LoadRollsModal from '../LoadRollsModal';
@@ -328,6 +330,71 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   );
 };
 
+/**
+ * DICE AREAS
+ */
+
+interface VisibilityMachineSchema {
+  states: {
+    invisible: {};
+    hiding: {};
+    visible: {};
+    showing: {};
+  };
+}
+
+type VisibilityEvent = { type: 'SHOW' } | { type: 'HIDE' };
+
+const CustomVisibilityMachine = Machine<
+  VisibilityMachineSchema,
+  VisibilityEvent
+>({
+  id: 'customDiceVisibility',
+  initial: 'visible',
+  states: {
+    hidden: {
+      on: {
+        SHOW: {
+          target: 'showing',
+        },
+      },
+    },
+    hiding: {
+      invoke: {
+        src: 'hide',
+        onDone: {
+          target: 'hidden',
+        },
+      },
+      on: {
+        SHOW: {
+          target: 'showing',
+        },
+      },
+    },
+    showing: {
+      invoke: {
+        src: 'show',
+        onDone: {
+          target: 'visible',
+        },
+      },
+      on: {
+        HIDE: {
+          target: 'hiding',
+        },
+      },
+    },
+    visible: {
+      on: {
+        HIDE: {
+          target: 'hiding',
+        },
+      },
+    },
+  },
+});
+
 function CustomDice({
   updateCustomDiceValue,
   customDiceValues,
@@ -335,7 +402,38 @@ function CustomDice({
   setCreateDieIsOpen,
 }) {
   const node = React.useRef(null);
-  const [open, setOpen] = React.useState(true);
+  const show = React.useCallback(() => {
+    return new Promise((resolve) => {
+      TweenLite.to(node.current, {
+        height: 'auto',
+        opacity: 1,
+        visibility: 'visible',
+        duration: 0.3,
+        ease: Sine.easeOut,
+        onComplete: resolve,
+      });
+    });
+  }, []);
+
+  const hide = React.useCallback(() => {
+    return new Promise((resolve) => {
+      TweenLite.to(node.current, {
+        height: '0px',
+        opacity: 0,
+        visibility: 'hidden',
+        duration: 0.3,
+        ease: Sine.easeOut,
+        onComplete: resolve,
+      });
+    });
+  }, []);
+
+  const [state, dispatch] = useMachine(CustomVisibilityMachine, {
+    services: {
+      show,
+      hide,
+    },
+  });
   return (
     <>
       <Box
@@ -356,30 +454,11 @@ function CustomDice({
           p="0px"
           fontSize={1}
           onClick={(e) => {
-            const tl = gsap.timeline();
-            if (open) {
-              // timeline to close
-              tl.to(node.current, {
-                opacity: 0.5,
-                duration: 0.25,
-              });
-              tl.to(node.current, {
-                height: '0px',
-                opacity: 0,
-                duration: 0.25,
-              });
-              setOpen(false);
-            } else {
-              tl.to(node.current, {
-                height: 'auto',
-                opacity: 1,
-                duration: 0.4,
-              });
-              setOpen(true);
-            }
+            e.preventDefault;
+            state.value === 'visible' ? dispatch('HIDE') : dispatch('SHOW');
           }}
         >
-          {open ? 'Hide' : 'Show'}
+          {state.value === 'visible' ? 'Hide' : 'Show'}
         </Button>
         <Box />
       </Box>
@@ -416,9 +495,91 @@ function CustomDice({
   );
 }
 
+const StandardVisibilityMachine = Machine<
+  VisibilityMachineSchema,
+  VisibilityEvent
+>({
+  id: 'standardDiceVisibility',
+  initial: 'visible',
+  states: {
+    hidden: {
+      on: {
+        SHOW: {
+          target: 'showing',
+        },
+      },
+    },
+    hiding: {
+      invoke: {
+        src: 'hide',
+        onDone: {
+          target: 'hidden',
+        },
+      },
+      on: {
+        SHOW: {
+          target: 'showing',
+        },
+      },
+    },
+    showing: {
+      invoke: {
+        src: 'show',
+        onDone: {
+          target: 'visible',
+        },
+      },
+      on: {
+        HIDE: {
+          target: 'hiding',
+        },
+      },
+    },
+    visible: {
+      on: {
+        HIDE: {
+          target: 'hiding',
+        },
+      },
+    },
+  },
+});
+
 function StandardDice({ updateCustomDiceValue, customDiceValues }) {
   const node = React.useRef(null);
-  const [open, setOpen] = React.useState(true);
+
+  const show = React.useCallback(() => {
+    return new Promise((resolve) => {
+      TweenLite.to(node.current, {
+        height: 'auto',
+        opacity: 1,
+        visibility: 'visible',
+        duration: 0.3,
+        ease: Sine.easeOut,
+        onComplete: resolve,
+      });
+    });
+  }, []);
+
+  const hide = React.useCallback(() => {
+    return new Promise((resolve) => {
+      TweenLite.to(node.current, {
+        height: '0px',
+        opacity: 0,
+        visibility: 'hidden',
+        duration: 0.3,
+        ease: Sine.easeOut,
+        onComplete: resolve,
+      });
+    });
+  }, []);
+
+  const [state, dispatch] = useMachine(StandardVisibilityMachine, {
+    services: {
+      show,
+      hide,
+    },
+  });
   return (
     <>
       <Box
@@ -439,35 +600,11 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
           p="0px"
           fontSize={1}
           onClick={(e) => {
-            const tl = gsap.timeline();
-            if (open) {
-              // timeline to close
-              tl.to(node.current, {
-                opacity: 0.5,
-                duration: 0.25,
-              });
-              tl.to(node.current, {
-                height: '0px',
-                opacity: 0,
-                duration: 0.25,
-              });
-              setOpen(false);
-            } else {
-              tl.to(node.current, {
-                height: '200px',
-                opacity: 0.1,
-                duration: 0.15,
-              });
-              tl.to(node.current, {
-                height: 'auto',
-                opacity: 1,
-                duration: 0.15,
-              });
-              setOpen(true);
-            }
+            e.preventDefault;
+            state.value === 'visible' ? dispatch('HIDE') : dispatch('SHOW');
           }}
         >
-          {open ? 'Hide' : 'Show'}
+          {state.value === 'visible' ? 'Hide' : 'Show'}
         </Button>
         <Box />
       </Box>

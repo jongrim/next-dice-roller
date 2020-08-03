@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { TweenMax, Elastic } from 'gsap';
-import { Box, Card, Flex, Image, Text } from 'rebass';
+import { Box, Card, Flex, Text } from 'rebass';
 import { DiceState } from '../types/dice';
 
 interface RollBubbleMachineSchema {

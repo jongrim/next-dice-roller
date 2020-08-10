@@ -320,9 +320,11 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
         </Button>
         <CreateDieModal
           isOpen={createDieIsOpen}
-          onDismiss={(e, die) => {
+          onDismiss={(e, die?) => {
             setCreateDieIsOpen(false);
-            setCustomDice(customDice.concat(die));
+            if (die) {
+              setCustomDice(customDice.concat(die));
+            }
           }}
         />
       </Box>

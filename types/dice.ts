@@ -33,7 +33,7 @@ export interface DiceState {
   name?: string;
   modifier?: string;
   id: string;
-  rolls: DiceState[];
+  rolls: Roll[];
   addToCurrentRoll?: boolean;
 }
 

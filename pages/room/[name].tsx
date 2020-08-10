@@ -33,6 +33,7 @@ import {
   DiceInterface,
   diceNeedsSubmission,
   DieNeed,
+  Roll,
 } from '../../types/dice';
 import { Switch } from '@rebass/forms';
 
@@ -120,18 +121,32 @@ const assignNeeds = (die: DiceBlock): DiceBlock =>
 const makeDiceNeeds = (vals: diceNeedsSubmission): DiceInterface =>
   R.mapObjIndexed(assignNeeds, vals);
 
-const mergeRolls = (rolls: DiceState[], cur: DiceState): DiceState[] => {
+export const mergeRolls = (rolls: Roll[], newRoll: Roll): Roll[] => {
   const lastRoll = rolls[0];
-  const mergedDice = R.mapObjIndexed((val: DiceBlock, key) => {
-    return {
-      ...val,
-      results: cur.dice[key]
-        ? [...val.results, ...cur.dice[key].results]
-        : val.results,
-      needs: cur.dice[key] ? val.needs + cur.dice[key].needs : val.needs,
+  const lastRollKeys = Object.keys(lastRoll.dice);
+  const newRollKeys = Object.keys(newRoll.dice);
+  const allKeys = [...new Set(lastRollKeys.concat(newRollKeys))];
+  const merged = R.reduce((acc: DiceInterface, cur: string): DiceInterface => {
+    const lastRolledDice = lastRoll.dice[cur] || {
+      results: [],
+      needs: 0,
+      sides: null,
     };
-  })(lastRoll.dice);
-  const updated = { ...lastRoll, dice: mergedDice };
+    const newRolledDice = newRoll.dice[cur] || {
+      results: [],
+      needs: 0,
+      sides: null,
+    };
+    return {
+      ...acc,
+      [cur]: {
+        results: [...lastRolledDice.results, ...newRolledDice.results],
+        needs: lastRolledDice.needs + newRolledDice.needs,
+        sides: lastRolledDice.sides || newRolledDice.sides,
+      },
+    };
+  }, {})(allKeys);
+  const updated = { ...lastRoll, dice: merged };
   return [updated, ...rolls.slice(1)];
 };
 
@@ -161,7 +176,16 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
     case 'roll':
       const newRolls = event.payload.addToCurrentRoll
         ? mergeRolls(state.rolls, event.payload)
-        : [event.payload, ...state.rolls];
+        : [
+            {
+              dice: event.payload.dice,
+              roller: event.payload.roller,
+              id: event.payload.id,
+              name: event.payload.name,
+              modifier: event.payload.modifier,
+            },
+            ...state.rolls,
+          ];
       return { ...event.payload, state: diceStates.finished, rolls: newRolls };
   }
 };
@@ -411,7 +435,10 @@ export default function Home() {
               width={['100%', 1 / 2, 1 / 2]}
               sx={{ order: [2, 1, 1] }}
             >
-              <DiceSelectionForm onSubmit={roll} />
+              <DiceSelectionForm
+                onSubmit={roll}
+                hasRolls={state.rolls.length > 0}
+              />
             </Box>
             <Flex
               as="section"

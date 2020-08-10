@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Box, Flex, Heading, Text } from 'rebass';
 import { Tooltip } from 'react-tippy';
-import { DiceState } from '../types/dice';
+import { Roll } from '../types/dice';
 import { rollTotal } from '../utils/rollMath';
 
-const RollHistory: React.FC<{ rolls: DiceState[] }> = ({ rolls }) => {
+const RollHistory: React.FC<{ rolls: Roll[] }> = ({ rolls }) => {
   return (
     <Box
       flex="1 0 0%"

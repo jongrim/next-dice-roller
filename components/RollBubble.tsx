@@ -3,7 +3,7 @@ import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { TweenMax, Elastic } from 'gsap';
 import { Box, Card, Flex, Text } from 'rebass';
-import { DiceState } from '../types/dice';
+import { Roll } from '../types/dice';
 
 interface RollBubbleMachineSchema {
   states: {
@@ -47,7 +47,7 @@ const RollBubbleMachine = Machine<RollBubbleMachineSchema, RollBubbleEvent>({
   },
 });
 
-const RollBubble = ({ roll }: { roll: DiceState }) => {
+const RollBubble = ({ roll }: { roll: Roll }) => {
   const element = React.useRef(null);
   const show = React.useCallback(() => {
     return new Promise((resolve) => {

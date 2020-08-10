@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Flex, Heading, Image, Text } from 'rebass';
+import { Flex, Heading, Text } from 'rebass';
 import { Label, Select } from '@rebass/forms';
 import { Tooltip } from 'react-tippy';
-import { DiceState } from '../types/dice';
+import { Roll } from '../types/dice';
 import { rollTotal } from '../utils/rollMath';
 import { useTheme } from 'emotion-theming';
 
@@ -24,7 +24,7 @@ const diceDisplayString = (mode: modes, dice: number[]): string => {
   }
 };
 
-const RollResultsTable = ({ roll }: { roll: DiceState }) => {
+const RollResultsTable = ({ roll }: { roll: Roll }) => {
   const [mode, setMode] = React.useState<modes>(modes.sum);
   const theme = useTheme();
 

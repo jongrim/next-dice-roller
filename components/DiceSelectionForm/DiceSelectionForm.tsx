@@ -28,9 +28,13 @@ export type rollInfo = {
 };
 interface DiceSelectionFormProps {
   onSubmit: (needs: diceNeedsSubmission, meta?: rollInfo) => void;
+  hasRolls: boolean;
 }
 
-const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
+const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
+  onSubmit,
+  hasRolls,
+}) => {
   const [storedRollIds, setStoredRollIds] = React.useState<
     configuredRoll['id'][]
   >([]);
@@ -278,6 +282,12 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               type="number"
               step="1"
               onChange={(e) => setAssortedModifier(e.target.value)}
+              sx={{
+                ':disabled': {
+                  backgroundColor: 'muted',
+                  cursor: 'not-allowed',
+                },
+              }}
             />
           </Box>
           <Box flex={['1 0 100%', '1 0 40%', '1 0 40%']} mt={2} ml={[0, 1, 1]}>
@@ -292,25 +302,23 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
               id="roll name"
               value={assortedLabel}
               onChange={(e) => setAssortedLabel(e.target.value)}
+              sx={{
+                ':disabled': {
+                  backgroundColor: 'muted',
+                  cursor: 'not-allowed',
+                },
+              }}
             />
           </Box>
         </Flex>
-        <Flex mt={3} alignItems="center">
-          <Label
-            htmlFor="add-to-current-roll-checkbox"
-            color="text"
-            fontSize={2}
-          >
-            <Checkbox
-              id="add-to-current-roll-checkbox"
-              name="add-to-current-roll-checkbox"
-              checked={addToCurrentRollIsChecked}
-              onChange={() => {
-                setAddToCurrentRollIsChecked((val) => !val);
-              }}
-            />
-            Add to current roll
-          </Label>
+        <Box
+          mt={3}
+          sx={{
+            display: 'grid',
+            gridGap: 2, // theme.space[3]
+            gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
+          }}
+        >
           <Button
             width="100%"
             onClick={(e) => {
@@ -351,7 +359,32 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
           >
             Roll the Dice
           </Button>
-        </Flex>
+          {hasRolls && (
+            <Label
+              htmlFor="add-to-current-roll-checkbox"
+              color="text"
+              fontSize={2}
+              alignSelf="center"
+            >
+              <Checkbox
+                color="text"
+                id="add-to-current-roll-checkbox"
+                name="add-to-current-roll-checkbox"
+                checked={addToCurrentRollIsChecked}
+                onChange={() => {
+                  setAddToCurrentRollIsChecked((val) => !val);
+                }}
+              />
+              Add to current roll
+            </Label>
+          )}
+        </Box>
+        {addToCurrentRollIsChecked && (
+          <Text color="text">
+            Roll results will be merged with current showing results and its
+            history entry
+          </Text>
+        )}
         <CreateDieModal
           isOpen={createDieIsOpen}
           onDismiss={(e, die) => {
@@ -614,6 +647,50 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
       hide,
     },
   });
+
+  const standardDice = [
+    {
+      name: 'd2',
+      setter: updateCustomDiceValue('d2'),
+      value: customDiceValues.d2,
+    },
+    {
+      name: 'd4',
+      setter: updateCustomDiceValue('d4'),
+      value: customDiceValues.d4,
+    },
+    {
+      name: 'd6',
+      setter: updateCustomDiceValue('d6'),
+      value: customDiceValues.d6,
+    },
+    {
+      name: 'd8',
+      setter: updateCustomDiceValue('d8'),
+      value: customDiceValues.d8,
+    },
+    {
+      name: 'd10',
+      setter: updateCustomDiceValue('d10'),
+      value: customDiceValues.d10,
+    },
+    {
+      name: 'd12',
+      setter: updateCustomDiceValue('d12'),
+      value: customDiceValues.d12,
+    },
+    {
+      name: 'd20',
+      setter: updateCustomDiceValue('d20'),
+      value: customDiceValues.d20,
+    },
+    {
+      name: 'd100',
+      setter: updateCustomDiceValue('d100'),
+      value: customDiceValues.d100,
+    },
+  ];
+
   return (
     <>
       <Box
@@ -640,6 +717,19 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
         >
           {state.value === 'visible' ? 'Hide' : 'Show'}
         </Button>
+        <Button
+          sx={{ justifySelf: 'start' }}
+          type="button"
+          variant="clear"
+          p="0px"
+          fontSize={1}
+          onClick={(e) => {
+            e.preventDefault;
+            standardDice.forEach((die) => die.setter(''));
+          }}
+        >
+          Clear
+        </Button>
         <Box />
       </Box>
       <Box
@@ -650,48 +740,7 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
           gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
         }}
       >
-        {[
-          {
-            name: 'd2',
-            setter: updateCustomDiceValue('d2'),
-            value: customDiceValues.d2,
-          },
-          {
-            name: 'd4',
-            setter: updateCustomDiceValue('d4'),
-            value: customDiceValues.d4,
-          },
-          {
-            name: 'd6',
-            setter: updateCustomDiceValue('d6'),
-            value: customDiceValues.d6,
-          },
-          {
-            name: 'd8',
-            setter: updateCustomDiceValue('d8'),
-            value: customDiceValues.d8,
-          },
-          {
-            name: 'd10',
-            setter: updateCustomDiceValue('d10'),
-            value: customDiceValues.d10,
-          },
-          {
-            name: 'd12',
-            setter: updateCustomDiceValue('d12'),
-            value: customDiceValues.d12,
-          },
-          {
-            name: 'd20',
-            setter: updateCustomDiceValue('d20'),
-            value: customDiceValues.d20,
-          },
-          {
-            name: 'd100',
-            setter: updateCustomDiceValue('d100'),
-            value: customDiceValues.d100,
-          },
-        ].map((die) => (
+        {standardDice.map((die) => (
           <DieInput {...die} key={die.name} />
         ))}
       </Box>

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Box, Button, Flex, Heading, Text } from 'rebass';
-import { Label, Input } from '@rebass/forms';
+import { Checkbox, Label, Input } from '@rebass/forms';
 import * as R from 'ramda';
 import { TweenLite, Sine } from 'gsap';
 import { Machine } from 'xstate';
@@ -21,7 +21,11 @@ export interface configuredRoll {
   id: string;
 }
 
-type rollInfo = { name: string; modifier: string };
+export type rollInfo = {
+  name: string;
+  modifier: string;
+  addToCurrentRoll: boolean;
+};
 interface DiceSelectionFormProps {
   onSubmit: (needs: diceNeedsSubmission, meta?: rollInfo) => void;
 }
@@ -38,6 +42,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
   const [customDiceValues, setCustomDiceValues] = React.useState<{
     [key: string]: string;
   }>({});
+  const [
+    addToCurrentRollIsChecked,
+    setAddToCurrentRollIsChecked,
+  ] = React.useState(false);
 
   const updateCustomDiceValue = (name: string) => (value: string) =>
     setCustomDiceValues((currentValues) => ({
@@ -129,6 +137,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
                     onSubmit(needs, {
                       name: roll.rollName,
                       modifier: roll.modifier,
+                      addToCurrentRoll: false,
                     });
                   }}
                 >
@@ -261,6 +270,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             </Label>
             <Input
               color="text"
+              disabled={addToCurrentRollIsChecked}
               placeholder="0"
               name="assorted-modifier"
               id="assorted-modifier"
@@ -276,6 +286,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             </Label>
             <Input
               color="text"
+              disabled={addToCurrentRollIsChecked}
               placeholder="Open your brain"
               name="roll name"
               id="roll name"
@@ -284,40 +295,63 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({ onSubmit }) => {
             />
           </Box>
         </Flex>
-        <Button
-          width="100%"
-          mt={3}
-          onClick={(e) => {
-            e.preventDefault();
-            emitEvent({
-              path: 'roll-assorted',
-              title: 'roll assorted',
-            });
-            const dice: diceNeedsSubmission = R.mapObjIndexed(
-              (val, key) => ({
-                needs: val ? Number.parseInt(val, 10) : 0,
-                sides: customDice.find(({ name }) => name === key)
-                  ? customDice.find(({ name }) => name === key).sides
-                  : parseInt(key.substr(1), 10),
-                name: customDice.find(({ name }) => name === key)
-                  ? customDice.find(({ name }) => name === key).name
-                  : key,
-              }),
-              customDiceValues
-            );
-            const modifier = assortedModifier || '0';
-            const name =
-              assortedLabel.trim() ||
-              Object.entries(dice)
-                .filter(([key, val]) => val.needs !== 0)
-                .map(([key, val]) => `${val.needs}${val.name}`)
-                .join(', ')
-                .concat(` + ${modifier}`);
-            onSubmit(dice, { name, modifier });
-          }}
-        >
-          Roll the Dice
-        </Button>
+        <Flex mt={3} alignItems="center">
+          <Label
+            htmlFor="add-to-current-roll-checkbox"
+            color="text"
+            fontSize={2}
+          >
+            <Checkbox
+              id="add-to-current-roll-checkbox"
+              name="add-to-current-roll-checkbox"
+              checked={addToCurrentRollIsChecked}
+              onChange={() => {
+                setAddToCurrentRollIsChecked((val) => !val);
+              }}
+            />
+            Add to current roll
+          </Label>
+          <Button
+            width="100%"
+            onClick={(e) => {
+              e.preventDefault();
+              emitEvent({
+                path: 'roll-assorted',
+                title: 'roll assorted',
+              });
+              const dice: diceNeedsSubmission = R.mapObjIndexed(
+                (val, key) => ({
+                  needs: val ? Number.parseInt(val, 10) : 0,
+                  sides: customDice.find(({ name }) => name === key)
+                    ? customDice.find(({ name }) => name === key).sides
+                    : parseInt(key.substr(1), 10),
+                  name: customDice.find(({ name }) => name === key)
+                    ? customDice.find(({ name }) => name === key).name
+                    : key,
+                }),
+                customDiceValues
+              );
+              const modifier = addToCurrentRollIsChecked
+                ? '0'
+                : assortedModifier || '0';
+              const name = addToCurrentRollIsChecked
+                ? ''
+                : assortedLabel.trim() ||
+                  Object.entries(dice)
+                    .filter(([key, val]) => val.needs !== 0)
+                    .map(([key, val]) => `${val.needs}${val.name}`)
+                    .join(', ')
+                    .concat(` + ${modifier}`);
+              onSubmit(dice, {
+                name,
+                modifier,
+                addToCurrentRoll: addToCurrentRollIsChecked,
+              });
+            }}
+          >
+            Roll the Dice
+          </Button>
+        </Flex>
         <CreateDieModal
           isOpen={createDieIsOpen}
           onDismiss={(e, die) => {

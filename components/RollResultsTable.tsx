@@ -70,51 +70,52 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
         </Tooltip>
       </Flex>
       <Flex flexWrap="wrap" justifyContent="space-around">
-        {Object.entries(roll.dice).map(([key, val], i) => {
-          if (val.results.length > 0) {
-            return (
-              <Flex
-                key={`roll-${roll.id}-${i}`}
-                flexDirection="column"
-                alignItems="center"
-                minWidth={90}
-              >
-                <Heading color="text" as="h3">
-                  {key}
-                </Heading>
-                <Text
-                  color="text"
-                  data-testid={`dice-results-${key}`}
-                  fontSize={3}
+        {roll &&
+          Object.entries(roll.dice).map(([key, val], i) => {
+            if (val.results.length > 0) {
+              return (
+                <Flex
+                  key={`roll-${roll.id}-${i}`}
+                  flexDirection="column"
+                  alignItems="center"
+                  minWidth={90}
                 >
-                  {diceDisplayString(
-                    mode,
-                    val.results.map((num) => (num % val.sides) + 1)
-                  )}
-                </Text>
-                {mode === modes.sum && (
+                  <Heading color="text" as="h3">
+                    {key}
+                  </Heading>
                   <Text
                     color="text"
+                    data-testid={`dice-results-${key}`}
                     fontSize={3}
-                    mt={1}
-                    pt={1}
-                    sx={(styles) => ({
-                      borderTop: `1px ${styles.colors.text} solid`,
-                    })}
                   >
-                    {val.results.reduce((sum, cur) => {
-                      const num = (cur % val.sides) + 1;
-                      return sum + num;
-                    }, 0)}
+                    {diceDisplayString(
+                      mode,
+                      val.results.map((num) => (num % val.sides) + 1)
+                    )}
                   </Text>
-                )}
-              </Flex>
-            );
-          }
-          return null;
-        })}
+                  {mode === modes.sum && (
+                    <Text
+                      color="text"
+                      fontSize={3}
+                      mt={1}
+                      pt={1}
+                      sx={(styles) => ({
+                        borderTop: `1px ${styles.colors.text} solid`,
+                      })}
+                    >
+                      {val.results.reduce((sum, cur) => {
+                        const num = (cur % val.sides) + 1;
+                        return sum + num;
+                      }, 0)}
+                    </Text>
+                  )}
+                </Flex>
+              );
+            }
+            return null;
+          })}
       </Flex>
-      {roll.modifier && (
+      {roll?.modifier && (
         <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
           <Heading color="text" as="h3">
             Roll Modifier
@@ -130,7 +131,7 @@ const RollResultsTable = ({ roll }: { roll: DiceState }) => {
             Total
           </Heading>
           <Text color="text" fontSize={3}>
-            {rollTotal(roll)}
+            {roll && rollTotal(roll)}
           </Text>
         </Flex>
       )}

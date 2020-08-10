@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Flex } from 'rebass';
 import RollBubble from './RollBubble';
-import { DiceState } from '../types/dice';
+import { Roll } from '../types/dice';
 
-const RollBubbleManager = ({ rolls }: { rolls: DiceState[] }) => {
+const RollBubbleManager = ({ rolls }: { rolls: Roll[] }) => {
   return (
     <Flex
       data-testid="roll-bubbles"

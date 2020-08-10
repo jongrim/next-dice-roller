@@ -14,7 +14,9 @@ import lightTheme from '../theme.json';
 import darkTheme from '../darkTheme.json';
 
 import UserSetupModal from '../../components/UserSetupModal';
-import DiceSelectionForm from '../../components/DiceSelectionForm/DiceSelectionForm';
+import DiceSelectionForm, {
+  rollInfo,
+} from '../../components/DiceSelectionForm/DiceSelectionForm';
 import RollBubbleManager from '../../components/RollBubbleManager';
 import RollResultsTable from '../../components/RollResultsTable';
 import RollHistory from '../../components/RollHistory';
@@ -31,6 +33,7 @@ import {
   DiceInterface,
   diceNeedsSubmission,
   DieNeed,
+  Roll,
 } from '../../types/dice';
 import { Switch } from '@rebass/forms';
 
@@ -58,6 +61,7 @@ const diceInitialResultsState: DiceState = {
   },
   roller: 'anonymous',
   id: '',
+  rolls: [],
 };
 
 type DiceEvent =
@@ -72,6 +76,7 @@ type DiceEvent =
         roller: string;
         name?: string;
         modifier?: string;
+        addToCurrentRoll: boolean;
       };
     }
   | { type: 'roll'; payload: DiceState };
@@ -116,12 +121,41 @@ const assignNeeds = (die: DiceBlock): DiceBlock =>
 const makeDiceNeeds = (vals: diceNeedsSubmission): DiceInterface =>
   R.mapObjIndexed(assignNeeds, vals);
 
+export const mergeRolls = (rolls: Roll[], newRoll: Roll): Roll[] => {
+  const lastRoll = rolls[0];
+  const lastRollKeys = Object.keys(lastRoll.dice);
+  const newRollKeys = Object.keys(newRoll.dice);
+  const allKeys = [...new Set(lastRollKeys.concat(newRollKeys))];
+  const merged = R.reduce((acc: DiceInterface, cur: string): DiceInterface => {
+    const lastRolledDice = lastRoll.dice[cur] || {
+      results: [],
+      needs: 0,
+      sides: null,
+    };
+    const newRolledDice = newRoll.dice[cur] || {
+      results: [],
+      needs: 0,
+      sides: null,
+    };
+    return {
+      ...acc,
+      [cur]: {
+        results: [...lastRolledDice.results, ...newRolledDice.results],
+        needs: lastRolledDice.needs + newRolledDice.needs,
+        sides: lastRolledDice.sides || newRolledDice.sides,
+      },
+    };
+  }, {})(allKeys);
+  const updated = { ...lastRoll, dice: merged };
+  return [updated, ...rolls.slice(1)];
+};
+
 const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
   switch (event.type) {
     case 'submit':
       return {
+        ...state,
         state: diceStates.pending,
-        ...diceInitialResultsState,
         dice: { ...makeDiceNeeds(event.payload) },
       };
     case 'compute':
@@ -129,16 +163,30 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
         ...state.dice,
       });
       const result = {
+        ...state,
         dice: newDice,
         state: diceStates.rolling,
         roller: event.payload.roller,
         name: event.payload.name,
         modifier: event.payload.modifier,
         id: uuidv4(),
+        addToCurrentRoll: event.payload.addToCurrentRoll,
       };
       return result;
     case 'roll':
-      return { ...event.payload, state: diceStates.finished };
+      const newRolls = event.payload.addToCurrentRoll
+        ? mergeRolls(state.rolls, event.payload)
+        : [
+            {
+              dice: event.payload.dice,
+              roller: event.payload.roller,
+              id: event.payload.id,
+              name: event.payload.name,
+              modifier: event.payload.modifier,
+            },
+            ...state.rolls,
+          ];
+      return { ...event.payload, state: diceStates.finished, rolls: newRolls };
   }
 };
 
@@ -150,7 +198,6 @@ export default function Home() {
     diceReducer,
     diceInitialResultsState
   );
-  const [rolls, setRolls] = React.useState([]);
   const [connected, setConnected] = React.useState(false);
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
@@ -187,7 +234,11 @@ export default function Home() {
 
   const roll = (
     dice: diceNeedsSubmission,
-    { name, modifier } = { name: '', modifier: '0' }
+    { name, modifier, addToCurrentRoll }: rollInfo = {
+      name: '',
+      modifier: '0',
+      addToCurrentRoll: false,
+    }
   ) => {
     dispatch({
       type: 'submit',
@@ -212,6 +263,7 @@ export default function Home() {
             roller: storedUsername,
             name,
             modifier,
+            addToCurrentRoll,
           },
         });
       });
@@ -247,8 +299,6 @@ export default function Home() {
          * Note: every socket receives this, including the person that emitted it
          */
         dispatch({ type: 'roll', payload: state });
-        // add to history of rolls
-        setRolls((cur) => [state, ...cur]);
       });
       return () => {
         ioSocket.close();
@@ -385,7 +435,10 @@ export default function Home() {
               width={['100%', 1 / 2, 1 / 2]}
               sx={{ order: [2, 1, 1] }}
             >
-              <DiceSelectionForm onSubmit={roll} />
+              <DiceSelectionForm
+                onSubmit={roll}
+                hasRolls={state.rolls.length > 0}
+              />
             </Box>
             <Flex
               as="section"
@@ -394,13 +447,13 @@ export default function Home() {
               flexDirection="column"
               minHeight="265px"
             >
-              <RollResultsTable roll={state} />
+              <RollResultsTable roll={state.rolls[0]} />
             </Flex>
           </Flex>
           <Flex as="section" flex="1" sx={{ order: 2 }} flexDirection="column">
-            <RollHistory rolls={rolls} />
+            <RollHistory rolls={state.rolls} />
           </Flex>
-          <RollBubbleManager rolls={rolls} />
+          <RollBubbleManager rolls={state.rolls} />
           <UserSetupModal
             storedUsername={storedUsername}
             setStoredUsername={setStoredUsername}

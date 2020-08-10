@@ -1,4 +1,4 @@
-import { DiceState } from '../types/dice';
+import { Roll } from '../types/dice';
 
 export const diceTypeTotal = (dice: number[], diceType: number) =>
   dice.reduce((sum, cur) => {
@@ -6,7 +6,7 @@ export const diceTypeTotal = (dice: number[], diceType: number) =>
     return sum + num;
   }, 0);
 
-export const rollTotal = (roll: DiceState): number => {
+export const rollTotal = (roll: Roll): number => {
   return Object.entries(roll.dice)
     .map(([key, val]) => {
       if (val.results.length > 0) {

@@ -33,4 +33,14 @@ export interface DiceState {
   name?: string;
   modifier?: string;
   id: string;
+  rolls: Roll[];
+  addToCurrentRoll?: boolean;
+}
+
+export interface Roll {
+  dice: DiceInterface;
+  roller: string;
+  name?: string;
+  modifier?: string;
+  id: string;
 }

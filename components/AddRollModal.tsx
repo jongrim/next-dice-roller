@@ -142,9 +142,12 @@ const AddRollModal: React.FC<AddRollModalProps> = ({ isOpen, onDismiss }) => {
           onChange={(e) => setModifier(e.target.value)}
           mt={2}
         />
-        <Button onClick={submit} mt={3}>
-          Done
-        </Button>
+        <Flex mt={3}>
+          <Button onClick={submit}>Done</Button>
+          <Button variant="ghost" onClick={onDismiss} ml={2}>
+            Cancel
+          </Button>
+        </Flex>
       </Box>
     </Dialog>
   );

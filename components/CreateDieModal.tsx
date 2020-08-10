@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Dialog } from '@reach/dialog';
-import { Box, Button, Heading, Text } from 'rebass';
+import { Box, Button, Heading, Text, Flex } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 import { useTheme } from 'emotion-theming';
 
@@ -85,9 +85,12 @@ const CreateDieModal: React.FC<CreateDieModalProps> = ({
             mt={2}
           />
         </Box>
-        <Button onClick={submit} mt={3}>
-          Done
-        </Button>
+        <Flex mt={3}>
+          <Button onClick={submit}>Done</Button>
+          <Button variant="ghost" onClick={onDismiss} ml={2}>
+            Cancel
+          </Button>
+        </Flex>
       </Box>
     </Dialog>
   );

@@ -44,7 +44,7 @@
     "@types/testing-library__cypress": "^5.0.6",
     "cypress": "^4.12.1",
     "eslint": "^7.6.0",
-    "eslint-plugin-react": "^7.20.5",
+    "eslint-plugin-react": "^7.20.6",
     "jest": "^26.3.0",
     "@types/ramda": "^0.27.14",
     "@typescript-eslint/eslint-plugin": "^3.9.0",

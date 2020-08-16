@@ -116,7 +116,13 @@ const RollResultsTable = ({ roll }: { roll: Roll }) => {
           })}
       </Flex>
       {roll?.modifier && (
-        <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
+        <Flex
+          flexDirection="column"
+          alignItems="center"
+          minWidth={128}
+          mt={2}
+          data-testid="results-roll-modifier"
+        >
           <Heading color="text" as="h3">
             Roll Modifier
           </Heading>

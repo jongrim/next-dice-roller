@@ -378,13 +378,13 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
               Add to current roll
             </Label>
           )}
+          {addToCurrentRollIsChecked && (
+            <Text color="text" sx={{ gridColumn: '1 / 3' }}>
+              Roll results will be merged with current showing results and its
+              history entry
+            </Text>
+          )}
         </Box>
-        {addToCurrentRollIsChecked && (
-          <Text color="text">
-            Roll results will be merged with current showing results and its
-            history entry
-          </Text>
-        )}
         <CreateDieModal
           isOpen={createDieIsOpen}
           onDismiss={(e, die?) => {

@@ -430,7 +430,7 @@ export default function Home() {
             sx={{
               display: 'grid',
               gridGap: 2, // theme.space[3]
-              gridTemplateColumns: '1fr 1fr 1fr',
+              gridTemplateColumns: ['1fr 1fr 1fr', '1fr 1fr', '1fr 1fr 1fr'],
             }}
           >
             <Box
@@ -455,7 +455,10 @@ export default function Home() {
             </Flex>
             <Flex
               as="section"
-              sx={{ gridColumn: ['1 / 4', '3', '3'], gridRow: ['3', '1', '1'] }}
+              sx={{
+                gridColumn: ['1 / 4', '1 / 3', '3'],
+                gridRow: ['3', '2', '1'],
+              }}
               flexDirection="column"
             >
               <RollHistory rolls={state.rolls} />

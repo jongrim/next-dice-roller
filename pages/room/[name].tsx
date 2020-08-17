@@ -425,15 +425,20 @@ export default function Home() {
           bg="background"
           flexDirection={['column', 'column', 'row']}
         >
-          <Flex
+          <Box
             flex="2"
-            sx={{ order: 1 }}
-            flexDirection={['column', 'row', 'row']}
+            sx={{
+              display: 'grid',
+              gridGap: 2, // theme.space[3]
+              gridTemplateColumns: ['1fr 1fr 1fr', '1fr 1fr', '1fr 1fr 1fr'],
+            }}
           >
             <Box
               as="section"
-              width={['100%', 1 / 2, 1 / 2]}
-              sx={{ order: [2, 1, 1] }}
+              sx={{
+                gridColumn: ['1 / 4', '1', '1'],
+                gridRow: ['2', '1', '1'],
+              }}
             >
               <DiceSelectionForm
                 onSubmit={roll}
@@ -442,17 +447,23 @@ export default function Home() {
             </Box>
             <Flex
               as="section"
-              flex="1"
-              sx={{ order: [1, 2, 2] }}
+              sx={{ gridColumn: ['1 / 4', '2', '2'], gridRow: ['1', '1', '1'] }}
               flexDirection="column"
               minHeight="265px"
             >
               <RollResultsTable roll={state.rolls[0]} />
             </Flex>
-          </Flex>
-          <Flex as="section" flex="1" sx={{ order: 2 }} flexDirection="column">
-            <RollHistory rolls={state.rolls} />
-          </Flex>
+            <Flex
+              as="section"
+              sx={{
+                gridColumn: ['1 / 4', '1 / 3', '3'],
+                gridRow: ['3', '2', '1'],
+              }}
+              flexDirection="column"
+            >
+              <RollHistory rolls={state.rolls} />
+            </Flex>
+          </Box>
           <RollBubbleManager rolls={state.rolls} />
           <UserSetupModal
             storedUsername={storedUsername}

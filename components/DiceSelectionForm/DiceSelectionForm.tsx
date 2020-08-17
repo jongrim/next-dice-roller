@@ -7,12 +7,13 @@ import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
 
 import AddRollModal from '../AddRollModal';
+import EditRollModal from '../EditRollModal';
 import LoadRollsModal from '../LoadRollsModal';
-import SaveRollButton from './SaveRollButton';
 import CreateDieModal from '../CreateDieModal';
 
 import { emitEvent } from '../../utils/goatcounter';
 import { diceNeedsSubmission, Die } from '../../types/dice';
+import ConfiguredRollListItem from './ConfiguredRollListItem';
 
 export interface configuredRoll {
   rollName: string;
@@ -39,6 +40,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
     configuredRoll['id'][]
   >([]);
   const [addRollIsOpen, setAddRollIsOpen] = React.useState(false);
+  const [editRollId, setEditRollId] = React.useState('');
   const [loadRollIsOpen, setLoadRollIsOpen] = React.useState(false);
   const [createDieIsOpen, setCreateDieIsOpen] = React.useState(false);
   const [rolls, setRolls] = React.useState<configuredRoll[]>([]);
@@ -78,6 +80,20 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
     }
   }, [setStoredRollIds]);
 
+  React.useEffect(() => {
+    rolls.forEach((roll) => {
+      window.localStorage.setItem(roll.id, JSON.stringify(roll));
+    });
+    const rollIds = rolls.map(({ id }) => id);
+    const localRolls = window.localStorage.getItem('rollIds');
+    const rollIdsToSave = localRolls
+      ? rollIds.concat(JSON.parse(localRolls))
+      : rollIds;
+    const uniqueIds = [...new Set(rollIdsToSave)];
+    window.localStorage.setItem('rollIds', JSON.stringify(uniqueIds));
+    setStoredRollIds(uniqueIds);
+  }, [rolls, setStoredRollIds]);
+
   return (
     <Box
       sx={(styles) => ({
@@ -101,92 +117,18 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
             </Text>
           </Box>
         )}
-        {rolls.map((roll) => {
-          return (
-            <Flex
-              alignItems="center"
-              justifyContent="space-between"
-              flexWrap="wrap"
-              mb={2}
-              key={roll.id}
-              data-testid={`configured-roll-${roll.rollName}`}
-            >
-              <Text color="text" key={roll.rollName}>
-                {roll.rollName}
-              </Text>
-              <Flex>
-                <Button
-                  type="button"
-                  variant="special"
-                  onClick={() => {
-                    emitEvent({
-                      path: 'roll-saved-roll',
-                      title: 'roll saved roll',
-                    });
-                    const needs: diceNeedsSubmission = roll.dice.reduce(
-                      (acc, cur) => {
-                        return {
-                          ...acc,
-                          [`d${cur}`]: {
-                            needs: acc[`d${cur}`]
-                              ? acc[`d${cur}`].needs + 1
-                              : 1,
-                            sides: parseInt(cur, 10),
-                            name: `d${cur}`,
-                          },
-                        };
-                      },
-                      {}
-                    );
-                    onSubmit(needs, {
-                      name: roll.rollName,
-                      modifier: roll.modifier,
-                      addToCurrentRoll: false,
-                    });
-                  }}
-                >
-                  Roll
-                </Button>
-                <SaveRollButton
-                  alreadySaved={storedRollIds.includes(roll.id)}
-                  roll={roll}
-                  saveRoll={(roll) => {
-                    const newRollIdsArray = storedRollIds.concat(roll.id);
-                    window.localStorage.setItem(roll.id, JSON.stringify(roll));
-                    window.localStorage.setItem(
-                      'rollIds',
-                      JSON.stringify(newRollIdsArray)
-                    );
-                    setStoredRollIds(newRollIdsArray);
-                  }}
-                />
-                <Button
-                  ml={2}
-                  type="button"
-                  variant="danger"
-                  onClick={() => {
-                    emitEvent({
-                      path: 'remove-saved-roll',
-                      title: 'remove saved roll',
-                    });
-                    const newRollIds = storedRollIds.filter(
-                      (id) => id !== roll.id
-                    );
-                    setStoredRollIds(newRollIds);
-                    window.localStorage.removeItem(roll.id);
-                    window.localStorage.setItem(
-                      'rollIds',
-                      JSON.stringify(newRollIds)
-                    );
-                    setRolls(rolls.filter((r) => r.id !== roll.id));
-                  }}
-                >
-                  Delete
-                </Button>
-              </Flex>
-            </Flex>
-          );
-        })}
+        {rolls.map((roll) => (
+          <ConfiguredRollListItem
+            key={roll.id}
+            roll={roll}
+            rolls={rolls}
+            onSubmit={onSubmit}
+            setEditRollId={setEditRollId}
+            storedRollIds={storedRollIds}
+            setStoredRollIds={setStoredRollIds}
+            setRolls={setRolls}
+          />
+        ))}
         <Flex justifyContent="space-between" alignItems="center" mt={3}>
           <Button
             width="48%"
@@ -235,6 +177,25 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
             title: 'close roll modal',
           });
           setAddRollIsOpen(false);
+        }}
+      />
+      <EditRollModal
+        isOpen={Boolean(editRollId)}
+        rollId={editRollId}
+        onDismiss={(e, roll?: configuredRoll) => {
+          e.preventDefault();
+          if (roll) {
+            emitEvent({
+              path: 'edit-roll',
+              title: 'edit roll',
+            });
+            const updatedRolls = rolls
+              .filter(({ id }) => id !== roll.id)
+              .concat(roll);
+            setRolls(updatedRolls);
+          }
+
+          setEditRollId('');
         }}
       />
       {loadRollIsOpen && (
@@ -378,13 +339,13 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
               Add to current roll
             </Label>
           )}
+          {addToCurrentRollIsChecked && (
+            <Text color="text" sx={{ gridColumn: '1 / 3' }}>
+              Roll results will be merged with current showing results and its
+              history entry
+            </Text>
+          )}
         </Box>
-        {addToCurrentRollIsChecked && (
-          <Text color="text">
-            Roll results will be merged with current showing results and its
-            history entry
-          </Text>
-        )}
         <CreateDieModal
           isOpen={createDieIsOpen}
           onDismiss={(e, die?) => {

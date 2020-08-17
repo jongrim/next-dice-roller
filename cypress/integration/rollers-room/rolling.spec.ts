@@ -166,16 +166,6 @@ describe('Configuring rolls', () => {
       cy.contains('Go Aggro');
       cy.contains('cypress');
     });
-    // test saving
-    cy.findByTestId('configured-roll-Go Aggro').within(() => {
-      cy.findByText('Save')
-        .click()
-        .then(() => {
-          expect(
-            JSON.parse(window.localStorage.getItem('rollIds')).length
-          ).to.eq(3);
-        });
-    });
     // test loading
     cy.findByText('Load Saved Rolls').click();
     cy.findByTestId('load-rolls-form').within(() => {
@@ -188,16 +178,30 @@ describe('Configuring rolls', () => {
     cy.findByTestId('configured-roll-Kick Some Ass').within(() => {
       cy.findByText('Roll').click();
     });
+    // test editing
+    cy.findByTestId('configured-roll-Go Aggro').within(() => {
+      cy.findByTestId('roll-options').click();
+    });
+    cy.findByText('Edit').click();
+    cy.findByLabelText('Modifier').clear().type('2');
+    cy.findByText('Done').click();
+    cy.findByTestId('configured-roll-Go Aggro').within(() => {
+      cy.findByText('Roll').click();
+    });
+    cy.findByTestId('results-roll-modifier').within(() => {
+      cy.findByText('2');
+    });
     // test removing
     cy.findByTestId('configured-roll-Go Aggro').within(() => {
-      cy.findByText('Delete')
-        .click()
-        .then(() => {
-          expect(
-            JSON.parse(window.localStorage.getItem('rollIds')).length
-          ).to.eq(2);
-        });
+      cy.findByTestId('roll-options').click();
     });
+    cy.findByText('Delete')
+      .click()
+      .then(() => {
+        expect(JSON.parse(window.localStorage.getItem('rollIds')).length).to.eq(
+          2
+        );
+      });
     cy.findByText('Load Saved Rolls').click();
     cy.findByTestId('load-rolls-form').within(() => {
       cy.findByLabelText('Go Aggro').should('not.exist');

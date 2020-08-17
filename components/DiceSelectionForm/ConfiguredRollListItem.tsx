@@ -61,6 +61,9 @@ const ConfiguredRollListItem = ({
           position="right"
           trigger="click"
           interactive
+          onRequestClose={() => {
+            setSideMenuOpen(false);
+          }}
           useContext
           open={sideMenuOpen}
           html={

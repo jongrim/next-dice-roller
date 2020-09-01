@@ -42,7 +42,7 @@
     "@types/react": "^16.9.49",
     "@types/socket.io-client": "^1.4.33",
     "@types/testing-library__cypress": "^5.0.6",
-    "cypress": "^4.12.1",
+    "cypress": "^5.0.0",
     "eslint": "^7.8.0",
     "eslint-plugin-react": "^7.20.6",
     "jest": "^26.4.2",

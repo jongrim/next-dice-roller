@@ -63,9 +63,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
     }));
 
   React.useEffect(() => {
-    console.log('running socket effect');
     socket?.on('add-die', ({ die }) => {
-      console.log('add-die received', die);
       /**
        * Note: every socket receives this, including the person that emitted it
        */

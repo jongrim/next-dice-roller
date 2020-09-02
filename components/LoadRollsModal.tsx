@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Dialog } from '@reach/dialog';
 import { Box, Button, Flex, Heading, Text } from 'rebass';
-import { Checkbox } from '@rebass/forms';
+import Checkbox from './Checkbox';
 import { configuredRoll } from './DiceSelectionForm/DiceSelectionForm';
 import { useTheme } from 'emotion-theming';
 
@@ -61,11 +61,6 @@ const LoadRollsModal: React.FC<LoadRollsModalProps> = ({
                       : [...rolls, roll];
                   })
                 }
-                sx={{
-                  'input:disabled ~ &': {
-                    color: 'secondary',
-                  },
-                }}
               />
               {roll.rollName}
             </Flex>

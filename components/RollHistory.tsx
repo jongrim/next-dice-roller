@@ -13,7 +13,7 @@ const RollHistory: React.FC<{ rolls: Roll[] }> = ({ rolls }) => {
       mt={[2, 2, 0]}
       pt={[2, 2, 0]}
     >
-      <Heading color="text" as="h2" textAlign="center">
+      <Heading color="text" as="h2" textAlign="center" fontWeight="600">
         Rolls Since Joining
       </Heading>
       <Flex

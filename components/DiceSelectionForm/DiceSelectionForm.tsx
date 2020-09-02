@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { Box, Button, Flex, Heading, Text } from 'rebass';
-import { Checkbox, Label, Input } from '@rebass/forms';
+import { Label, Input } from '@rebass/forms';
 import * as R from 'ramda';
 import { TweenLite, Sine } from 'gsap';
 import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
 
+import Checkbox from '../Checkbox';
 import AddRollModal from '../AddRollModal';
 import EditRollModal from '../EditRollModal';
 import LoadRollsModal from '../LoadRollsModal';
@@ -30,11 +31,13 @@ export type rollInfo = {
 interface DiceSelectionFormProps {
   onSubmit: (needs: diceNeedsSubmission, meta?: rollInfo) => void;
   hasRolls: boolean;
+  socket: SocketIOClient.Socket;
 }
 
 const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
   onSubmit,
   hasRolls,
+  socket,
 }) => {
   const [storedRollIds, setStoredRollIds] = React.useState<
     configuredRoll['id'][]
@@ -58,6 +61,17 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
       ...currentValues,
       [name]: value,
     }));
+
+  React.useEffect(() => {
+    console.log('running socket effect');
+    socket?.on('add-die', ({ die }) => {
+      console.log('add-die received', die);
+      /**
+       * Note: every socket receives this, including the person that emitted it
+       */
+      setCustomDice((curDice) => curDice.concat(die));
+    });
+  }, [socket]);
 
   const [assortedModifier, setAssortedModifier] = React.useState('');
   const [assortedLabel, setAssortedLabel] = React.useState('');
@@ -102,7 +116,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
       mt={[2, 0, 0]}
       pt={[2, 0, 0]}
     >
-      <Heading as="h3" color="text">
+      <Heading as="h3" color="text" fontWeight="600">
         Your Configured Rolls
       </Heading>
       <Box mt={2}>
@@ -211,7 +225,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
         sx={(styles) => ({ borderTop: `1px ${styles.colors.text} solid` })}
         mt={3}
       >
-        <Heading color="text" as="h3" mt={2}>
+        <Heading color="text" as="h3" mt={2} fontWeight="600">
           Build a Roll
         </Heading>
         <StandardDice
@@ -348,10 +362,14 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
         </Box>
         <CreateDieModal
           isOpen={createDieIsOpen}
-          onDismiss={(e, die?) => {
+          onDismiss={(e, die?, emitToRoom?) => {
             setCreateDieIsOpen(false);
             if (die) {
-              setCustomDice(customDice.concat(die));
+              if (emitToRoom) {
+                socket.emit('add-die', { die });
+              } else {
+                setCustomDice(customDice.concat(die));
+              }
             }
           }}
         />
@@ -466,19 +484,11 @@ function CustomDice({
   });
   return (
     <>
-      <Box
-        mt={2}
-        sx={{
-          display: 'grid',
-          gridGap: 2, // theme.space[3]
-          gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 0.33fr))',
-        }}
-      >
-        <Heading color="text" as="h4" fontSize={2}>
+      <Box mt={2}>
+        <Heading color="secondary" as="h4" fontWeight="600" fontSize={2}>
           Custom Dice
         </Heading>
         <Button
-          sx={{ justifySelf: 'start' }}
           type="button"
           variant="clear"
           p="0px"
@@ -656,19 +666,12 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
 
   return (
     <>
-      <Box
-        mt={2}
-        sx={{
-          display: 'grid',
-          gridGap: 2, // theme.space[3]
-          gridTemplateColumns: 'repeat(auto-fit, minmax(124px, 1fr))',
-        }}
-      >
-        <Heading color="text" as="h4" fontSize={2}>
+      <Box mt={2}>
+        <Heading color="secondary" fontWeight="600" as="h4" fontSize={2}>
           Standard Dice
         </Heading>
         <Button
-          sx={{ justifySelf: 'start' }}
+          mr={3}
           type="button"
           variant="clear"
           p="0px"
@@ -681,7 +684,6 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
           {state.value === 'visible' ? 'Hide' : 'Show'}
         </Button>
         <Button
-          sx={{ justifySelf: 'start' }}
           type="button"
           variant="clear"
           p="0px"
@@ -693,7 +695,6 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
         >
           Clear
         </Button>
-        <Box />
       </Box>
       <Box
         ref={node}

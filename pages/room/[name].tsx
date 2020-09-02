@@ -193,7 +193,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
 export default function Home() {
   const router = useRouter();
   const { name } = router.query;
-  const [socket, setSocket] = React.useState(null);
+  const [socket, setSocket] = React.useState<SocketIOClient.Socket>(null);
   const [state, dispatch] = React.useReducer(
     diceReducer,
     diceInitialResultsState
@@ -443,6 +443,7 @@ export default function Home() {
               <DiceSelectionForm
                 onSubmit={roll}
                 hasRolls={state.rolls.length > 0}
+                socket={socket}
               />
             </Box>
             <Flex

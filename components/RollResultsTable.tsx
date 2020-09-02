@@ -36,7 +36,7 @@ const RollResultsTable = ({ roll }: { roll: Roll }) => {
       flex="1 0 0%"
     >
       <Flex>
-        <Heading color="text" as="h2" mr={2}>
+        <Heading color="text" as="h2" mr={2} fontWeight="600">
           Results
         </Heading>
         <Tooltip
@@ -80,7 +80,7 @@ const RollResultsTable = ({ roll }: { roll: Roll }) => {
                   alignItems="center"
                   minWidth={90}
                 >
-                  <Heading color="text" as="h3">
+                  <Heading color="text" as="h3" fontWeight="200">
                     {key}
                   </Heading>
                   <Text
@@ -123,7 +123,7 @@ const RollResultsTable = ({ roll }: { roll: Roll }) => {
           mt={2}
           data-testid="results-roll-modifier"
         >
-          <Heading color="text" as="h3">
+          <Heading color="text" as="h3" fontWeight="200">
             Roll Modifier
           </Heading>
           <Text color="text" fontSize={3}>
@@ -133,7 +133,7 @@ const RollResultsTable = ({ roll }: { roll: Roll }) => {
       )}
       {mode === modes.sum && (
         <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
-          <Heading color="text" as="h3">
+          <Heading color="text" as="h3" fontWeight="200">
             Total
           </Heading>
           <Text color="text" fontSize={3}>

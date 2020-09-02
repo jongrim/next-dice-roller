@@ -2,13 +2,14 @@ import * as React from 'react';
 import { Dialog } from '@reach/dialog';
 import { Box, Button, Heading, Text, Flex } from 'rebass';
 import { Label, Input } from '@rebass/forms';
+import Checkbox from './Checkbox';
 import { useTheme } from 'emotion-theming';
 
 import { Die } from '../types/dice';
 
 interface CreateDieModalProps {
   isOpen: boolean;
-  onDismiss: (e: React.SyntheticEvent, die?: Die) => void;
+  onDismiss: (e: React.SyntheticEvent, die?: Die, emitToRoom?: Boolean) => void;
 }
 
 const CreateDieModal: React.FC<CreateDieModalProps> = ({
@@ -19,6 +20,7 @@ const CreateDieModal: React.FC<CreateDieModalProps> = ({
   const [error, setErrorMessage] = React.useState('');
   const [dieName, setDieName] = React.useState('');
   const [sides, setSides] = React.useState('');
+  const [emitToRoom, setEmitToRoom] = React.useState(false);
   const submit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!sides) {
@@ -28,7 +30,11 @@ const CreateDieModal: React.FC<CreateDieModalProps> = ({
       );
       return;
     }
-    onDismiss(e, { name: dieName || `d${sides}`, sides: parseInt(sides, 10) });
+    onDismiss(
+      e,
+      { name: dieName || `d${sides}`, sides: parseInt(sides, 10) },
+      emitToRoom
+    );
     setDieName('');
     setSides('');
   };
@@ -84,6 +90,20 @@ const CreateDieModal: React.FC<CreateDieModalProps> = ({
             onChange={(e) => setSides(e.target.value)}
             mt={2}
           />
+        </Box>
+        <Box mt={3}>
+          <Label htmlFor="emit-die-to-room" color="text" fontSize={2}>
+            <Checkbox
+              color="text"
+              id="emit-die-to-room"
+              name="emit-die-to-room"
+              checked={emitToRoom}
+              onChange={() => {
+                setEmitToRoom((val) => !val);
+              }}
+            />
+            Share with the room - this custom die will show up for everyone
+          </Label>
         </Box>
         <Flex mt={3}>
           <Button onClick={submit}>Done</Button>

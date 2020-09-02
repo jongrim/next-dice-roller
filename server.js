@@ -33,6 +33,9 @@ app.prepare().then(() => {
       socket.on('roll', (data) => {
         room.emit('roll', data);
       });
+      socket.on('add-die', (data) => {
+        room.emit('add-die', data);
+      });
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));
         room.emit('update-users', roomUsers);

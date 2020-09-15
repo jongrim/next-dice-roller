@@ -2151,10 +2151,10 @@
     "@types/styled-system" "*"
     "@types/styled-system__css" "*"
 
-"@types/rebass__forms@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@types/rebass__forms/-/rebass__forms-4.0.2.tgz#69a2c50753583180bbe092dd147de8af2965d209"
-  integrity sha512-cop3eRQOh84O5RfKFo3pTcOdgJa8sFpa314fvFfH/msr43Ao1wW1xJzCUHVDx1D6lZSaqndS7QCJlkNrOpZnXA==
+"@types/rebass__forms@^4.0.3":
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/@types/rebass__forms/-/rebass__forms-4.0.3.tgz#5e7418ab1c3422b595331b92408c9bf83adfc259"
+  integrity sha512-bSf4uNIdBFGyujzF1Ko7JBiGZXkEvstBeB5GutA/z1fA97LYtOOKXVv+QIbQwtkeAMGYYD7GpIGmVtVWfG2/pw==
   dependencies:
     "@types/react" "*"
     "@types/rebass" "*"

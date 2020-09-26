@@ -2,14 +2,19 @@ import * as React from 'react';
 import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { TweenMax, Elastic } from 'gsap';
-import { Box, Flex } from 'rebass';
-import { Icon, InlineIcon } from '@iconify/react';
+import { Button, Flex } from 'rebass';
+import { Icon } from '@iconify/react';
+import { v4 as uuidv4 } from 'uuid';
+import uniqueId from 'lodash.uniqueid';
 import diceD4Outline from '@iconify/icons-mdi/dice-d4-outline';
 import diceD6Outline from '@iconify/icons-mdi/dice-d6-outline';
 import diceD8Outline from '@iconify/icons-mdi/dice-d8-outline';
 import diceD10Outline from '@iconify/icons-mdi/dice-d10-outline';
 import diceD12Outline from '@iconify/icons-mdi/dice-d12-outline';
 import diceD20Outline from '@iconify/icons-mdi/dice-d20-outline';
+import { GraphicDie } from '../../types/dice';
+
+const CLIENT_ID = uuidv4();
 
 interface SidebarMachineSchema {
   states: {
@@ -70,7 +75,11 @@ const nextMessageMap: { [key: string]: SidebarEvent } = {
   opening: { type: 'CLOSE' },
 };
 
-function DiceSidebar() {
+interface DiceSidebarProps {
+  addDie: (die: GraphicDie) => void;
+}
+
+const DiceSidebar: React.FC<DiceSidebarProps> = ({ addDie }) => {
   const element = React.useRef(null);
   const openMenu = React.useCallback(() => {
     return new Promise((resolve) => {
@@ -102,6 +111,15 @@ function DiceSidebar() {
 
   const nextMessage: SidebarEvent = nextMessageMap[current.value.toString()];
 
+  const makeDie = (sides: number): GraphicDie => ({
+    sides,
+    bgColor: 'black',
+    fontColor: 'white',
+    id: uniqueId(`die-${CLIENT_ID}-`),
+    curNumber: sides,
+    rollVersion: 1,
+  });
+
   return (
     <Flex
       className="sidebar"
@@ -110,15 +128,54 @@ function DiceSidebar() {
       flexDirection="column"
       justifyContent="space-around"
       alignItems="center"
+      sx={(style) => ({
+        borderRight: `1px ${style.colors.text} solid`,
+      })}
     >
-      <Icon height="3rem" icon={diceD4Outline} />
-      <Icon height="3rem" icon={diceD6Outline} />
-      <Icon height="3rem" icon={diceD8Outline} />
-      <Icon height="3rem" icon={diceD10Outline} />
-      <Icon height="3rem" icon={diceD12Outline} />
-      <Icon height="3rem" icon={diceD20Outline} />
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => addDie(makeDie(4))}
+      >
+        <Icon height="3rem" icon={diceD4Outline} />
+      </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => addDie(makeDie(6))}
+      >
+        <Icon height="3rem" icon={diceD6Outline} />
+      </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => addDie(makeDie(8))}
+      >
+        <Icon height="3rem" icon={diceD8Outline} />
+      </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => addDie(makeDie(10))}
+      >
+        <Icon height="3rem" icon={diceD10Outline} />
+      </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => addDie(makeDie(12))}
+      >
+        <Icon height="3rem" icon={diceD12Outline} />
+      </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => addDie(makeDie(20))}
+      >
+        <Icon height="3rem" icon={diceD20Outline} />
+      </Button>
     </Flex>
   );
-}
+};
 
 export default DiceSidebar;

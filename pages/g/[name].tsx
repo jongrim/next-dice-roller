@@ -4,19 +4,14 @@ import { useRouter } from 'next/router';
 import { Box, Flex } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import { ThemeProvider } from 'emotion-theming';
+import { TweenMax, Elastic } from 'gsap';
 import * as R from 'ramda';
-
-import lightTheme from '../theme.json';
-import darkTheme from '../darkTheme.json';
 
 import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
-import DiceSelectionForm, {
-  rollInfo,
-} from '../../components/DiceSelectionForm/DiceSelectionForm';
 import RollBubbleManager from '../../components/RollBubbleManager';
-import RollResultsTable from '../../components/RollResultsTable';
 import RollHistory from '../../components/RollHistory';
+import DiceSidebar from './DiceSidebar';
 
 import {
   DiceBlock,
@@ -24,8 +19,42 @@ import {
   DiceInterface,
   diceNeedsSubmission,
   DieNeed,
+  Die,
   Roll,
 } from '../../types/dice';
+import { rollInfo } from '../../components/DiceSelectionForm/DiceSelectionForm';
+import useTheme from '../../hooks/useTheme';
+
+let gsap;
+let Draggable;
+
+interface GraphicDie {
+  id: string;
+  bgColor: string;
+  fontColor: string;
+  sides: number;
+}
+
+const tempDice: GraphicDie[] = [
+  {
+    id: 'dot-1',
+    bgColor: '#CC3363',
+    fontColor: '#fff',
+    sides: 6,
+  },
+  {
+    id: 'dot-2',
+    bgColor: '#9AD1D4',
+    fontColor: '#333',
+    sides: 12,
+  },
+  {
+    id: 'dot-3',
+    bgColor: '#62C370',
+    fontColor: '#333',
+    sides: 20,
+  },
+];
 
 const diceStates = {
   pending: 'pending',
@@ -109,35 +138,6 @@ const assignNeeds = (die: DiceBlock): DiceBlock =>
 const makeDiceNeeds = (vals: diceNeedsSubmission): DiceInterface =>
   R.mapObjIndexed(assignNeeds, vals);
 
-export const mergeRolls = (rolls: Roll[], newRoll: Roll): Roll[] => {
-  const lastRoll = rolls[0];
-  const lastRollKeys = Object.keys(lastRoll.dice);
-  const newRollKeys = Object.keys(newRoll.dice);
-  const allKeys = [...new Set(lastRollKeys.concat(newRollKeys))];
-  const merged = R.reduce((acc: DiceInterface, cur: string): DiceInterface => {
-    const lastRolledDice = lastRoll.dice[cur] || {
-      results: [],
-      needs: 0,
-      sides: null,
-    };
-    const newRolledDice = newRoll.dice[cur] || {
-      results: [],
-      needs: 0,
-      sides: null,
-    };
-    return {
-      ...acc,
-      [cur]: {
-        results: [...lastRolledDice.results, ...newRolledDice.results],
-        needs: lastRolledDice.needs + newRolledDice.needs,
-        sides: lastRolledDice.sides || newRolledDice.sides,
-      },
-    };
-  }, {})(allKeys);
-  const updated = { ...lastRoll, dice: merged };
-  return [updated, ...rolls.slice(1)];
-};
-
 const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
   switch (event.type) {
     case 'submit':
@@ -162,23 +162,21 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
       };
       return result;
     case 'roll':
-      const newRolls = event.payload.addToCurrentRoll
-        ? mergeRolls(state.rolls, event.payload)
-        : [
-            {
-              dice: event.payload.dice,
-              roller: event.payload.roller,
-              id: event.payload.id,
-              name: event.payload.name,
-              modifier: event.payload.modifier,
-            },
-            ...state.rolls,
-          ];
+      const newRolls = [
+        {
+          dice: event.payload.dice,
+          roller: event.payload.roller,
+          id: event.payload.id,
+          name: event.payload.name,
+          modifier: event.payload.modifier,
+        },
+        ...state.rolls,
+      ];
       return { ...event.payload, state: diceStates.finished, rolls: newRolls };
   }
 };
 
-export default function Home() {
+export default function GraphicDiceRoom() {
   const router = useRouter();
   const { name } = router.query;
   const [socket, setSocket] = React.useState<SocketIOClient.Socket>(null);
@@ -189,36 +187,7 @@ export default function Home() {
   const [connected, setConnected] = React.useState(false);
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
-  const [theme, setTheme] = React.useState<{ label: string; value: object }>({
-    label: 'light',
-    value: lightTheme,
-  });
-
-  const toggleTheme = () =>
-    setTheme((curTheme) => {
-      if (curTheme.label === 'light') {
-        return { label: 'dark', value: darkTheme };
-      }
-      return { label: 'light', value: lightTheme };
-    });
-
-  React.useLayoutEffect(() => {
-    const userTheme = window.localStorage.getItem('theme');
-    if (!userTheme) {
-      // user doesn't have a set theme, so use system preference
-      const mqList = window.matchMedia('(prefers-color-scheme: dark)');
-      if (mqList.matches) {
-        setTheme({ label: 'dark', value: darkTheme });
-      }
-    }
-    if (userTheme === 'dark') {
-      setTheme({ label: 'dark', value: darkTheme });
-    }
-  }, []);
-
-  React.useEffect(() => {
-    window.localStorage.setItem('theme', theme.label);
-  }, [theme]);
+  const { theme, toggleTheme } = useTheme();
 
   const roll = (
     dice: diceNeedsSubmission,
@@ -292,7 +261,7 @@ export default function Home() {
         ioSocket.close();
       };
     }
-  }, [name]);
+  }, [name, Draggable]);
 
   // emit rolls
   React.useEffect(() => {
@@ -303,6 +272,65 @@ export default function Home() {
     }
   }, [state.state]);
 
+  // Draggable dice
+  const [graphicDice, setGraphicDice] = React.useState(tempDice);
+  const el = React.useRef();
+  React.useEffect(() => {
+    async function load() {
+      const { gsap: g, Draggable: D } = await import('gsap/all');
+      gsap = g;
+      Draggable = D;
+      gsap.registerPlugin(Draggable);
+    }
+    if (socket) {
+      load().then(() => {
+        Draggable.create(
+          graphicDice.map(({ id }) => `#${id}`),
+          {
+            type: 'x,y',
+            bounds: document.getElementById('dicebox'),
+            onDragEnd: function () {
+              socket.emit('drag', {
+                dragEvent: {
+                  id: this.target.id,
+                  left: this.endX,
+                  top: this.endY,
+                },
+              });
+            },
+          }
+        );
+      });
+    } else {
+      if (gsap && Draggable) {
+        Draggable.create(
+          graphicDice.map(({ id }) => `#${id}`),
+          {
+            type: 'x,y',
+            bounds: document.getElementById('dicebox'),
+            onDragEnd: () => {
+              console.log('dragend');
+            },
+          }
+        );
+      }
+    }
+  }, [graphicDice, socket]);
+
+  // Drag dice when moved
+  React.useEffect(() => {
+    if (socket && Draggable) {
+      socket.on('drag', ({ dragEvent }) => {
+        TweenMax.to(document.getElementById(dragEvent.id), {
+          x: dragEvent.left,
+          y: dragEvent.top,
+          ease: Elastic.easeOut.config(1, 1),
+          duration: 0.5,
+        });
+      });
+    }
+  }, [socket, Draggable]);
+
   return (
     <ThemeProvider theme={theme.value}>
       <Navbar
@@ -312,71 +340,33 @@ export default function Home() {
         theme={theme}
         toggleTheme={toggleTheme}
       />
-      <Flex
-        bg="background"
-        width="100%"
-        flex="1"
-        minHeight="0"
-        justifyContent="center"
-        p={3}
-      >
-        <Flex
-          as="main"
-          flex="1"
-          minHeight="0"
-          maxWidth="1280px"
-          bg="background"
-          flexDirection={['column', 'column', 'row']}
-        >
-          <Box
-            flex="2"
-            sx={{
-              display: 'grid',
-              gridGap: 2, // theme.space[3]
-              gridTemplateColumns: ['1fr 1fr 1fr', '1fr 1fr', '1fr 1fr 1fr'],
-            }}
-          >
+      <Flex bg="background" width="100%" flex="1" minHeight="0">
+        <DiceSidebar />
+        <Box id="dicebox" width="100%">
+          {graphicDice.map((d) => (
             <Box
-              as="section"
-              sx={{
-                gridColumn: ['1 / 4', '1', '1'],
-                gridRow: ['2', '1', '1'],
-              }}
+              id={d.id}
+              key={d.id}
+              width="3rem"
+              height="3rem"
+              style={{ border: '1px solid #251fdd' }}
+              ref={d.id === 'dot-2' ? el : null}
             >
-              <DiceSelectionForm
-                onSubmit={roll}
-                hasRolls={state.rolls.length > 0}
-                socket={socket}
-              />
+              {d.id}
             </Box>
-            <Flex
-              as="section"
-              sx={{ gridColumn: ['1 / 4', '2', '2'], gridRow: ['1', '1', '1'] }}
-              flexDirection="column"
-              minHeight="265px"
-            >
-              <RollResultsTable roll={state.rolls[0]} />
-            </Flex>
-            <Flex
-              as="section"
-              sx={{
-                gridColumn: ['1 / 4', '1 / 3', '3'],
-                gridRow: ['3', '2', '1'],
-              }}
-              flexDirection="column"
-            >
-              <RollHistory rolls={state.rolls} />
-            </Flex>
-          </Box>
-          <RollBubbleManager rolls={state.rolls} />
-          <UserSetupModal
-            storedUsername={storedUsername}
-            setStoredUsername={setStoredUsername}
-            onDone={() => {
-              socket?.emit('register-user', storedUsername);
-            }}
-          />
-        </Flex>
+          ))}
+        </Box>
+        {/* <Box as="main" flex="1" minHeight="0" maxWidth="1280px" bg="background">
+          <RollHistory rolls={state.rolls} />
+        </Box> */}
+        <RollBubbleManager rolls={state.rolls} />
+        <UserSetupModal
+          storedUsername={storedUsername}
+          setStoredUsername={setStoredUsername}
+          onDone={() => {
+            socket?.emit('register-user', storedUsername);
+          }}
+        />
       </Flex>
     </ThemeProvider>
   );

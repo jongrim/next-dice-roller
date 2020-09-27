@@ -22,6 +22,7 @@ import shapeRhombus from '@iconify/icons-mdi-light/shape-rhombus';
 import shapeOctagon from '@iconify/icons-mdi-light/shape-octagon';
 import shapeHexagon from '@iconify/icons-mdi-light/shape-hexagon';
 import refreshIcon from '@iconify/icons-mdi-light/refresh';
+import deleteIcon from '@iconify/icons-mdi-light/delete';
 
 import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
@@ -89,6 +90,10 @@ type DiceEvent =
       payload: { die: GraphicDie };
     }
   | {
+      type: 'remove-die';
+      payload: { id: string };
+    }
+  | {
       type: 'roll';
       payload: { id: string; randNumbers: number[]; roller: string };
     };
@@ -104,6 +109,11 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
       return {
         ...state,
         dice: state.dice.concat(event.payload.die),
+      };
+    case 'remove-die':
+      return {
+        ...state,
+        dice: state.dice.filter(({ id }) => id !== event.payload.id),
       };
     case 'roll':
       const newDice = state.dice.map((die) => {
@@ -405,24 +415,42 @@ export default function GraphicDiceRoom() {
               socket={socket}
             />
           ))}
+          {selectedDice.length > 0 && (
+            <Flex
+              sx={{ position: 'absolute', bottom: '3rem' }}
+              width="100%"
+              justifyContent="center"
+            >
+              <Button
+                onClick={() => {
+                  selectedDice.forEach((id) => {
+                    roll({ id });
+                  });
+                }}
+                variant="ghost"
+                mr={2}
+              >
+                <Icon icon={refreshIcon} height="3rem" />
+              </Button>
+              <Button
+                onClick={() => {
+                  selectedDice.forEach((id) => {
+                    dispatch({ type: 'remove-die', payload: { id } });
+                  });
+                }}
+                variant="ghost"
+                ml={2}
+              >
+                <Icon icon={deleteIcon} height="3rem" />
+              </Button>
+            </Flex>
+          )}
         </Box>
         {/* <Box as="main" flex="1" minHeight="0" maxWidth="1280px" bg="background">
           <RollHistory rolls={state.rolls} />
         </Box> */}
         {/* <RollBubbleManager rolls={state.rolls} /> */}
-        {selectedDice.length > 0 && (
-          <Button
-            sx={{ position: 'absolute', bottom: '3rem', left: '50%' }}
-            onClick={() => {
-              selectedDice.forEach((id) => {
-                roll({ id });
-              });
-            }}
-            variant="ghost"
-          >
-            <Icon icon={refreshIcon} height="3rem" />
-          </Button>
-        )}
+
         <UserSetupModal
           storedUsername={storedUsername}
           setStoredUsername={setStoredUsername}
@@ -449,7 +477,7 @@ function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'grid',
+        display: 'inline-grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
@@ -490,7 +518,7 @@ function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'grid',
+        display: 'inline-grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
@@ -531,7 +559,7 @@ function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'grid',
+        display: 'inline-grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
@@ -573,7 +601,7 @@ function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'grid',
+        display: 'inline-grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
@@ -623,7 +651,7 @@ function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'grid',
+        display: 'inline-grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
@@ -641,10 +669,10 @@ function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '3px' }}>
         <Icon icon={shapeHexagon} height="5rem" />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={1}>
+      <Box style={{ gridArea: '1 / 1' }} pt={1} pl="-5px">
         {String(curNumber)
           .split('')
           .map((n, i) => (
@@ -672,7 +700,7 @@ function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'grid',
+        display: 'inline-grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',

@@ -21,6 +21,7 @@ import shapeSquare from '@iconify/icons-mdi-light/shape-square';
 import shapeRhombus from '@iconify/icons-mdi-light/shape-rhombus';
 import shapeOctagon from '@iconify/icons-mdi-light/shape-octagon';
 import shapeHexagon from '@iconify/icons-mdi-light/shape-hexagon';
+import refreshIcon from '@iconify/icons-mdi-light/refresh';
 
 import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
@@ -129,6 +130,7 @@ export default function GraphicDiceRoom() {
   const [connected, setConnected] = React.useState(false);
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
+  const [selectedDice, setSelectedDice] = React.useState<string[]>([]);
   const [gsap, setGsap] = React.useState({});
   const [{ Draggable }, setDraggable] = React.useState<{
     Draggable: typeof _Draggable;
@@ -150,6 +152,16 @@ export default function GraphicDiceRoom() {
       .then(({ nums }) => {
         socket.emit('roll', { id, nums });
       });
+  };
+
+  const addToSelected = (id: string) => {
+    setSelectedDice((cur) => [...cur, id]);
+  };
+  const removeFromSelected = (id: string) => {
+    setSelectedDice((cur) => cur.filter((i) => i !== id));
+  };
+  const onSelect = (id: string) => {
+    selectedDice.includes(id) ? removeFromSelected(id) : addToSelected(id);
   };
 
   // connect to socket
@@ -218,25 +230,45 @@ export default function GraphicDiceRoom() {
 
   React.useEffect(() => {
     if (Draggable) {
-      //@ts-ignore
       Draggable.create(
         state.dice.map(({ id }) => `#${id}`),
         {
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
-          onDragEnd: function () {
-            socket.emit('drag', {
-              dragEvent: {
-                id: this.target.id,
-                left: this.endX,
-                top: this.endY,
-              },
+          onDrag: function () {
+            selectedDice.forEach((id) => {
+              if (id === this.target.id) return;
+              TweenMax.to(document.getElementById(id), 0.25, {
+                x: this.x,
+                y: this.y,
+              });
             });
+          },
+          onDragEnd: function () {
+            if (selectedDice.length) {
+              selectedDice.forEach((id) => {
+                socket.emit('drag', {
+                  dragEvent: {
+                    id,
+                    left: this.endX,
+                    top: this.endY,
+                  },
+                });
+              });
+            } else {
+              socket.emit('drag', {
+                dragEvent: {
+                  id: this.target.id,
+                  left: this.endX,
+                  top: this.endY,
+                },
+              });
+            }
           },
         }
       );
     }
-  }, [Draggable, state.dice]);
+  }, [Draggable, state.dice, selectedDice]);
 
   // Drag dice when moved
   React.useEffect(() => {
@@ -269,17 +301,59 @@ export default function GraphicDiceRoom() {
           {state.dice.map((d) => {
             switch (d.sides) {
               case 4:
-                return <D4Die {...d} roll={roll} />;
+                return (
+                  <D4Die
+                    {...d}
+                    roll={roll}
+                    onSelect={onSelect}
+                    selected={selectedDice.includes(d.id)}
+                  />
+                );
               case 6:
-                return <D6Die {...d} roll={roll} />;
+                return (
+                  <D6Die
+                    {...d}
+                    roll={roll}
+                    onSelect={onSelect}
+                    selected={selectedDice.includes(d.id)}
+                  />
+                );
               case 8:
-                return <D8Die {...d} roll={roll} />;
+                return (
+                  <D8Die
+                    {...d}
+                    roll={roll}
+                    onSelect={onSelect}
+                    selected={selectedDice.includes(d.id)}
+                  />
+                );
               case 10:
-                return <D10Die {...d} roll={roll} />;
+                return (
+                  <D10Die
+                    {...d}
+                    roll={roll}
+                    onSelect={onSelect}
+                    selected={selectedDice.includes(d.id)}
+                  />
+                );
               case 12:
-                return <D12Die {...d} roll={roll} />;
+                return (
+                  <D12Die
+                    {...d}
+                    roll={roll}
+                    onSelect={onSelect}
+                    selected={selectedDice.includes(d.id)}
+                  />
+                );
               case 20:
-                return <D20Die {...d} roll={roll} />;
+                return (
+                  <D20Die
+                    {...d}
+                    roll={roll}
+                    onSelect={onSelect}
+                    selected={selectedDice.includes(d.id)}
+                  />
+                );
             }
           })}
         </Box>
@@ -287,6 +361,19 @@ export default function GraphicDiceRoom() {
           <RollHistory rolls={state.rolls} />
         </Box> */}
         {/* <RollBubbleManager rolls={state.rolls} /> */}
+        {selectedDice.length > 0 && (
+          <Button
+            sx={{ position: 'absolute', bottom: '3rem', left: '50%' }}
+            onClick={() => {
+              selectedDice.forEach((id) => {
+                roll({ id });
+              });
+            }}
+            variant="ghost"
+          >
+            <Icon icon={refreshIcon} height="3rem" />
+          </Button>
+        )}
         <UserSetupModal
           storedUsername={storedUsername}
           setStoredUsername={setStoredUsername}
@@ -299,7 +386,7 @@ export default function GraphicDiceRoom() {
   );
 }
 
-function D4Die({ id, curNumber, roll, rollVersion }) {
+function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
     console.log('run effect');
@@ -312,15 +399,17 @@ function D4Die({ id, curNumber, roll, rollVersion }) {
     <Button
       id={id}
       key={id}
-      width="3rem"
-      height="3rem"
-      style={{
+      sx={(style) => ({
         display: 'grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
-        border: 'none',
-      }}
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+      })}
+      onClick={() => onSelect(id)}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -334,7 +423,7 @@ function D4Die({ id, curNumber, roll, rollVersion }) {
     </Button>
   );
 }
-function D6Die({ id, curNumber, roll, rollVersion }) {
+function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
     console.log('run effect');
@@ -347,15 +436,17 @@ function D6Die({ id, curNumber, roll, rollVersion }) {
     <Button
       id={id}
       key={id}
-      width="3rem"
-      height="3rem"
-      style={{
+      sx={(style) => ({
         display: 'grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
-        border: 'none',
-      }}
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+      })}
+      onClick={() => onSelect(id)}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -369,7 +460,7 @@ function D6Die({ id, curNumber, roll, rollVersion }) {
     </Button>
   );
 }
-function D8Die({ id, curNumber, roll, rollVersion }) {
+function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
     console.log('run effect');
@@ -382,15 +473,17 @@ function D8Die({ id, curNumber, roll, rollVersion }) {
     <Button
       id={id}
       key={id}
-      width="3rem"
-      height="3rem"
-      style={{
+      sx={(style) => ({
         display: 'grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
-        border: 'none',
-      }}
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+      })}
+      onClick={() => onSelect(id)}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -405,7 +498,7 @@ function D8Die({ id, curNumber, roll, rollVersion }) {
     </Button>
   );
 }
-function D10Die({ id, curNumber, roll, rollVersion }) {
+function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
     console.log('run effect');
@@ -418,15 +511,17 @@ function D10Die({ id, curNumber, roll, rollVersion }) {
     <Button
       id={id}
       key={id}
-      width="3rem"
-      height="3rem"
-      style={{
+      sx={(style) => ({
         display: 'grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
-        border: 'none',
-      }}
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+      })}
+      onClick={() => onSelect(id)}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -449,7 +544,7 @@ function D10Die({ id, curNumber, roll, rollVersion }) {
     </Button>
   );
 }
-function D12Die({ id, curNumber, roll, rollVersion }) {
+function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
     console.log('run effect');
@@ -462,15 +557,17 @@ function D12Die({ id, curNumber, roll, rollVersion }) {
     <Button
       id={id}
       key={id}
-      width="3rem"
-      height="3rem"
-      style={{
+      sx={(style) => ({
         display: 'grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
-        border: 'none',
-      }}
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+      })}
+      onClick={() => onSelect(id)}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -492,7 +589,7 @@ function D12Die({ id, curNumber, roll, rollVersion }) {
     </Button>
   );
 }
-function D20Die({ id, curNumber, roll, rollVersion }) {
+function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
     console.log('run effect');
@@ -505,15 +602,17 @@ function D20Die({ id, curNumber, roll, rollVersion }) {
     <Button
       id={id}
       key={id}
-      width="3rem"
-      height="3rem"
-      style={{
+      sx={(style) => ({
         display: 'grid',
         gridTemplate: '1fr / 1fr',
         justifyItems: 'center',
         alignItems: 'center',
-        border: 'none',
-      }}
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+      })}
+      onClick={() => onSelect(id)}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}

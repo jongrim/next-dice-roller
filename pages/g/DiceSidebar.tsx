@@ -12,7 +12,10 @@ import diceD8Outline from '@iconify/icons-mdi/dice-d8-outline';
 import diceD10Outline from '@iconify/icons-mdi/dice-d10-outline';
 import diceD12Outline from '@iconify/icons-mdi/dice-d12-outline';
 import diceD20Outline from '@iconify/icons-mdi/dice-d20-outline';
+import clockIcon from '@iconify/icons-mdi-light/clock';
+import NewClockModal from './NewClockModal';
 import { GraphicDie } from '../../types/dice';
+import { Clock } from '../../types/clock';
 
 const CLIENT_ID = uuidv4();
 
@@ -77,9 +80,10 @@ const nextMessageMap: { [key: string]: SidebarEvent } = {
 
 interface DiceSidebarProps {
   addDie: (die: GraphicDie) => void;
+  addClock: (clock: Clock) => void;
 }
 
-const DiceSidebar: React.FC<DiceSidebarProps> = ({ addDie }) => {
+const DiceSidebar: React.FC<DiceSidebarProps> = ({ addClock, addDie }) => {
   const element = React.useRef(null);
   const openMenu = React.useCallback(() => {
     return new Promise((resolve) => {
@@ -110,6 +114,8 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({ addDie }) => {
   });
 
   const nextMessage: SidebarEvent = nextMessageMap[current.value.toString()];
+
+  const [addClockModalIsOpen, setAddClockModalIsOpen] = React.useState(false);
 
   const makeDie = (sides: number): GraphicDie => ({
     sides,
@@ -174,6 +180,23 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({ addDie }) => {
       >
         <Icon height="3rem" icon={diceD20Outline} />
       </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => setAddClockModalIsOpen(true)}
+      >
+        <Icon height="3rem" icon={clockIcon} />
+      </Button>
+      <NewClockModal
+        onDone={(clock?: Clock) => {
+          if (clock) {
+            console.log(clock);
+            addClock(clock);
+          }
+          setAddClockModalIsOpen(false);
+        }}
+        isOpen={addClockModalIsOpen}
+      />
     </Flex>
   );
 };

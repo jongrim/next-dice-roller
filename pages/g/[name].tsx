@@ -33,6 +33,7 @@ import { GraphicDie } from '../../types/dice';
 import useTheme from '../../hooks/useTheme';
 import _Draggable from 'gsap/Draggable';
 import { Icon } from '@iconify/react';
+import { Clock } from '../../types/clock';
 
 const getNumberIcon = (num: number) => {
   switch (num) {
@@ -131,6 +132,7 @@ export default function GraphicDiceRoom() {
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
   const [selectedDice, setSelectedDice] = React.useState<string[]>([]);
+  const [clocks, setClocks] = React.useState<Clock[]>([]);
   const [gsap, setGsap] = React.useState({});
   const [{ Draggable }, setDraggable] = React.useState<{
     Draggable: typeof _Draggable;
@@ -205,6 +207,9 @@ export default function GraphicDiceRoom() {
       ioSocket.on('add-g-die', ({ die }) =>
         dispatch({ type: 'add-die', payload: { die } })
       );
+      ioSocket.on('add-clock', ({ clock }) =>
+        setClocks((cur) => [...cur, clock])
+      );
       return () => {
         ioSocket.close();
       };
@@ -235,6 +240,7 @@ export default function GraphicDiceRoom() {
         {
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
+          zIndex: 1,
           onDrag: function () {
             selectedDice.forEach((id) => {
               if (id === this.target.id) return;
@@ -270,6 +276,28 @@ export default function GraphicDiceRoom() {
     }
   }, [Draggable, state.dice, selectedDice]);
 
+  // Draggable clocks
+  React.useEffect(() => {
+    if (Draggable) {
+      Draggable.create(
+        clocks.map(({ name }) => `#${name}`),
+        {
+          type: 'x,y',
+          bounds: document.getElementById('dicebox'),
+          onDragEnd: function () {
+            socket.emit('drag', {
+              dragEvent: {
+                id: this.target.id,
+                left: this.endX,
+                top: this.endY,
+              },
+            });
+          },
+        }
+      );
+    }
+  }, [Draggable, clocks]);
+
   // Drag dice when moved
   React.useEffect(() => {
     if (socket && Draggable) {
@@ -296,8 +324,15 @@ export default function GraphicDiceRoom() {
       <Flex bg="background" width="100%" flex="1" minHeight="0">
         <DiceSidebar
           addDie={(die: GraphicDie) => socket?.emit('add-g-die', { die })}
+          addClock={(clock) => socket?.emit('add-clock', { clock })}
         />
-        <Box id="dicebox" width="100%">
+        <Box
+          id="dicebox"
+          width="100%"
+          onClick={() => {
+            setSelectedDice([]);
+          }}
+        >
           {state.dice.map((d) => {
             switch (d.sides) {
               case 4:
@@ -307,6 +342,7 @@ export default function GraphicDiceRoom() {
                     roll={roll}
                     onSelect={onSelect}
                     selected={selectedDice.includes(d.id)}
+                    key={d.id}
                   />
                 );
               case 6:
@@ -316,6 +352,7 @@ export default function GraphicDiceRoom() {
                     roll={roll}
                     onSelect={onSelect}
                     selected={selectedDice.includes(d.id)}
+                    key={d.id}
                   />
                 );
               case 8:
@@ -325,6 +362,7 @@ export default function GraphicDiceRoom() {
                     roll={roll}
                     onSelect={onSelect}
                     selected={selectedDice.includes(d.id)}
+                    key={d.id}
                   />
                 );
               case 10:
@@ -334,6 +372,7 @@ export default function GraphicDiceRoom() {
                     roll={roll}
                     onSelect={onSelect}
                     selected={selectedDice.includes(d.id)}
+                    key={d.id}
                   />
                 );
               case 12:
@@ -343,6 +382,7 @@ export default function GraphicDiceRoom() {
                     roll={roll}
                     onSelect={onSelect}
                     selected={selectedDice.includes(d.id)}
+                    key={d.id}
                   />
                 );
               case 20:
@@ -352,10 +392,19 @@ export default function GraphicDiceRoom() {
                     roll={roll}
                     onSelect={onSelect}
                     selected={selectedDice.includes(d.id)}
+                    key={d.id}
                   />
                 );
             }
           })}
+          {clocks.map((c) => (
+            <ClockPie
+              key={c.name}
+              name={c.name}
+              segments={c.segments}
+              socket={socket}
+            />
+          ))}
         </Box>
         {/* <Box as="main" flex="1" minHeight="0" maxWidth="1280px" bg="background">
           <RollHistory rolls={state.rolls} />
@@ -389,7 +438,6 @@ export default function GraphicDiceRoom() {
 function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
-    console.log('run effect');
     TweenMax.from(el.current, 1.25, {
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
@@ -397,6 +445,7 @@ function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   }, [rollVersion]);
   return (
     <Button
+      m={0}
       id={id}
       key={id}
       sx={(style) => ({
@@ -408,8 +457,12 @@ function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
         boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+        position: 'relative',
       })}
-      onClick={() => onSelect(id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -426,7 +479,6 @@ function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
 function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
-    console.log('run effect');
     TweenMax.from(el.current, 1.25, {
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
@@ -434,6 +486,7 @@ function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   }, [rollVersion]);
   return (
     <Button
+      m={0}
       id={id}
       key={id}
       sx={(style) => ({
@@ -445,8 +498,12 @@ function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
         boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+        position: 'relative',
       })}
-      onClick={() => onSelect(id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -463,7 +520,6 @@ function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
 function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
-    console.log('run effect');
     TweenMax.from(el.current, 1.25, {
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
@@ -471,6 +527,7 @@ function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   }, [rollVersion]);
   return (
     <Button
+      m={0}
       id={id}
       key={id}
       sx={(style) => ({
@@ -482,8 +539,12 @@ function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
         boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+        position: 'relative',
       })}
-      onClick={() => onSelect(id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -501,7 +562,6 @@ function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
 function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
-    console.log('run effect');
     TweenMax.from(el.current, 1.25, {
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
@@ -509,6 +569,7 @@ function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   }, [rollVersion]);
   return (
     <Button
+      m={0}
       id={id}
       key={id}
       sx={(style) => ({
@@ -520,8 +581,12 @@ function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
         boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+        position: 'relative',
       })}
-      onClick={() => onSelect(id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -547,7 +612,6 @@ function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
 function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
-    console.log('run effect');
     TweenMax.from(el.current, 1.25, {
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
@@ -555,6 +619,7 @@ function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   }, [rollVersion]);
   return (
     <Button
+      m={0}
       id={id}
       key={id}
       sx={(style) => ({
@@ -566,8 +631,12 @@ function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
         boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+        position: 'relative',
       })}
-      onClick={() => onSelect(id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -592,7 +661,6 @@ function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
 function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   const el = React.useRef();
   React.useEffect(() => {
-    console.log('run effect');
     TweenMax.from(el.current, 1.25, {
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
@@ -600,6 +668,7 @@ function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
   }, [rollVersion]);
   return (
     <Button
+      m={0}
       id={id}
       key={id}
       sx={(style) => ({
@@ -611,8 +680,12 @@ function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
         boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+        position: 'relative',
       })}
-      onClick={() => onSelect(id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
       onDoubleClick={(e) => roll({ id })}
       variant="ghost"
       p={0}
@@ -634,3 +707,64 @@ function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
     </Button>
   );
 }
+
+interface ClockProps extends Clock {
+  socket: SocketIOClient.Socket;
+}
+const ClockPie: React.FC<ClockProps> = ({ name, segments, socket }) => {
+  const el = React.useRef();
+  const [segment, tick] = React.useState(0);
+  const handleAdvance = () => {
+    tick((cur) => cur + 1);
+  };
+  const time = (segment / segments) * 100;
+  React.useEffect(() => {
+    TweenMax.to(el.current, 0.25, {
+      strokeDasharray: `${time} 100`,
+    });
+  }, [time]);
+  React.useEffect(() => {
+    socket.on('advance', ({ clockName }) => {
+      if (clockName === name) {
+        handleAdvance();
+      }
+    });
+  }, [socket]);
+  return (
+    <Flex
+      width="5rem"
+      id={name}
+      flexDirection="column"
+      alignItems="center"
+      m={0}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <Text fontSize={1} color="text">
+        {name}
+      </Text>
+      <svg
+        viewBox="0 0 32 32"
+        style={{
+          background: 'transparent',
+          borderRadius: '50%',
+          transform: 'rotate(-90deg)',
+        }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          socket.emit('advance', { clockName: name });
+        }}
+      >
+        <circle
+          ref={el}
+          fill="#44ffd2"
+          stroke="#F26DF9"
+          strokeWidth={32}
+          strokeDasharray={`${time} 100`}
+          r="16"
+          cx="16"
+          cy="16"
+        />
+      </svg>
+    </Flex>
+  );
+};

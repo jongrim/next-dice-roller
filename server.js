@@ -36,6 +36,30 @@ app.prepare().then(() => {
       socket.on('add-die', (data) => {
         room.emit('add-die', data);
       });
+      socket.on('drag', (data) => {
+        room.emit('drag', data);
+      });
+      socket.on('add-g-die', (data) => {
+        room.emit('add-g-die', data);
+      });
+      socket.on('remove-items', (data) => {
+        room.emit('remove-items', data);
+      });
+      socket.on('add-clock', (data) => {
+        room.emit('add-clock', data);
+      });
+      socket.on('remove-clock', (data) => {
+        room.emit('remove-clock', data);
+      });
+      socket.on('advance', (data) => {
+        room.emit('advance', data);
+      });
+      socket.on('add-img', (data) => {
+        room.emit('add-img', data);
+      });
+      socket.on('remove-img', (data) => {
+        room.emit('remove-img', data);
+      });
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));
         room.emit('update-users', roomUsers);

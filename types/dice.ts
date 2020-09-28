@@ -6,6 +6,15 @@ export interface Die {
   step?: number;
 }
 
+export interface GraphicDie {
+  id: string;
+  bgColor: string;
+  fontColor: string;
+  sides: number;
+  curNumber: number;
+  rollVersion: number;
+}
+
 export interface DiceBlock {
   results: number[];
   needs: number;

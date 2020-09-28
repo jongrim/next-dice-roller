@@ -17,6 +17,7 @@ const BetaWarningModal = ({}) => {
       isOpen={isOpen}
       onDismiss={dismiss}
       aria-label="Beta warning"
+      // @ts-ignore
       style={{ backgroundColor: theme.colors.background }}
     >
       <Box py={2} bg="background">

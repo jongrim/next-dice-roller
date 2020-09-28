@@ -20,7 +20,7 @@
     "@rebass/preset": "^4.0.5",
     "@types/jest": "^26.0.14",
     "@types/rebass": "^4.0.6",
-    "@types/rebass__forms": "^4.0.3",
+    "@types/rebass__forms": "^4.0.4",
     "@xstate/react": "^0.8.1",
     "cross-env": "^7.0.2",
     "emotion-theming": "^10.0.27",

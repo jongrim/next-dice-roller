@@ -6,6 +6,7 @@ import { Button, Flex } from 'rebass';
 import { Icon } from '@iconify/react';
 import { v4 as uuidv4 } from 'uuid';
 import uniqueId from 'lodash.uniqueid';
+import { Tooltip } from 'react-tippy';
 import diceD4Outline from '@iconify/icons-mdi/dice-d4-outline';
 import diceD6Outline from '@iconify/icons-mdi/dice-d6-outline';
 import diceD8Outline from '@iconify/icons-mdi/dice-d8-outline';
@@ -193,20 +194,24 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({
       >
         <Icon height="3rem" icon={diceD20Outline} />
       </Button>
-      <Button
-        variant="ghost"
-        style={{ border: 'none' }}
-        onClick={() => setAddClockModalIsOpen(true)}
-      >
-        <Icon height="3rem" icon={clockIcon} />
-      </Button>
-      <Button
-        variant="ghost"
-        style={{ border: 'none' }}
-        onClick={() => setAddImgModalIsOpen(true)}
-      >
-        <Icon height="3rem" icon={messagePhoto} />
-      </Button>
+      <Tooltip arrow title="Add a clock" position="right">
+        <Button
+          variant="ghost"
+          style={{ border: 'none' }}
+          onClick={() => setAddClockModalIsOpen(true)}
+        >
+          <Icon height="3rem" icon={clockIcon} />
+        </Button>
+      </Tooltip>
+      <Tooltip arrow title="Manage images" position="right">
+        <Button
+          variant="ghost"
+          style={{ border: 'none' }}
+          onClick={() => setAddImgModalIsOpen(true)}
+        >
+          <Icon height="3rem" icon={messagePhoto} />
+        </Button>
+      </Tooltip>
       <NewImgModal
         onDone={(urls?: { [x: number]: string }) => {
           if (urls) {

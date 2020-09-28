@@ -5,6 +5,7 @@ import { Box, Button, Flex, Text } from 'rebass';
 import { ThemeProvider } from 'emotion-theming';
 import { TweenMax, Elastic } from 'gsap';
 import FsLightbox from 'fslightbox-react';
+import { Tooltip } from 'react-tippy';
 
 import number0 from '@iconify/icons-ri/number-0';
 import number1 from '@iconify/icons-ri/number-1';
@@ -37,6 +38,7 @@ import useTheme from '../../hooks/useTheme';
 import _Draggable from 'gsap/Draggable';
 import { Icon } from '@iconify/react';
 import { Clock } from '../../types/clock';
+import BetaWarningModal from './BetaWarningModal';
 
 const getNumberIcon = (num: number) => {
   switch (num) {
@@ -485,51 +487,69 @@ export default function GraphicDiceRoom() {
               width="100%"
               justifyContent="center"
             >
-              <Button
-                onClick={() => {
-                  selectedItems.forEach((id) => {
-                    roll({ id });
-                  });
-                }}
-                variant="ghost"
-                mr={2}
-              >
-                <Icon icon={refreshIcon} height="3rem" />
-              </Button>
-              <Button
-                onClick={() => {
-                  socket.emit('remove-items', { items: selectedItems });
-                }}
-                variant="ghost"
-                ml={2}
-              >
-                <Icon icon={deleteIcon} height="3rem" />
-              </Button>
+              <Tooltip arrow title="Roll selected dice">
+                <Button
+                  onClick={() => {
+                    selectedItems.forEach((id) => {
+                      roll({ id });
+                    });
+                  }}
+                  variant="ghost"
+                  mr={2}
+                >
+                  <Icon icon={refreshIcon} height="3rem" />
+                </Button>
+              </Tooltip>
+              <Tooltip arrow title="Delete selected items">
+                <Button
+                  onClick={() => {
+                    socket.emit('remove-items', { items: selectedItems });
+                  }}
+                  variant="ghost"
+                  ml={2}
+                >
+                  <Icon icon={deleteIcon} height="3rem" />
+                </Button>
+              </Tooltip>
             </Flex>
           )}
           {state.imgs.length > 0 && (
-            <Button
+            <Box
               sx={{
                 position: 'absolute',
                 right: '3rem',
                 top: '50%',
-                border: 'none',
               }}
-              onClick={() => {
-                toggleLighthouse(!lighthouseToggler);
-              }}
-              variant="ghost"
-              ml={2}
+              height="5rem"
             >
-              <Icon icon={pictureIcon} height="2rem" />
-            </Button>
+              <Tooltip
+                arrow
+                title="Open picture viewer"
+                position="left"
+                style={{ display: 'inherit' }}
+              >
+                <Button
+                  sx={{
+                    border: 'none',
+                  }}
+                  onClick={() => {
+                    toggleLighthouse(!lighthouseToggler);
+                  }}
+                  variant="ghost"
+                  height="2rem"
+                  p={0}
+                >
+                  <Icon icon={pictureIcon} height="2rem" />
+                </Button>
+              </Tooltip>
+            </Box>
           )}
         </Box>
         {/* <Box as="main" flex="1" minHeight="0" maxWidth="1280px" bg="background">
           <RollHistory rolls={state.rolls} />
         </Box> */}
         {/* <RollBubbleManager rolls={state.rolls} /> */}
-
+        <BetaWarningModal />
         <UserSetupModal
           storedUsername={storedUsername}
           setStoredUsername={setStoredUsername}

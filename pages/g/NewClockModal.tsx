@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Dialog } from '@reach/dialog';
 import { Box, Button, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
+import { v4 as uuidv4 } from 'uuid';
 import { Clock } from '../../types/clock';
 import { useTheme } from 'emotion-theming';
 
@@ -18,7 +19,7 @@ const NewClockModal: React.FC<NewClockModalProps> = ({ isOpen, onDone }) => {
   const finish = (e) => {
     e.preventDefault();
     if (name && segments) {
-      onDone({ name, segments: parseInt(segments, 10) });
+      onDone({ name, segments: parseInt(segments, 10), id: uuidv4() });
       setName('');
     } else {
       onDone();

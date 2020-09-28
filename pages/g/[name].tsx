@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { Box, Button, Flex, Text } from 'rebass';
 import { ThemeProvider } from 'emotion-theming';
 import { TweenMax, Elastic } from 'gsap';
+import FsLightbox from 'fslightbox-react';
 
 import number0 from '@iconify/icons-ri/number-0';
 import number1 from '@iconify/icons-ri/number-1';
@@ -23,6 +24,7 @@ import shapeOctagon from '@iconify/icons-mdi-light/shape-octagon';
 import shapeHexagon from '@iconify/icons-mdi-light/shape-hexagon';
 import refreshIcon from '@iconify/icons-mdi-light/refresh';
 import deleteIcon from '@iconify/icons-mdi-light/delete';
+import pictureIcon from '@iconify/icons-mdi-light/picture';
 
 import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
@@ -69,15 +71,21 @@ const diceStates = {
   finished: 'finished',
 };
 
+export type Img = { id: string; url: string };
+
 interface GraphicDiceResultsState {
   state: string;
   dice: GraphicDie[];
+  clocks: Clock[];
+  imgs: Img[];
   roller: string;
 }
 
 const diceInitialResultsState: GraphicDiceResultsState = {
   state: diceStates.waiting,
   dice: [],
+  clocks: [],
+  imgs: [],
   roller: 'anonymous',
 };
 
@@ -90,7 +98,23 @@ type DiceEvent =
       payload: { die: GraphicDie };
     }
   | {
-      type: 'remove-die';
+      type: 'remove-item';
+      payload: { id: string };
+    }
+  | {
+      type: 'add-clock';
+      payload: { clock: Clock };
+    }
+  | {
+      type: 'remove-clock';
+      payload: { id: string };
+    }
+  | {
+      type: 'add-img';
+      payload: { img: Img };
+    }
+  | {
+      type: 'remove-img';
       payload: { id: string };
     }
   | {
@@ -110,10 +134,32 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         ...state,
         dice: state.dice.concat(event.payload.die),
       };
-    case 'remove-die':
+    case 'remove-item':
       return {
         ...state,
         dice: state.dice.filter(({ id }) => id !== event.payload.id),
+        clocks: state.clocks.filter(({ id }) => id !== event.payload.id),
+      };
+    case 'add-clock':
+      return {
+        ...state,
+        clocks: state.clocks.concat(event.payload.clock),
+      };
+    case 'remove-clock':
+      return {
+        ...state,
+        clocks: state.clocks.filter(({ id }) => id !== event.payload.id),
+      };
+    case 'add-img':
+      return {
+        ...state,
+        imgs: state.imgs.concat(event.payload.img),
+      };
+    case 'remove-img':
+      console.log(event.payload.id);
+      return {
+        ...state,
+        imgs: state.imgs.filter(({ id }) => id !== event.payload.id),
       };
     case 'roll':
       const newDice = state.dice.map((die) => {
@@ -141,8 +187,8 @@ export default function GraphicDiceRoom() {
   const [connected, setConnected] = React.useState(false);
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
-  const [selectedDice, setSelectedDice] = React.useState<string[]>([]);
-  const [clocks, setClocks] = React.useState<Clock[]>([]);
+  const [selectedItems, setSelectedItems] = React.useState<string[]>([]);
+  const [lighthouseToggler, toggleLighthouse] = React.useState(false);
   const [gsap, setGsap] = React.useState({});
   const [{ Draggable }, setDraggable] = React.useState<{
     Draggable: typeof _Draggable;
@@ -167,13 +213,13 @@ export default function GraphicDiceRoom() {
   };
 
   const addToSelected = (id: string) => {
-    setSelectedDice((cur) => [...cur, id]);
+    setSelectedItems((cur) => [...cur, id]);
   };
   const removeFromSelected = (id: string) => {
-    setSelectedDice((cur) => cur.filter((i) => i !== id));
+    setSelectedItems((cur) => cur.filter((i) => i !== id));
   };
   const onSelect = (id: string) => {
-    selectedDice.includes(id) ? removeFromSelected(id) : addToSelected(id);
+    selectedItems.includes(id) ? removeFromSelected(id) : addToSelected(id);
   };
 
   // connect to socket
@@ -217,9 +263,23 @@ export default function GraphicDiceRoom() {
       ioSocket.on('add-g-die', ({ die }) =>
         dispatch({ type: 'add-die', payload: { die } })
       );
+      ioSocket.on('remove-items', ({ items }) => {
+        items.forEach((id) => {
+          dispatch({ type: 'remove-item', payload: { id } });
+        });
+      });
       ioSocket.on('add-clock', ({ clock }) =>
-        setClocks((cur) => [...cur, clock])
+        dispatch({ type: 'add-clock', payload: { clock } })
       );
+      ioSocket.on('remove-clock', ({ id }) =>
+        dispatch({ type: 'remove-clock', payload: { id } })
+      );
+      ioSocket.on('add-img', ({ img }) => {
+        dispatch({ type: 'add-img', payload: { img } });
+      });
+      ioSocket.on('remove-img', ({ id }) => {
+        dispatch({ type: 'remove-img', payload: { id } });
+      });
       return () => {
         ioSocket.close();
       };
@@ -252,7 +312,7 @@ export default function GraphicDiceRoom() {
           bounds: document.getElementById('dicebox'),
           zIndex: 1,
           onDrag: function () {
-            selectedDice.forEach((id) => {
+            selectedItems.forEach((id) => {
               if (id === this.target.id) return;
               TweenMax.to(document.getElementById(id), 0.25, {
                 x: this.x,
@@ -261,8 +321,8 @@ export default function GraphicDiceRoom() {
             });
           },
           onDragEnd: function () {
-            if (selectedDice.length) {
-              selectedDice.forEach((id) => {
+            if (selectedItems.length) {
+              selectedItems.forEach((id) => {
                 socket.emit('drag', {
                   dragEvent: {
                     id,
@@ -284,13 +344,13 @@ export default function GraphicDiceRoom() {
         }
       );
     }
-  }, [Draggable, state.dice, selectedDice]);
+  }, [Draggable, state.dice, selectedItems]);
 
   // Draggable clocks
   React.useEffect(() => {
     if (Draggable) {
       Draggable.create(
-        clocks.map(({ name }) => `#${name}`),
+        state.clocks.map(({ name }) => `#${name}`),
         {
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
@@ -306,7 +366,7 @@ export default function GraphicDiceRoom() {
         }
       );
     }
-  }, [Draggable, clocks]);
+  }, [Draggable, state.clocks]);
 
   // Drag dice when moved
   React.useEffect(() => {
@@ -335,12 +395,15 @@ export default function GraphicDiceRoom() {
         <DiceSidebar
           addDie={(die: GraphicDie) => socket?.emit('add-g-die', { die })}
           addClock={(clock) => socket?.emit('add-clock', { clock })}
+          addImg={(img) => socket?.emit('add-img', { img })}
+          removeImg={(id) => socket.emit('remove-img', { id })}
+          imgs={state.imgs}
         />
         <Box
           id="dicebox"
           width="100%"
           onClick={() => {
-            setSelectedDice([]);
+            setSelectedItems([]);
           }}
         >
           {state.dice.map((d) => {
@@ -351,7 +414,7 @@ export default function GraphicDiceRoom() {
                     {...d}
                     roll={roll}
                     onSelect={onSelect}
-                    selected={selectedDice.includes(d.id)}
+                    selected={selectedItems.includes(d.id)}
                     key={d.id}
                   />
                 );
@@ -361,7 +424,7 @@ export default function GraphicDiceRoom() {
                     {...d}
                     roll={roll}
                     onSelect={onSelect}
-                    selected={selectedDice.includes(d.id)}
+                    selected={selectedItems.includes(d.id)}
                     key={d.id}
                   />
                 );
@@ -371,7 +434,7 @@ export default function GraphicDiceRoom() {
                     {...d}
                     roll={roll}
                     onSelect={onSelect}
-                    selected={selectedDice.includes(d.id)}
+                    selected={selectedItems.includes(d.id)}
                     key={d.id}
                   />
                 );
@@ -381,7 +444,7 @@ export default function GraphicDiceRoom() {
                     {...d}
                     roll={roll}
                     onSelect={onSelect}
-                    selected={selectedDice.includes(d.id)}
+                    selected={selectedItems.includes(d.id)}
                     key={d.id}
                   />
                 );
@@ -391,7 +454,7 @@ export default function GraphicDiceRoom() {
                     {...d}
                     roll={roll}
                     onSelect={onSelect}
-                    selected={selectedDice.includes(d.id)}
+                    selected={selectedItems.includes(d.id)}
                     key={d.id}
                   />
                 );
@@ -401,21 +464,22 @@ export default function GraphicDiceRoom() {
                     {...d}
                     roll={roll}
                     onSelect={onSelect}
-                    selected={selectedDice.includes(d.id)}
+                    selected={selectedItems.includes(d.id)}
                     key={d.id}
                   />
                 );
             }
           })}
-          {clocks.map((c) => (
+          {state.clocks.map((c) => (
             <ClockPie
-              key={c.name}
-              name={c.name}
-              segments={c.segments}
+              key={c.id}
+              {...c}
               socket={socket}
+              selected={selectedItems.includes(c.id)}
+              onSelect={onSelect}
             />
           ))}
-          {selectedDice.length > 0 && (
+          {selectedItems.length > 0 && (
             <Flex
               sx={{ position: 'absolute', bottom: '3rem' }}
               width="100%"
@@ -423,7 +487,7 @@ export default function GraphicDiceRoom() {
             >
               <Button
                 onClick={() => {
-                  selectedDice.forEach((id) => {
+                  selectedItems.forEach((id) => {
                     roll({ id });
                   });
                 }}
@@ -434,9 +498,7 @@ export default function GraphicDiceRoom() {
               </Button>
               <Button
                 onClick={() => {
-                  selectedDice.forEach((id) => {
-                    dispatch({ type: 'remove-die', payload: { id } });
-                  });
+                  socket.emit('remove-items', { items: selectedItems });
                 }}
                 variant="ghost"
                 ml={2}
@@ -444,6 +506,23 @@ export default function GraphicDiceRoom() {
                 <Icon icon={deleteIcon} height="3rem" />
               </Button>
             </Flex>
+          )}
+          {state.imgs.length > 0 && (
+            <Button
+              sx={{
+                position: 'absolute',
+                right: '3rem',
+                top: '50%',
+                border: 'none',
+              }}
+              onClick={() => {
+                toggleLighthouse(!lighthouseToggler);
+              }}
+              variant="ghost"
+              ml={2}
+            >
+              <Icon icon={pictureIcon} height="2rem" />
+            </Button>
           )}
         </Box>
         {/* <Box as="main" flex="1" minHeight="0" maxWidth="1280px" bg="background">
@@ -457,6 +536,12 @@ export default function GraphicDiceRoom() {
           onDone={() => {
             socket?.emit('register-user', storedUsername);
           }}
+        />
+        <FsLightbox
+          toggler={lighthouseToggler}
+          sources={state.imgs.map(({ url }) => url)}
+          key={state.imgs.length}
+          type="image"
         />
       </Flex>
     </ThemeProvider>
@@ -738,8 +823,17 @@ function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
 
 interface ClockProps extends Clock {
   socket: SocketIOClient.Socket;
+  selected: boolean;
+  onSelect: (id: string) => void;
 }
-const ClockPie: React.FC<ClockProps> = ({ name, segments, socket }) => {
+const ClockPie: React.FC<ClockProps> = ({
+  id,
+  name,
+  onSelect,
+  segments,
+  selected,
+  socket,
+}) => {
   const el = React.useRef();
   const [segment, tick] = React.useState(0);
   const handleAdvance = () => {
@@ -765,7 +859,16 @@ const ClockPie: React.FC<ClockProps> = ({ name, segments, socket }) => {
       flexDirection="column"
       alignItems="center"
       m={0}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
+      sx={(style) => ({
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+      })}
     >
       <Text fontSize={1} color="text">
         {name}

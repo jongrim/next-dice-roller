@@ -13,9 +13,12 @@ import diceD10Outline from '@iconify/icons-mdi/dice-d10-outline';
 import diceD12Outline from '@iconify/icons-mdi/dice-d12-outline';
 import diceD20Outline from '@iconify/icons-mdi/dice-d20-outline';
 import clockIcon from '@iconify/icons-mdi-light/clock';
+import messagePhoto from '@iconify/icons-mdi-light/message-photo';
 import NewClockModal from './NewClockModal';
 import { GraphicDie } from '../../types/dice';
 import { Clock } from '../../types/clock';
+import NewImgModal from './NewImgModal';
+import { Img } from './[name]';
 
 const CLIENT_ID = uuidv4();
 
@@ -81,9 +84,18 @@ const nextMessageMap: { [key: string]: SidebarEvent } = {
 interface DiceSidebarProps {
   addDie: (die: GraphicDie) => void;
   addClock: (clock: Clock) => void;
+  addImg: (img: Img) => void;
+  removeImg: (id: string) => void;
+  imgs: Img[];
 }
 
-const DiceSidebar: React.FC<DiceSidebarProps> = ({ addClock, addDie }) => {
+const DiceSidebar: React.FC<DiceSidebarProps> = ({
+  addClock,
+  addDie,
+  addImg,
+  removeImg,
+  imgs,
+}) => {
   const element = React.useRef(null);
   const openMenu = React.useCallback(() => {
     return new Promise((resolve) => {
@@ -116,6 +128,7 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({ addClock, addDie }) => {
   const nextMessage: SidebarEvent = nextMessageMap[current.value.toString()];
 
   const [addClockModalIsOpen, setAddClockModalIsOpen] = React.useState(false);
+  const [addImgModalIsOpen, setAddImgModalIsOpen] = React.useState(false);
 
   const makeDie = (sides: number): GraphicDie => ({
     sides,
@@ -187,10 +200,31 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({ addClock, addDie }) => {
       >
         <Icon height="3rem" icon={clockIcon} />
       </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={() => setAddImgModalIsOpen(true)}
+      >
+        <Icon height="3rem" icon={messagePhoto} />
+      </Button>
+      <NewImgModal
+        onDone={(urls?: { [x: number]: string }) => {
+          if (urls) {
+            Object.keys(urls).forEach((id) => {
+              if (urls[id]) {
+                addImg({ id, url: urls[id] });
+              }
+            });
+          }
+          setAddImgModalIsOpen(false);
+        }}
+        imgs={imgs}
+        removeImg={removeImg}
+        isOpen={addImgModalIsOpen}
+      />
       <NewClockModal
         onDone={(clock?: Clock) => {
           if (clock) {
-            console.log(clock);
             addClock(clock);
           }
           setAddClockModalIsOpen(false);

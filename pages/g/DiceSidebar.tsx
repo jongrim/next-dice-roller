@@ -21,7 +21,7 @@ import { Clock } from '../../types/clock';
 import NewImgModal from './NewImgModal';
 import { Img } from './[name]';
 
-const CLIENT_ID = uuidv4();
+export const CLIENT_ID = uuidv4();
 
 interface SidebarMachineSchema {
   states: {

@@ -35,6 +35,7 @@ const NewImgModal: React.FC<NewImgModalProps> = ({
       isOpen={isOpen}
       onDismiss={finish}
       aria-label="New clock"
+      // @ts-ignore
       style={{ backgroundColor: theme.colors.background }}
     >
       <Box py={2} bg="background">
@@ -74,7 +75,12 @@ const NewImgModal: React.FC<NewImgModalProps> = ({
           Already Loaded
         </Text>
         {imgs.map(({ id, url }) => (
-          <Flex key={id} mt={2} alignItems="center">
+          <Flex
+            key={id}
+            mt={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
             <Text color="text" sx={{ overflow: 'scroll' }}>
               {url}
             </Text>

@@ -5,6 +5,8 @@ import { Label, Input } from '@rebass/forms';
 import { v4 as uuidv4 } from 'uuid';
 import { Clock } from '../../types/clock';
 import { useTheme } from 'emotion-theming';
+import uniqueId from 'lodash.uniqueid';
+import { CLIENT_ID } from './DiceSidebar';
 
 interface NewClockModalProps {
   isOpen: boolean;
@@ -19,7 +21,11 @@ const NewClockModal: React.FC<NewClockModalProps> = ({ isOpen, onDone }) => {
   const finish = (e) => {
     e.preventDefault();
     if (name && segments) {
-      onDone({ name, segments: parseInt(segments, 10), id: uuidv4() });
+      onDone({
+        name,
+        segments: parseInt(segments, 10),
+        id: uniqueId(`clock-${CLIENT_ID}-`),
+      });
       setName('');
     } else {
       onDone();
@@ -31,6 +37,7 @@ const NewClockModal: React.FC<NewClockModalProps> = ({ isOpen, onDone }) => {
       isOpen={isOpen}
       onDismiss={finish}
       aria-label="New clock"
+      // @ts-ignore
       style={{ backgroundColor: theme.colors.background }}
     >
       <Box py={2} bg="background">

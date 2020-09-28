@@ -312,7 +312,6 @@ export default function GraphicDiceRoom() {
         {
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
-          zIndex: 1,
           onDrag: function () {
             selectedItems.forEach((id) => {
               if (id === this.target.id) return;
@@ -352,23 +351,44 @@ export default function GraphicDiceRoom() {
   React.useEffect(() => {
     if (Draggable) {
       Draggable.create(
-        state.clocks.map(({ name }) => `#${name}`),
+        state.clocks.map(({ id }) => `#${id}`),
         {
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
-          onDragEnd: function () {
-            socket.emit('drag', {
-              dragEvent: {
-                id: this.target.id,
-                left: this.endX,
-                top: this.endY,
-              },
+          onDrag: function () {
+            selectedItems.forEach((id) => {
+              if (id === this.target.id) return;
+              TweenMax.to(document.getElementById(id), 0.25, {
+                x: this.x,
+                y: this.y,
+              });
             });
+          },
+          onDragEnd: function () {
+            if (selectedItems.length) {
+              selectedItems.forEach((id) => {
+                socket.emit('drag', {
+                  dragEvent: {
+                    id,
+                    left: this.endX,
+                    top: this.endY,
+                  },
+                });
+              });
+            } else {
+              socket.emit('drag', {
+                dragEvent: {
+                  id: this.target.id,
+                  left: this.endX,
+                  top: this.endY,
+                },
+              });
+            }
           },
         }
       );
     }
-  }, [Draggable, state.clocks]);
+  }, [Draggable, state.clocks, selectedItems]);
 
   // Drag dice when moved
   React.useEffect(() => {
@@ -875,7 +895,7 @@ const ClockPie: React.FC<ClockProps> = ({
   return (
     <Flex
       width="5rem"
-      id={name}
+      id={id}
       flexDirection="column"
       alignItems="center"
       m={0}

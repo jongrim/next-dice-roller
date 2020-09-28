@@ -4,9 +4,9 @@ import { Box, Button, Flex, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
 import { useTheme } from 'emotion-theming';
 import { v4 as uuidv4 } from 'uuid';
-import { Img } from './[name]';
 import Icon from '@iconify/react';
 import deleteIcon from '@iconify/icons-mdi-light/delete';
+import { Img } from '../types/image';
 
 interface NewImgModalProps {
   isOpen: boolean;

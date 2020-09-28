@@ -16,10 +16,10 @@ import diceD20Outline from '@iconify/icons-mdi/dice-d20-outline';
 import clockIcon from '@iconify/icons-mdi-light/clock';
 import messagePhoto from '@iconify/icons-mdi-light/message-photo';
 import NewClockModal from './NewClockModal';
-import { GraphicDie } from '../../types/dice';
-import { Clock } from '../../types/clock';
+import { GraphicDie } from '../types/dice';
+import { Clock } from '../types/clock';
 import NewImgModal from './NewImgModal';
-import { Img } from './[name]';
+import { Img } from '../types/image';
 
 export const CLIENT_ID = uuidv4();
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Dialog } from '@reach/dialog';
 import { Box, Button, Heading, Text } from 'rebass';
 import { useTheme } from 'emotion-theming';
-import useLocalStorage from '../../hooks/useLocalStorage';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 const BetaWarningModal = ({}) => {
   const theme = useTheme();

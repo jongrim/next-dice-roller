@@ -31,14 +31,15 @@ import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
 import RollBubbleManager from '../../components/RollBubbleManager';
 import RollHistory from '../../components/RollHistory';
-import DiceSidebar from './DiceSidebar';
+import DiceSidebar from '../../components/DiceSidebar';
 
 import { GraphicDie } from '../../types/dice';
 import useTheme from '../../hooks/useTheme';
 import _Draggable from 'gsap/Draggable';
 import { Icon } from '@iconify/react';
 import { Clock } from '../../types/clock';
-import BetaWarningModal from './BetaWarningModal';
+import BetaWarningModal from '../../components/BetaWarningModal';
+import { Img } from '../../types/image';
 
 const getNumberIcon = (num: number) => {
   switch (num) {
@@ -72,8 +73,6 @@ const diceStates = {
   rolling: 'rolling',
   finished: 'finished',
 };
-
-export type Img = { id: string; url: string };
 
 interface GraphicDiceResultsState {
   state: string;

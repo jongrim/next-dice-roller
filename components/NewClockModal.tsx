@@ -2,11 +2,10 @@ import * as React from 'react';
 import { Dialog } from '@reach/dialog';
 import { Box, Button, Heading, Text } from 'rebass';
 import { Label, Input } from '@rebass/forms';
-import { v4 as uuidv4 } from 'uuid';
-import { Clock } from '../../types/clock';
 import { useTheme } from 'emotion-theming';
 import uniqueId from 'lodash.uniqueid';
 import { CLIENT_ID } from './DiceSidebar';
+import { Clock } from '../types/clock';
 
 interface NewClockModalProps {
   isOpen: boolean;

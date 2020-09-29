@@ -27,14 +27,14 @@ const BetaWarningModal = ({}) => {
         <Text fontSize={2} color="text">
           Hey! If you found you're way here I either told you about it or you're
           very good at snooping. Either way, just know that this area is all
-          pretty new and still being tested out for issues. One known issue is
-          that you can't add too many dice (around 10) before stuff starts
-          getting glitchy. I'm working on improving that performance.
+          pretty new and still being tested out for issues. Trying to roll lots
+          of dice (10 or more) doesn't have super smooth animations. I'm working
+          on improving that performance.
         </Text>
         <Text fontSize={2} color="text" mt={1}>
           Still, you're welcome to try these bits out and let me know what you
-          think. Is there something vital that is missing? Found a bug? Feel
-          free to{' '}
+          think. Is there something vital that is missing? Is something hard to
+          use or set up in a weird way? Found a bug? Feel free to{' '}
           <a href="https://twitter.com/jonjongrim" style={{ color: '#3075AB' }}>
             message me
           </a>{' '}

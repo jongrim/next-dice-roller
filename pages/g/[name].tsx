@@ -169,7 +169,6 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         clocks: state.clocks.concat(event.payload.clock),
       };
     case 'advance-clock':
-      debugger;
       return {
         ...state,
         clocks: state.clocks.map((c) => {
@@ -247,7 +246,7 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
   }
 };
 
-export default function GraphicDiceRoom() {
+export default function GraphicDiceRoom(): React.ReactElement {
   const router = useRouter();
   const { name } = router.query;
   const [socket, setSocket] = React.useState<SocketIOClient.Socket>(null);
@@ -266,22 +265,25 @@ export default function GraphicDiceRoom() {
   }>({ Draggable: undefined });
   const { theme, toggleTheme } = useTheme();
 
-  const roll = ({ id }) => {
-    dispatch({
-      type: 'submit',
-    });
-    window
-      .fetch('/api/random', {
-        method: 'POST',
-        body: JSON.stringify({
-          size: 1,
-        }),
-      })
-      .then((res) => res.json())
-      .then(({ nums }) => {
-        socket.emit('roll', { id, nums });
+  const roll = React.useCallback(
+    ({ id }) => {
+      dispatch({
+        type: 'submit',
       });
-  };
+      window
+        .fetch('/api/random', {
+          method: 'POST',
+          body: JSON.stringify({
+            size: 1,
+          }),
+        })
+        .then((res) => res.json())
+        .then(({ nums }) => {
+          socket.emit('roll', { id, nums });
+        });
+    },
+    [socket]
+  );
 
   const addToSelected = (id: string) => {
     setSelectedItems((cur) => [...cur, id]);
@@ -327,6 +329,7 @@ export default function GraphicDiceRoom() {
           payload: {
             id,
             randNumbers: nums.data,
+            // TODO: fix this. I'm ignoring this dep because it doesn't work yet
             roller: storedUsername,
           },
         });
@@ -389,7 +392,32 @@ export default function GraphicDiceRoom() {
         }
       });
     }
-  }, [socket, CLIENT_ID]);
+  }, [socket]);
+
+  // Keyboard events
+  React.useEffect(() => {
+    const listeners = (ev: KeyboardEvent) => {
+      switch (ev.key) {
+        case 'Enter':
+          if (selectedItems.length) {
+            selectedItems.forEach((id) => roll({ id }));
+          }
+          break;
+        case 'Backspace':
+          if (selectedItems.length) {
+            socket.emit('remove-items', { items: selectedItems });
+            setSelectedItems([]);
+          }
+          break;
+        case 'Esc':
+        case 'Escape':
+          setSelectedItems([]);
+          break;
+      }
+    };
+    document.addEventListener('keydown', listeners);
+    return () => document.removeEventListener('keydown', listeners);
+  }, [selectedItems, socket, roll]);
 
   // Draggable dice
   React.useEffect(() => {
@@ -422,6 +450,20 @@ export default function GraphicDiceRoom() {
                 x: this.x,
                 y: this.y,
               });
+              socket.emit('drag', {
+                dragEvent: {
+                  id,
+                  left: this.endX,
+                  top: this.endY,
+                },
+              });
+            });
+            socket.emit('drag', {
+              dragEvent: {
+                id: this.target.id,
+                left: this.endX,
+                top: this.endY,
+              },
             });
           },
           onDragEnd: function () {
@@ -435,20 +477,19 @@ export default function GraphicDiceRoom() {
                   },
                 });
               });
-            } else {
-              socket.emit('drag', {
-                dragEvent: {
-                  id: this.target.id,
-                  left: this.endX,
-                  top: this.endY,
-                },
-              });
             }
+            socket.emit('drag', {
+              dragEvent: {
+                id: this.target.id,
+                left: this.endX,
+                top: this.endY,
+              },
+            });
           },
         }
       );
     }
-  }, [Draggable, state.dice, selectedItems]);
+  }, [Draggable, state.dice, selectedItems, socket]);
 
   // Draggable clocks
   React.useEffect(() => {
@@ -465,6 +506,20 @@ export default function GraphicDiceRoom() {
                 x: this.x,
                 y: this.y,
               });
+              socket.emit('drag', {
+                dragEvent: {
+                  id,
+                  left: this.endX,
+                  top: this.endY,
+                },
+              });
+            });
+            socket.emit('drag', {
+              dragEvent: {
+                id: this.target.id,
+                left: this.endX,
+                top: this.endY,
+              },
             });
           },
           onDragEnd: function () {
@@ -478,20 +533,19 @@ export default function GraphicDiceRoom() {
                   },
                 });
               });
-            } else {
-              socket.emit('drag', {
-                dragEvent: {
-                  id: this.target.id,
-                  left: this.endX,
-                  top: this.endY,
-                },
-              });
             }
+            socket.emit('drag', {
+              dragEvent: {
+                id: this.target.id,
+                left: this.endX,
+                top: this.endY,
+              },
+            });
           },
         }
       );
     }
-  }, [Draggable, state.clocks, selectedItems]);
+  }, [Draggable, state.clocks, selectedItems, socket]);
 
   // Drag dice when moved
   React.useEffect(() => {
@@ -593,6 +647,8 @@ export default function GraphicDiceRoom() {
                     key={d.id}
                   />
                 );
+              default:
+                return null;
             }
           })}
           {state.clocks.map((c) => (
@@ -691,8 +747,23 @@ export default function GraphicDiceRoom() {
     </ThemeProvider>
   );
 }
+interface DieProps {
+  id: string;
+  curNumber: number;
+  roll: ({ id: string }) => void;
+  rollVersion: number;
+  onSelect: (id: string) => void;
+  selected: boolean;
+}
 
-function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
+function D4Die({
+  id,
+  curNumber,
+  roll,
+  rollVersion,
+  onSelect,
+  selected,
+}: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
     TweenMax.from(el.current, 1.25, {
@@ -733,7 +804,14 @@ function D4Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
     </Button>
   );
 }
-function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
+function D6Die({
+  id,
+  curNumber,
+  roll,
+  rollVersion,
+  onSelect,
+  selected,
+}: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
     TweenMax.from(el.current, 1.25, {
@@ -774,7 +852,14 @@ function D6Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
     </Button>
   );
 }
-function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
+function D8Die({
+  id,
+  curNumber,
+  roll,
+  rollVersion,
+  onSelect,
+  selected,
+}: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
     TweenMax.from(el.current, 1.25, {
@@ -816,7 +901,14 @@ function D8Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
     </Button>
   );
 }
-function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
+function D10Die({
+  id,
+  curNumber,
+  roll,
+  rollVersion,
+  onSelect,
+  selected,
+}: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
     TweenMax.from(el.current, 1.25, {
@@ -866,7 +958,14 @@ function D10Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
     </Button>
   );
 }
-function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
+function D12Die({
+  id,
+  curNumber,
+  roll,
+  rollVersion,
+  onSelect,
+  selected,
+}: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
     TweenMax.from(el.current, 1.25, {
@@ -906,7 +1005,7 @@ function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           .split('')
           .map((n, i) => (
             <Icon
-              key={`${id}-${n}`}
+              key={`${id}-${i}`}
               icon={getNumberIcon(parseInt(n, 10))}
               style={{ marginLeft: i === 1 ? '-5px' : '' }}
             />
@@ -915,7 +1014,14 @@ function D12Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
     </Button>
   );
 }
-function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
+function D20Die({
+  id,
+  curNumber,
+  roll,
+  rollVersion,
+  onSelect,
+  selected,
+}: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
     TweenMax.from(el.current, 1.25, {
@@ -955,7 +1061,7 @@ function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
           .split('')
           .map((n, i) => (
             <Icon
-              key={`${id}-${n}`}
+              key={`${id}-${i}`}
               icon={getNumberIcon(parseInt(n, 10))}
               style={{ marginLeft: i === 1 ? '-5px' : '' }}
             />
@@ -971,7 +1077,7 @@ interface ClockProps extends Clock {
   selected: boolean;
   onSelect: (id: string) => void;
 }
-const ClockPie: React.FC<ClockProps> = ({
+function ClockPie({
   dispatch,
   id,
   name,
@@ -980,7 +1086,7 @@ const ClockPie: React.FC<ClockProps> = ({
   segments,
   selected,
   socket,
-}) => {
+}: ClockProps) {
   const el = React.useRef();
   const handleRewind = () =>
     dispatch({
@@ -995,13 +1101,6 @@ const ClockPie: React.FC<ClockProps> = ({
       strokeDasharray: `${time} 100`,
     });
   }, [time]);
-  React.useEffect(() => {
-    socket.on('rewind', ({ clockName }) => {
-      if (clockName === name) {
-        handleRewind();
-      }
-    });
-  }, [socket, handleRewind, name]);
   return (
     <Flex
       width="5rem"
@@ -1048,4 +1147,4 @@ const ClockPie: React.FC<ClockProps> = ({
       </svg>
     </Flex>
   );
-};
+}

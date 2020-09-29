@@ -15,16 +15,18 @@ interface NewImgModalProps {
   imgs: Img[];
 }
 
-const NewImgModal: React.FC<NewImgModalProps> = ({
+function NewImgModal({
   isOpen,
   onDone,
   imgs,
   removeImg,
-}) => {
+}: NewImgModalProps): React.ReactElement {
   const theme = useTheme();
   const [urls, setUrls] = React.useState({ [uuidv4()]: '' });
+  const [board, setBoard] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
-  const finish = (e) => {
+  const finish = (e: React.SyntheticEvent) => {
     e.preventDefault();
     onDone(urls);
     setUrls({ [uuidv4()]: '' });
@@ -66,9 +68,64 @@ const NewImgModal: React.FC<NewImgModalProps> = ({
         <Button
           type="button"
           onClick={() => setUrls((cur) => ({ ...cur, [uuidv4()]: '' }))}
-          mt={3}
+          mt={2}
         >
           Add another
+        </Button>
+        <hr />
+        <Heading as="h3" color="text">
+          Load a Pinterest Board
+        </Heading>
+        <Text fontSize={2} color="text">
+          Load the images from a public board. The board must be public and you
+          need to enter the RSS link (add <code>.rss</code> to the end)
+        </Text>
+        <Input
+          name="board"
+          id="board"
+          placeholder="https://www.pinterest.com/username/board.rss"
+          value={board}
+          onChange={(e) => setBoard(e.target.value)}
+        />
+        <Button
+          disabled={loading}
+          type="button"
+          mt={2}
+          onClick={() => {
+            setLoading(true);
+            window
+              .fetch('/api/fetchPinterestBoardImages', {
+                method: 'POST',
+                body: JSON.stringify({
+                  board,
+                }),
+              })
+              .then((res) => res.json())
+              .then(({ xml }) => {
+                const doc = new DOMParser().parseFromString(xml, 'text/xml');
+                const descriptions = Array.from(
+                  doc.querySelectorAll('description')
+                );
+                const imageLinks = descriptions
+                  .map((d) => d.innerHTML)
+                  .filter(Boolean)
+                  .map((t) => {
+                    const r = new RegExp(/src="(.+)"/gm);
+                    return r.exec(t)[1];
+                  })
+                  .map((l) => l.replace('236x', '640x'));
+                const mapping = imageLinks.reduce(
+                  (acc, cur) => ({
+                    ...acc,
+                    [uuidv4()]: cur,
+                  }),
+                  {}
+                );
+                onDone(mapping);
+              });
+          }}
+        >
+          {loading ? 'Loading' : 'Load'}
         </Button>
         <hr />
         <Text as="h3" color="text">
@@ -81,11 +138,10 @@ const NewImgModal: React.FC<NewImgModalProps> = ({
             alignItems="center"
             justifyContent="space-between"
           >
-            <Text color="text" sx={{ overflow: 'scroll' }}>
-              {url}
-            </Text>
+            <Text color="text">{url}</Text>
             <Button
               type="button"
+              flex="0 0 3rem"
               onClick={() => removeImg(id)}
               ml={3}
               variant="danger"
@@ -100,6 +156,6 @@ const NewImgModal: React.FC<NewImgModalProps> = ({
       </Box>
     </Dialog>
   );
-};
+}
 
 export default NewImgModal;

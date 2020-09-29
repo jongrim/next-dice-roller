@@ -70,7 +70,7 @@ type DiceEvent =
   | { type: 'roll'; payload: DiceState };
 
 const diceNeedsMet = (dieBlock: DiceBlock): boolean =>
-  dieBlock.results.length == dieBlock.needs;
+  dieBlock.results.length === dieBlock.needs;
 const not = (fn) => (...args) => !fn(...args);
 const diceNeedsNotMet = not(diceNeedsMet);
 
@@ -178,7 +178,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
   }
 };
 
-export default function Home() {
+export default function Home(): React.ReactChild {
   const router = useRouter();
   const { name } = router.query;
   const [socket, setSocket] = React.useState<SocketIOClient.Socket>(null);
@@ -189,7 +189,10 @@ export default function Home() {
   const [connected, setConnected] = React.useState(false);
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
-  const [theme, setTheme] = React.useState<{ label: string; value: object }>({
+  const [theme, setTheme] = React.useState<{
+    label: string;
+    value: Record<string, unknown>;
+  }>({
     label: 'light',
     value: lightTheme,
   });
@@ -301,7 +304,7 @@ export default function Home() {
         socket.emit('roll', { state });
       }
     }
-  }, [state.state]);
+  }, [socket, state]);
 
   return (
     <ThemeProvider theme={theme.value}>

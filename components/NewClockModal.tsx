@@ -22,6 +22,7 @@ const NewClockModal: React.FC<NewClockModalProps> = ({ isOpen, onDone }) => {
     if (name && segments) {
       onDone({
         name,
+        curSegment: 0,
         segments: parseInt(segments, 10),
         id: uniqueId(`clock-${CLIENT_ID}-`),
       });

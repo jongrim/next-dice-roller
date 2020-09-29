@@ -51,14 +51,20 @@ app.prepare().then(() => {
       socket.on('remove-clock', (data) => {
         room.emit('remove-clock', data);
       });
-      socket.on('advance', (data) => {
-        room.emit('advance', data);
+      socket.on('advance-clock', (data) => {
+        room.emit('advance-clock', data);
       });
       socket.on('add-img', (data) => {
         room.emit('add-img', data);
       });
       socket.on('remove-img', (data) => {
         room.emit('remove-img', data);
+      });
+      socket.on('request-sync', (data) => {
+        room.emit('request-sync', data);
+      });
+      socket.on('sync', (data) => {
+        room.emit('sync', data);
       });
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));

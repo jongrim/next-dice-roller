@@ -41,6 +41,8 @@ import { Clock } from '../../types/clock';
 import BetaWarningModal from '../../components/BetaWarningModal';
 import { Img } from '../../types/image';
 
+import { CLIENT_ID } from '../../components/DiceSidebar';
+
 const getNumberIcon = (num: number) => {
   switch (num) {
     case 0:
@@ -107,6 +109,14 @@ type DiceEvent =
       payload: { clock: Clock };
     }
   | {
+      type: 'advance-clock';
+      payload: { id: string };
+    }
+  | {
+      type: 'rewind-clock';
+      payload: { id: string };
+    }
+  | {
       type: 'remove-clock';
       payload: { id: string };
     }
@@ -121,6 +131,18 @@ type DiceEvent =
   | {
       type: 'roll';
       payload: { id: string; randNumbers: number[]; roller: string };
+    }
+  | {
+      type: 'emit-state';
+      payload: { socket: SocketIOClient.Socket };
+    }
+  | {
+      type: 'sync';
+      payload: {
+        dice: GraphicDie[];
+        clocks: Clock[];
+        imgs: Img[];
+      };
     };
 
 const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
@@ -146,6 +168,33 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         ...state,
         clocks: state.clocks.concat(event.payload.clock),
       };
+    case 'advance-clock':
+      debugger;
+      return {
+        ...state,
+        clocks: state.clocks.map((c) => {
+          if (c.id === event.payload.id) {
+            return {
+              ...c,
+              curSegment: c.curSegment + 1,
+            };
+          }
+          return { ...c };
+        }),
+      };
+    case 'rewind-clock':
+      return {
+        ...state,
+        clocks: state.clocks.map((c) => {
+          if (c.id === event.payload.id) {
+            return {
+              ...c,
+              curSegment: c.curSegment - 1,
+            };
+          }
+          return c;
+        }),
+      };
     case 'remove-clock':
       return {
         ...state,
@@ -157,10 +206,31 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         imgs: state.imgs.concat(event.payload.img),
       };
     case 'remove-img':
-      console.log(event.payload.id);
       return {
         ...state,
         imgs: state.imgs.filter(({ id }) => id !== event.payload.id),
+      };
+    case 'emit-state':
+      event.payload.socket.emit('sync', {
+        clientId: CLIENT_ID,
+        dice: state.dice,
+        clocks: state.clocks,
+        imgs: state.imgs,
+      });
+      return state;
+    case 'sync':
+      interface IdObject {
+        id: string;
+      }
+      const { dice, clocks, imgs } = event.payload;
+      function itemsNotShared<T extends IdObject>(arrA: T[], arrB: T[]): T[] {
+        return arrB.filter(({ id }) => !arrA.find(({ id: i }) => id === i));
+      }
+      return {
+        ...state,
+        dice: state.dice.concat(itemsNotShared(state.dice, dice)),
+        clocks: state.clocks.concat(itemsNotShared(state.clocks, clocks)),
+        imgs: state.imgs.concat(itemsNotShared(state.imgs, imgs)),
       };
     case 'roll':
       const newDice = state.dice.map((die) => {
@@ -272,6 +342,14 @@ export default function GraphicDiceRoom() {
       ioSocket.on('add-clock', ({ clock }) =>
         dispatch({ type: 'add-clock', payload: { clock } })
       );
+      ioSocket.on('advance-clock', ({ id }) =>
+        dispatch({
+          type: 'advance-clock',
+          payload: {
+            id,
+          },
+        })
+      );
       ioSocket.on('remove-clock', ({ id }) =>
         dispatch({ type: 'remove-clock', payload: { id } })
       );
@@ -281,11 +359,37 @@ export default function GraphicDiceRoom() {
       ioSocket.on('remove-img', ({ id }) => {
         dispatch({ type: 'remove-img', payload: { id } });
       });
+      ioSocket.on(
+        'sync',
+        ({
+          clientId,
+          ...rest
+        }: {
+          dice: GraphicDie[];
+          clocks: Clock[];
+          imgs: Img[];
+          clientId: string;
+        }) => {
+          dispatch({ type: 'sync', payload: rest });
+        }
+      );
+      ioSocket.emit('request-sync', { clientId: CLIENT_ID });
       return () => {
         ioSocket.close();
       };
     }
   }, [name]);
+
+  // Syncing
+  React.useEffect(() => {
+    if (socket) {
+      socket.on('request-sync', ({ clientId }) => {
+        if (clientId !== CLIENT_ID) {
+          dispatch({ type: 'emit-state', payload: { socket } });
+        }
+      });
+    }
+  }, [socket, CLIENT_ID]);
 
   // Draggable dice
   React.useEffect(() => {
@@ -494,6 +598,7 @@ export default function GraphicDiceRoom() {
           {state.clocks.map((c) => (
             <ClockPie
               key={c.id}
+              dispatch={dispatch}
               {...c}
               socket={socket}
               selected={selectedItems.includes(c.id)}
@@ -861,36 +966,42 @@ function D20Die({ id, curNumber, roll, rollVersion, onSelect, selected }) {
 }
 
 interface ClockProps extends Clock {
+  dispatch: React.Dispatch<DiceEvent>;
   socket: SocketIOClient.Socket;
   selected: boolean;
   onSelect: (id: string) => void;
 }
 const ClockPie: React.FC<ClockProps> = ({
+  dispatch,
   id,
   name,
   onSelect,
+  curSegment,
   segments,
   selected,
   socket,
 }) => {
   const el = React.useRef();
-  const [segment, tick] = React.useState(0);
-  const handleAdvance = () => {
-    tick((cur) => cur + 1);
-  };
-  const time = (segment / segments) * 100;
+  const handleRewind = () =>
+    dispatch({
+      type: 'rewind-clock',
+      payload: {
+        id,
+      },
+    });
+  const time = (curSegment / segments) * 100;
   React.useEffect(() => {
     TweenMax.to(el.current, 0.25, {
       strokeDasharray: `${time} 100`,
     });
   }, [time]);
   React.useEffect(() => {
-    socket.on('advance', ({ clockName }) => {
+    socket.on('rewind', ({ clockName }) => {
       if (clockName === name) {
-        handleAdvance();
+        handleRewind();
       }
     });
-  }, [socket]);
+  }, [socket, handleRewind, name]);
   return (
     <Flex
       width="5rem"
@@ -921,7 +1032,7 @@ const ClockPie: React.FC<ClockProps> = ({
         }}
         onDoubleClick={(e) => {
           e.stopPropagation();
-          socket.emit('advance', { clockName: name });
+          socket.emit('advance-clock', { id });
         }}
       >
         <circle

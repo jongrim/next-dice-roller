@@ -674,7 +674,6 @@ export default function GraphicDiceRoom(): React.ReactElement {
           {state.clocks.map((c) => (
             <ClockPie
               key={c.id}
-              dispatch={dispatch}
               {...c}
               socket={socket}
               selected={selectedItems.includes(c.id)}

@@ -23,9 +23,13 @@ import shapeSquare from '@iconify/icons-mdi-light/shape-square';
 import shapeRhombus from '@iconify/icons-mdi-light/shape-rhombus';
 import shapeOctagon from '@iconify/icons-mdi-light/shape-octagon';
 import shapeHexagon from '@iconify/icons-mdi-light/shape-hexagon';
+import decagramOutline from '@iconify/icons-mdi/decagram-outline';
 import refreshIcon from '@iconify/icons-mdi-light/refresh';
 import deleteIcon from '@iconify/icons-mdi-light/delete';
 import pictureIcon from '@iconify/icons-mdi-light/picture';
+
+import arrowRight from '@iconify/icons-mdi-light/arrow-right';
+import arrowLeft from '@iconify/icons-mdi-light/arrow-left';
 
 import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
@@ -353,6 +357,14 @@ export default function GraphicDiceRoom(): React.ReactElement {
           },
         })
       );
+      ioSocket.on('rewind-clock', ({ id }) =>
+        dispatch({
+          type: 'rewind-clock',
+          payload: {
+            id,
+          },
+        })
+      );
       ioSocket.on('remove-clock', ({ id }) =>
         dispatch({ type: 'remove-clock', payload: { id } })
       );
@@ -648,7 +660,15 @@ export default function GraphicDiceRoom(): React.ReactElement {
                   />
                 );
               default:
-                return null;
+                return (
+                  <DXDie
+                    {...d}
+                    roll={roll}
+                    onSelect={onSelect}
+                    selected={selectedItems.includes(d.id)}
+                    key={d.id}
+                  />
+                );
             }
           })}
           {state.clocks.map((c) => (
@@ -753,6 +773,7 @@ interface DieProps {
   roll: ({ id: string }) => void;
   rollVersion: number;
   onSelect: (id: string) => void;
+  sides: number;
   selected: boolean;
 }
 
@@ -1070,15 +1091,71 @@ function D20Die({
     </Button>
   );
 }
+function DXDie({
+  id,
+  curNumber,
+  roll,
+  rollVersion,
+  sides,
+  onSelect,
+  selected,
+}: DieProps) {
+  const el = React.useRef();
+  React.useEffect(() => {
+    TweenMax.from(el.current, 1.25, {
+      rotation: 360,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [rollVersion]);
+  return (
+    <Button
+      m={0}
+      id={id}
+      key={id}
+      sx={(style) => ({
+        display: 'inline-grid',
+        gridTemplate: '1fr / 1fr',
+        justifyItems: 'center',
+        alignItems: 'center',
+        border: selected
+          ? `1px solid ${style.colors.special}`
+          : '1px solid transparent',
+        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
+        position: 'relative',
+      })}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
+      onDoubleClick={(e) => roll({ id })}
+      variant="ghost"
+      p={0}
+    >
+      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+        <Icon icon={decagramOutline} height="5rem" />
+      </Box>
+      <Box style={{ gridArea: '1 / 1' }} pt={1}>
+        {String(curNumber)
+          .split('')
+          .map((n, i) => (
+            <Icon
+              key={`${id}-${i}`}
+              icon={getNumberIcon(parseInt(n, 10))}
+              style={{ marginLeft: i === 1 ? '-5px' : '' }}
+            />
+          ))}
+      </Box>
+      <Text fontSize={1}>D{sides}</Text>
+    </Button>
+  );
+}
 
 interface ClockProps extends Clock {
-  dispatch: React.Dispatch<DiceEvent>;
   socket: SocketIOClient.Socket;
   selected: boolean;
   onSelect: (id: string) => void;
 }
 function ClockPie({
-  dispatch,
   id,
   name,
   onSelect,
@@ -1088,13 +1165,6 @@ function ClockPie({
   socket,
 }: ClockProps) {
   const el = React.useRef();
-  const handleRewind = () =>
-    dispatch({
-      type: 'rewind-clock',
-      payload: {
-        id,
-      },
-    });
   const time = (curSegment / segments) * 100;
   React.useEffect(() => {
     TweenMax.to(el.current, 0.25, {
@@ -1145,6 +1215,30 @@ function ClockPie({
           cy="16"
         />
       </svg>
+      <Flex justifyContent="space-around" alignItems="center">
+        <Button
+          variant="ghost"
+          p={1}
+          sx={{ border: 'none' }}
+          onClick={(e) => {
+            e.stopPropagation();
+            socket.emit('rewind-clock', { id });
+          }}
+        >
+          <Icon icon={arrowLeft} width="2rem" />
+        </Button>
+        <Button
+          variant="ghost"
+          p={1}
+          sx={{ border: 'none' }}
+          onClick={(e) => {
+            e.stopPropagation();
+            socket.emit('advance-clock', { id });
+          }}
+        >
+          <Icon icon={arrowRight} width="2rem" />
+        </Button>
+      </Flex>
     </Flex>
   );
 }

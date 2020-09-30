@@ -13,22 +13,24 @@ import diceD8Outline from '@iconify/icons-mdi/dice-d8-outline';
 import diceD10Outline from '@iconify/icons-mdi/dice-d10-outline';
 import diceD12Outline from '@iconify/icons-mdi/dice-d12-outline';
 import diceD20Outline from '@iconify/icons-mdi/dice-d20-outline';
+import plusBoxOutline from '@iconify/icons-mdi/plus-box-outline';
 import clockIcon from '@iconify/icons-mdi-light/clock';
-import messagePhoto from '@iconify/icons-mdi-light/message-photo';
+import cameraImage from '@iconify/icons-mdi/camera-image';
 import NewClockModal from './NewClockModal';
 import { GraphicDie } from '../types/dice';
 import { Clock } from '../types/clock';
 import NewImgModal from './NewImgModal';
 import { Img } from '../types/image';
+import CustomDieModal from './CustomDieModal';
 
 export const CLIENT_ID = uuidv4();
 
 interface SidebarMachineSchema {
   states: {
-    closed: {};
-    closing: {};
-    open: {};
-    opening: {};
+    closed: Record<string, unknown>;
+    closing: Record<string, unknown>;
+    open: Record<string, unknown>;
+    opening: Record<string, unknown>;
   };
 }
 
@@ -90,13 +92,13 @@ interface DiceSidebarProps {
   imgs: Img[];
 }
 
-const DiceSidebar: React.FC<DiceSidebarProps> = ({
+const DiceSidebar = ({
   addClock,
   addDie,
   addImg,
   removeImg,
   imgs,
-}) => {
+}: DiceSidebarProps): React.ReactElement => {
   const element = React.useRef(null);
   const openMenu = React.useCallback(() => {
     return new Promise((resolve) => {
@@ -130,6 +132,11 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({
 
   const [addClockModalIsOpen, setAddClockModalIsOpen] = React.useState(false);
   const [addImgModalIsOpen, setAddImgModalIsOpen] = React.useState(false);
+  const [addCustomDieModalIsOpen, setAddCustomDieModalIsOpen] = React.useState(
+    false
+  );
+
+  const showCustomDieModal = () => setAddCustomDieModalIsOpen(true);
 
   const makeDie = (sides: number): GraphicDie => ({
     sides,
@@ -157,42 +164,49 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(4))}
       >
-        <Icon height="3rem" icon={diceD4Outline} />
+        <Icon height="2rem" icon={diceD4Outline} />
       </Button>
       <Button
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(6))}
       >
-        <Icon height="3rem" icon={diceD6Outline} />
+        <Icon height="2rem" icon={diceD6Outline} />
       </Button>
       <Button
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(8))}
       >
-        <Icon height="3rem" icon={diceD8Outline} />
+        <Icon height="2rem" icon={diceD8Outline} />
       </Button>
       <Button
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(10))}
       >
-        <Icon height="3rem" icon={diceD10Outline} />
+        <Icon height="2rem" icon={diceD10Outline} />
       </Button>
       <Button
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(12))}
       >
-        <Icon height="3rem" icon={diceD12Outline} />
+        <Icon height="2rem" icon={diceD12Outline} />
       </Button>
       <Button
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(20))}
       >
-        <Icon height="3rem" icon={diceD20Outline} />
+        <Icon height="2rem" icon={diceD20Outline} />
+      </Button>
+      <Button
+        variant="ghost"
+        style={{ border: 'none' }}
+        onClick={showCustomDieModal}
+      >
+        <Icon height="2rem" icon={plusBoxOutline} />
       </Button>
       <Tooltip arrow title="Add a clock" position="right">
         <Button
@@ -200,7 +214,7 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({
           style={{ border: 'none' }}
           onClick={() => setAddClockModalIsOpen(true)}
         >
-          <Icon height="3rem" icon={clockIcon} />
+          <Icon height="2rem" icon={clockIcon} />
         </Button>
       </Tooltip>
       <Tooltip arrow title="Manage images" position="right">
@@ -209,9 +223,18 @@ const DiceSidebar: React.FC<DiceSidebarProps> = ({
           style={{ border: 'none' }}
           onClick={() => setAddImgModalIsOpen(true)}
         >
-          <Icon height="3rem" icon={messagePhoto} />
+          <Icon height="2rem" icon={cameraImage} />
         </Button>
       </Tooltip>
+      <CustomDieModal
+        isOpen={addCustomDieModalIsOpen}
+        onDone={(die?: GraphicDie) => {
+          if (die) {
+            addDie(die);
+          }
+          setAddCustomDieModalIsOpen(false);
+        }}
+      />
       <NewImgModal
         onDone={(urls?: { [x: number]: string }) => {
           if (urls) {

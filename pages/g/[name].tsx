@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import { useRouter } from 'next/router';
 import { Box, Button, Flex, Text } from 'rebass';
 import { ThemeProvider } from 'emotion-theming';
-import { TweenMax, Elastic } from 'gsap';
+import gsap, { Elastic } from 'gsap';
 import FsLightbox from 'fslightbox-react';
 import { Tooltip } from 'react-tippy';
 import { useTheme as emotionTheme } from 'emotion-theming';
@@ -264,7 +264,6 @@ export default function GraphicDiceRoom(): React.ReactElement {
   const [storedUsername, setStoredUsername] = React.useState('');
   const [selectedItems, setSelectedItems] = React.useState<string[]>([]);
   const [lighthouseToggler, toggleLighthouse] = React.useState(false);
-  const [gsap, setGsap] = React.useState({});
   const [{ Draggable }, setDraggable] = React.useState<{
     Draggable: typeof _Draggable;
   }>({ Draggable: undefined });
@@ -435,8 +434,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
   // Draggable dice
   React.useEffect(() => {
     async function load() {
-      const { gsap: g, Draggable: D } = await import('gsap/all');
-      setGsap(g);
+      const { Draggable: D } = await import('gsap/all');
       setDraggable({ Draggable: D });
     }
     load();
@@ -460,7 +458,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
           onDrag: function () {
             selectedItems.forEach((id) => {
               if (id === this.target.id) return;
-              TweenMax.to(document.getElementById(id), 0.25, {
+              gsap.to(document.getElementById(id), {
+                duration: 0.25,
                 x: this.x,
                 y: this.y,
               });
@@ -516,7 +515,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
           onDrag: function () {
             selectedItems.forEach((id) => {
               if (id === this.target.id) return;
-              TweenMax.to(document.getElementById(id), 0.25, {
+              gsap.to(document.getElementById(id), {
+                duration: 0.25,
                 x: this.x,
                 y: this.y,
               });
@@ -565,7 +565,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
   React.useEffect(() => {
     if (socket && Draggable) {
       socket.on('drag', ({ dragEvent }) => {
-        TweenMax.to(document.getElementById(dragEvent.id), {
+        gsap.to(document.getElementById(dragEvent.id), {
           x: dragEvent.left,
           y: dragEvent.top,
           ease: Elastic.easeOut.config(1, 1),
@@ -786,7 +786,8 @@ function D4Die({
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
-    TweenMax.from(el.current, 1.25, {
+    gsap.from(el.current, {
+      duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
@@ -837,7 +838,8 @@ function D6Die({
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
-    TweenMax.from(el.current, 1.25, {
+    gsap.from(el.current, {
+      duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
@@ -888,7 +890,8 @@ function D8Die({
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
-    TweenMax.from(el.current, 1.25, {
+    gsap.from(el.current, {
+      duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
@@ -940,7 +943,8 @@ function D10Die({
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
-    TweenMax.from(el.current, 1.25, {
+    gsap.from(el.current, {
+      duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
@@ -1005,7 +1009,8 @@ function D12Die({
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
-    TweenMax.from(el.current, 1.25, {
+    gsap.from(el.current, {
+      duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
@@ -1068,7 +1073,8 @@ function D20Die({
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
-    TweenMax.from(el.current, 1.25, {
+    gsap.from(el.current, {
+      duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
@@ -1132,7 +1138,8 @@ function DXDie({
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
-    TweenMax.from(el.current, 1.25, {
+    gsap.from(el.current, {
+      duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
@@ -1203,7 +1210,8 @@ function ClockPie({
   const el = React.useRef();
   const time = (curSegment / segments) * 100;
   React.useEffect(() => {
-    TweenMax.to(el.current, 0.25, {
+    gsap.to(el.current, {
+      duration: 0.25,
       strokeDasharray: `${time} 100`,
     });
   }, [time]);

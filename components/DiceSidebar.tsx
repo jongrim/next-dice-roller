@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
-import { TweenMax, Elastic } from 'gsap';
-import { Box, Button, Flex } from 'rebass';
+import gsap, { Elastic } from 'gsap';
+import { Button, Flex } from 'rebass';
 import { Icon } from '@iconify/react';
 import { v4 as uuidv4 } from 'uuid';
 import uniqueId from 'lodash.uniqueid';
@@ -104,7 +104,7 @@ const DiceSidebar = ({
   const element = React.useRef(null);
   const openMenu = React.useCallback(() => {
     return new Promise((resolve) => {
-      TweenMax.to(element.current || {}, 0.5, {
+      gsap.to(element.current || {}, 0.5, {
         left: 0,
         backdropFilter: 'blur(5px)',
         ease: Elastic.easeOut.config(1, 1),
@@ -114,7 +114,7 @@ const DiceSidebar = ({
   }, []);
   const closeMenu = React.useCallback(() => {
     return new Promise((resolve) => {
-      TweenMax.to(element.current || {}, 0.5, {
+      gsap.to(element.current || {}, 0.5, {
         left: -200,
         backdropFilter: 'blur(0px)',
         ease: Elastic.easeOut.config(1, 1),

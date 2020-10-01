@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Machine } from 'xstate';
 import { useMachine } from '@xstate/react';
-import { TweenMax, Elastic } from 'gsap';
+import gsap, { Elastic } from 'gsap';
 import { Button, Flex } from 'rebass';
 import { Icon } from '@iconify/react';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,6 +22,8 @@ import { Clock } from '../types/clock';
 import NewImgModal from './NewImgModal';
 import { Img } from '../types/image';
 import CustomDieModal from './CustomDieModal';
+import { Input, Label } from '@rebass/forms';
+import invert from '../utils/invertColor';
 
 export const CLIENT_ID = uuidv4();
 
@@ -102,7 +104,7 @@ const DiceSidebar = ({
   const element = React.useRef(null);
   const openMenu = React.useCallback(() => {
     return new Promise((resolve) => {
-      TweenMax.to(element.current || {}, 0.5, {
+      gsap.to(element.current || {}, 0.5, {
         left: 0,
         backdropFilter: 'blur(5px)',
         ease: Elastic.easeOut.config(1, 1),
@@ -112,7 +114,7 @@ const DiceSidebar = ({
   }, []);
   const closeMenu = React.useCallback(() => {
     return new Promise((resolve) => {
-      TweenMax.to(element.current || {}, 0.5, {
+      gsap.to(element.current || {}, 0.5, {
         left: -200,
         backdropFilter: 'blur(0px)',
         ease: Elastic.easeOut.config(1, 1),
@@ -135,13 +137,14 @@ const DiceSidebar = ({
   const [addCustomDieModalIsOpen, setAddCustomDieModalIsOpen] = React.useState(
     false
   );
+  const [color, setColor] = React.useState('#cccccc');
 
   const showCustomDieModal = () => setAddCustomDieModalIsOpen(true);
 
   const makeDie = (sides: number): GraphicDie => ({
     sides,
-    bgColor: 'black',
-    fontColor: 'white',
+    bgColor: color,
+    fontColor: invert(color),
     id: uniqueId(`die-${CLIENT_ID}-`),
     curNumber: sides,
     rollVersion: 1,
@@ -159,6 +162,16 @@ const DiceSidebar = ({
         borderRight: `1px ${style.colors.text} solid`,
       })}
     >
+      <Input
+        aria-label="new die color"
+        type="color"
+        value={color}
+        onChange={(e) => setColor(e.target.value)}
+        p={0}
+        sx={{ border: 'none', cursor: 'pointer' }}
+        width="2.5rem"
+        height="2.5rem"
+      />
       <Button
         variant="ghost"
         style={{ border: 'none' }}
@@ -230,7 +243,7 @@ const DiceSidebar = ({
         isOpen={addCustomDieModalIsOpen}
         onDone={(die?: GraphicDie) => {
           if (die) {
-            addDie(die);
+            addDie({ ...die, bgColor: color });
           }
           setAddCustomDieModalIsOpen(false);
         }}

@@ -3,7 +3,14 @@ import lightTheme from '../pages/theme.json';
 import darkTheme from '../pages/darkTheme.json';
 
 export default function useTheme() {
-  const [theme, setTheme] = React.useState<{ label: string; value: object }>({
+  const [theme, setTheme] = React.useState<{
+    label: string;
+    value: {
+      colors: {
+        [index: string]: string;
+      };
+    };
+  }>({
     label: 'light',
     value: lightTheme,
   });

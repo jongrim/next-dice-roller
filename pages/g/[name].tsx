@@ -454,6 +454,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
       Draggable.create(
         state.dice.map(({ id }) => `#${id}`),
         {
+          allowEventDefault: true,
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
           onDrag: function () {
@@ -684,7 +685,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
           {selectedItems.length > 0 && (
             <Flex
               sx={{ position: 'absolute', bottom: '3rem' }}
-              width="100%"
+              width={window.innerWidth - 100}
               justifyContent="center"
             >
               <Tooltip arrow title="Roll selected dice">
@@ -797,10 +798,7 @@ function D4Die({
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'inline-grid',
-        gridTemplate: '1fr / 1fr',
-        justifyItems: 'center',
-        alignItems: 'center',
+        cursor: 'pointer',
         border: selected
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
@@ -815,7 +813,7 @@ function D4Die({
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+      <Box ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeTriangle} height="5rem" color={bgColor} />
       </Box>
       <Box style={{ position: 'absolute', left: '40%', top: '50%' }}>
@@ -851,10 +849,7 @@ function D6Die({
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'inline-grid',
-        gridTemplate: '1fr / 1fr',
-        justifyItems: 'center',
-        alignItems: 'center',
+        cursor: 'pointer',
         border: selected
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
@@ -869,7 +864,7 @@ function D6Die({
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+      <Box ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeSquare} height="5rem" color={bgColor} />
       </Box>
       <Box style={{ position: 'absolute', left: '40%', top: '42%' }}>
@@ -905,10 +900,7 @@ function D8Die({
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'inline-grid',
-        gridTemplate: '1fr / 1fr',
-        justifyItems: 'center',
-        alignItems: 'center',
+        cursor: 'pointer',
         border: selected
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
@@ -923,7 +915,7 @@ function D8Die({
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+      <Box ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeRhombus} height="5rem" color={bgColor} />
       </Box>
       <Box style={{ position: 'absolute', left: '40%', top: '35%' }}>
@@ -960,10 +952,7 @@ function D10Die({
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'inline-grid',
-        gridTemplate: '1fr / 1fr',
-        justifyItems: 'center',
-        alignItems: 'center',
+        cursor: 'pointer',
         border: selected
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
@@ -978,7 +967,7 @@ function D10Die({
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+      <Box ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeRhombus} height="5rem" color={bgColor} />
       </Box>
       <Box
@@ -1028,10 +1017,7 @@ function D12Die({
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'inline-grid',
-        gridTemplate: '1fr / 1fr',
-        justifyItems: 'center',
-        alignItems: 'center',
+        cursor: 'pointer',
         border: selected
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
@@ -1046,7 +1032,7 @@ function D12Die({
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '3px' }}>
+      <Box ref={el} style={{ paddingLeft: '3px' }}>
         <Icon icon={shapeHexagon} height="5rem" color={bgColor} />
       </Box>
       <Box
@@ -1094,10 +1080,7 @@ function D20Die({
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'inline-grid',
-        gridTemplate: '1fr / 1fr',
-        justifyItems: 'center',
-        alignItems: 'center',
+        cursor: 'pointer',
         border: selected
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
@@ -1112,7 +1095,7 @@ function D20Die({
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+      <Box ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeOctagon} height="5rem" color={bgColor} />
       </Box>
       <Box
@@ -1161,10 +1144,7 @@ function DXDie({
       id={id}
       key={id}
       sx={(style) => ({
-        display: 'inline-grid',
-        gridTemplate: '1fr / 1fr',
-        justifyItems: 'center',
-        alignItems: 'center',
+        cursor: 'pointer',
         border: selected
           ? `1px solid ${style.colors.special}`
           : '1px solid transparent',
@@ -1179,7 +1159,7 @@ function DXDie({
       variant="ghost"
       p={0}
     >
-      <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
+      <Box ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={decagramOutline} height="5rem" color={bgColor} />
       </Box>
       <Box

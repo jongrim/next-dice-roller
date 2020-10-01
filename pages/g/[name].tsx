@@ -6,6 +6,7 @@ import { ThemeProvider } from 'emotion-theming';
 import { TweenMax, Elastic } from 'gsap';
 import FsLightbox from 'fslightbox-react';
 import { Tooltip } from 'react-tippy';
+import { useTheme as emotionTheme } from 'emotion-theming';
 
 import number0 from '@iconify/icons-ri/number-0';
 import number1 from '@iconify/icons-ri/number-1';
@@ -759,20 +760,17 @@ export default function GraphicDiceRoom(): React.ReactElement {
         <FsLightbox
           toggler={lighthouseToggler}
           sources={state.imgs.map(({ url }) => url)}
-          key={state.imgs.length}
+          key={state.imgs}
           type="image"
         />
       </Flex>
     </ThemeProvider>
   );
 }
-interface DieProps {
-  id: string;
-  curNumber: number;
+interface DieProps extends GraphicDie {
   roll: ({ id: string }) => void;
   rollVersion: number;
   onSelect: (id: string) => void;
-  sides: number;
   selected: boolean;
 }
 
@@ -783,6 +781,7 @@ function D4Die({
   rollVersion,
   onSelect,
   selected,
+  bgColor,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -791,6 +790,7 @@ function D4Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const theme = emotionTheme();
   return (
     <Button
       m={0}
@@ -816,10 +816,14 @@ function D4Die({
       p={0}
     >
       <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
-        <Icon icon={shapeTriangle} height="5rem" />
+        <Icon icon={shapeTriangle} height="5rem" color={bgColor} />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={3}>
-        <Icon icon={getNumberIcon(curNumber)} />
+      <Box style={{ position: 'absolute', left: '40%', top: '50%' }}>
+        <Icon
+          icon={getNumberIcon(curNumber)}
+          // @ts-ignore
+          color={theme.colors.text}
+        />
       </Box>
     </Button>
   );
@@ -831,6 +835,7 @@ function D6Die({
   rollVersion,
   onSelect,
   selected,
+  bgColor,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -839,6 +844,7 @@ function D6Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const theme = emotionTheme();
   return (
     <Button
       m={0}
@@ -864,10 +870,14 @@ function D6Die({
       p={0}
     >
       <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
-        <Icon icon={shapeSquare} height="5rem" />
+        <Icon icon={shapeSquare} height="5rem" color={bgColor} />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={1}>
-        <Icon icon={getNumberIcon(curNumber)} />
+      <Box style={{ position: 'absolute', left: '40%', top: '42%' }}>
+        <Icon
+          icon={getNumberIcon(curNumber)}
+          // @ts-ignore
+          color={theme.colors.text}
+        />
       </Box>
     </Button>
   );
@@ -879,6 +889,7 @@ function D8Die({
   rollVersion,
   onSelect,
   selected,
+  bgColor,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -887,6 +898,7 @@ function D8Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const theme = emotionTheme();
   return (
     <Button
       m={0}
@@ -912,10 +924,14 @@ function D8Die({
       p={0}
     >
       <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
-        <Icon icon={shapeRhombus} height="5rem" />
+        <Icon icon={shapeRhombus} height="5rem" color={bgColor} />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={1} pl="-5px">
-        <Icon icon={getNumberIcon(curNumber)} />
+      <Box style={{ position: 'absolute', left: '40%', top: '35%' }}>
+        <Icon
+          icon={getNumberIcon(curNumber)}
+          // @ts-ignore
+          color={theme.colors.text}
+        />
       </Box>
       <Text fontSize={1}>D8</Text>
     </Button>
@@ -928,6 +944,7 @@ function D10Die({
   rollVersion,
   onSelect,
   selected,
+  bgColor,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -936,6 +953,7 @@ function D10Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const theme = emotionTheme();
   return (
     <Button
       m={0}
@@ -961,9 +979,16 @@ function D10Die({
       p={0}
     >
       <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
-        <Icon icon={shapeRhombus} height="5rem" />
+        <Icon icon={shapeRhombus} height="5rem" color={bgColor} />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={1}>
+      <Box
+        style={{
+          position: 'absolute',
+          left: String(curNumber).length > 1 ? '33%' : '40%',
+          top: '30%',
+        }}
+        pt={1}
+      >
         {String(curNumber)
           .split('')
           .map((n, i) => (
@@ -971,6 +996,8 @@ function D10Die({
               key={`${id}-${n}`}
               icon={getNumberIcon(parseInt(n, 10))}
               style={{ marginLeft: i === 1 ? '-5px' : '' }}
+              // @ts-ignore
+              color={theme.colors.text}
             />
           ))}
       </Box>
@@ -985,6 +1012,7 @@ function D12Die({
   rollVersion,
   onSelect,
   selected,
+  bgColor,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -993,6 +1021,7 @@ function D12Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const theme = emotionTheme();
   return (
     <Button
       m={0}
@@ -1018,9 +1047,15 @@ function D12Die({
       p={0}
     >
       <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '3px' }}>
-        <Icon icon={shapeHexagon} height="5rem" />
+        <Icon icon={shapeHexagon} height="5rem" color={bgColor} />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={1} pl="-5px">
+      <Box
+        style={{
+          position: 'absolute',
+          left: String(curNumber).length > 1 ? '34%' : '40%',
+          top: '40%',
+        }}
+      >
         {String(curNumber)
           .split('')
           .map((n, i) => (
@@ -1028,6 +1063,8 @@ function D12Die({
               key={`${id}-${i}`}
               icon={getNumberIcon(parseInt(n, 10))}
               style={{ marginLeft: i === 1 ? '-5px' : '' }}
+              // @ts-ignore
+              color={theme.colors.text}
             />
           ))}
       </Box>
@@ -1041,6 +1078,7 @@ function D20Die({
   rollVersion,
   onSelect,
   selected,
+  bgColor,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1049,6 +1087,7 @@ function D20Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const theme = emotionTheme();
   return (
     <Button
       m={0}
@@ -1074,9 +1113,15 @@ function D20Die({
       p={0}
     >
       <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
-        <Icon icon={shapeOctagon} height="5rem" />
+        <Icon icon={shapeOctagon} height="5rem" color={bgColor} />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={1}>
+      <Box
+        style={{
+          position: 'absolute',
+          left: String(curNumber).length > 1 ? '34%' : '40%',
+          top: '40%',
+        }}
+      >
         {String(curNumber)
           .split('')
           .map((n, i) => (
@@ -1084,6 +1129,8 @@ function D20Die({
               key={`${id}-${i}`}
               icon={getNumberIcon(parseInt(n, 10))}
               style={{ marginLeft: i === 1 ? '-5px' : '' }}
+              // @ts-ignore
+              color={theme.colors.text}
             />
           ))}
       </Box>
@@ -1098,6 +1145,7 @@ function DXDie({
   sides,
   onSelect,
   selected,
+  bgColor,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1106,6 +1154,7 @@ function DXDie({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const theme = emotionTheme();
   return (
     <Button
       m={0}
@@ -1131,9 +1180,15 @@ function DXDie({
       p={0}
     >
       <Box ref={el} style={{ gridArea: '1 / 1', paddingLeft: '2px' }}>
-        <Icon icon={decagramOutline} height="5rem" />
+        <Icon icon={decagramOutline} height="5rem" color={bgColor} />
       </Box>
-      <Box style={{ gridArea: '1 / 1' }} pt={1}>
+      <Box
+        style={{
+          position: 'absolute',
+          left: String(curNumber).length > 1 ? '34%' : '40%',
+          top: '33%',
+        }}
+      >
         {String(curNumber)
           .split('')
           .map((n, i) => (
@@ -1141,6 +1196,8 @@ function DXDie({
               key={`${id}-${i}`}
               icon={getNumberIcon(parseInt(n, 10))}
               style={{ marginLeft: i === 1 ? '-5px' : '' }}
+              // @ts-ignore
+              color={theme.colors.text}
             />
           ))}
       </Box>

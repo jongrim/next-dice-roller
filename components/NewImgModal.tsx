@@ -81,6 +81,7 @@ function NewImgModal({
           need to enter the RSS link (add <code>.rss</code> to the end)
         </Text>
         <Input
+          color="text"
           name="board"
           id="board"
           placeholder="https://www.pinterest.com/username/board.rss"

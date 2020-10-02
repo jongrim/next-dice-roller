@@ -6,7 +6,7 @@ import { ThemeProvider } from 'emotion-theming';
 import gsap, { Elastic } from 'gsap';
 import FsLightbox from 'fslightbox-react';
 import { Tooltip } from 'react-tippy';
-import { useTheme as emotionTheme } from 'emotion-theming';
+import styles from './die.module.css';
 
 import number0 from '@iconify/icons-ri/number-0';
 import number1 from '@iconify/icons-ri/number-1';
@@ -295,9 +295,12 @@ export default function GraphicDiceRoom(): React.ReactElement {
   const removeFromSelected = (id: string) => {
     setSelectedItems((cur) => cur.filter((i) => i !== id));
   };
-  const onSelect = (id: string) => {
-    selectedItems.includes(id) ? removeFromSelected(id) : addToSelected(id);
-  };
+  const onSelect = React.useCallback(
+    (id: string) => {
+      selectedItems.includes(id) ? removeFromSelected(id) : addToSelected(id);
+    },
+    [selectedItems]
+  );
 
   // connect to socket
   React.useEffect(() => {
@@ -445,7 +448,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
       // @ts-ignore
       gsap.registerPlugin(Draggable);
     }
-  }, [gsap, Draggable]);
+  }, [Draggable]);
 
   React.useEffect(() => {
     if (Draggable) {
@@ -455,30 +458,6 @@ export default function GraphicDiceRoom(): React.ReactElement {
           allowEventDefault: true,
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
-          onDrag: function () {
-            selectedItems.forEach((id) => {
-              if (id === this.target.id) return;
-              gsap.to(document.getElementById(id), {
-                duration: 0.25,
-                x: this.x,
-                y: this.y,
-              });
-              socket.emit('drag', {
-                dragEvent: {
-                  id,
-                  left: this.endX,
-                  top: this.endY,
-                },
-              });
-            });
-            socket.emit('drag', {
-              dragEvent: {
-                id: this.target.id,
-                left: this.endX,
-                top: this.endY,
-              },
-            });
-          },
           onDragEnd: function () {
             if (selectedItems.length) {
               selectedItems.forEach((id) => {
@@ -512,30 +491,6 @@ export default function GraphicDiceRoom(): React.ReactElement {
         {
           type: 'x,y',
           bounds: document.getElementById('dicebox'),
-          onDrag: function () {
-            selectedItems.forEach((id) => {
-              if (id === this.target.id) return;
-              gsap.to(document.getElementById(id), {
-                duration: 0.25,
-                x: this.x,
-                y: this.y,
-              });
-              socket.emit('drag', {
-                dragEvent: {
-                  id,
-                  left: this.endX,
-                  top: this.endY,
-                },
-              });
-            });
-            socket.emit('drag', {
-              dragEvent: {
-                id: this.target.id,
-                left: this.endX,
-                top: this.endY,
-              },
-            });
-          },
           onDragEnd: function () {
             if (selectedItems.length) {
               selectedItems.forEach((id) => {
@@ -586,10 +541,21 @@ export default function GraphicDiceRoom(): React.ReactElement {
       />
       <Flex bg="background" width="100%" flex="1" minHeight="0">
         <DiceSidebar
-          addDie={(die: GraphicDie) => socket?.emit('add-g-die', { die })}
-          addClock={(clock) => socket?.emit('add-clock', { clock })}
-          addImg={(img) => socket?.emit('add-img', { img })}
-          removeImg={(id) => socket.emit('remove-img', { id })}
+          addDie={React.useCallback(
+            (die: GraphicDie) => socket?.emit('add-g-die', { die }),
+            [socket]
+          )}
+          addClock={React.useCallback(
+            (clock) => socket?.emit('add-clock', { clock }),
+            [socket]
+          )}
+          addImg={React.useCallback((img) => socket?.emit('add-img', { img }), [
+            socket,
+          ])}
+          removeImg={React.useCallback(
+            (id) => socket.emit('remove-img', { id }),
+            [socket]
+          )}
           imgs={state.imgs}
         />
         <Box
@@ -609,6 +575,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     onSelect={onSelect}
                     selected={selectedItems.includes(d.id)}
                     key={d.id}
+                    theme={theme.value}
                   />
                 );
               case 6:
@@ -619,6 +586,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     onSelect={onSelect}
                     selected={selectedItems.includes(d.id)}
                     key={d.id}
+                    theme={theme.value}
                   />
                 );
               case 8:
@@ -629,6 +597,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     onSelect={onSelect}
                     selected={selectedItems.includes(d.id)}
                     key={d.id}
+                    theme={theme.value}
                   />
                 );
               case 10:
@@ -639,6 +608,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     onSelect={onSelect}
                     selected={selectedItems.includes(d.id)}
                     key={d.id}
+                    theme={theme.value}
                   />
                 );
               case 12:
@@ -649,6 +619,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     onSelect={onSelect}
                     selected={selectedItems.includes(d.id)}
                     key={d.id}
+                    theme={theme.value}
                   />
                 );
               case 20:
@@ -659,6 +630,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     onSelect={onSelect}
                     selected={selectedItems.includes(d.id)}
                     key={d.id}
+                    theme={theme.value}
                   />
                 );
               default:
@@ -669,6 +641,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     onSelect={onSelect}
                     selected={selectedItems.includes(d.id)}
                     key={d.id}
+                    theme={theme.value}
                   />
                 );
             }
@@ -680,6 +653,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
               socket={socket}
               selected={selectedItems.includes(c.id)}
               onSelect={onSelect}
+              theme={theme.value}
             />
           ))}
           {selectedItems.length > 0 && (
@@ -773,6 +747,7 @@ interface DieProps extends GraphicDie {
   rollVersion: number;
   onSelect: (id: string) => void;
   selected: boolean;
+  theme: { colors: { [index: string]: string } };
 }
 
 function D4Die({
@@ -783,6 +758,7 @@ function D4Die({
   onSelect,
   selected,
   bgColor,
+  theme,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -792,39 +768,29 @@ function D4Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
-  const theme = emotionTheme();
   return (
-    <Button
-      m={0}
+    <button
       id={id}
       key={id}
-      sx={(style) => ({
-        cursor: 'pointer',
-        border: selected
-          ? `1px solid ${style.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-        position: 'relative',
-      })}
+      data-selected={selected}
+      className={styles.die}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
       }}
       onDoubleClick={(e) => roll({ id })}
-      variant="ghost"
-      p={0}
     >
-      <Box ref={el} style={{ paddingLeft: '2px' }}>
+      <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeTriangle} height="5rem" color={bgColor} />
-      </Box>
-      <Box style={{ position: 'absolute', left: '40%', top: '50%' }}>
+      </div>
+      <div style={{ position: 'absolute', left: '40%', top: '50%' }}>
         <Icon
           icon={getNumberIcon(curNumber)}
           // @ts-ignore
           color={theme.colors.text}
         />
-      </Box>
-    </Button>
+      </div>
+    </button>
   );
 }
 function D6Die({
@@ -835,6 +801,7 @@ function D6Die({
   onSelect,
   selected,
   bgColor,
+  theme,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -844,39 +811,29 @@ function D6Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
-  const theme = emotionTheme();
   return (
-    <Button
-      m={0}
+    <button
       id={id}
       key={id}
-      sx={(style) => ({
-        cursor: 'pointer',
-        border: selected
-          ? `1px solid ${style.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-        position: 'relative',
-      })}
+      data-selected={selected}
+      className={styles.die}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
       }}
       onDoubleClick={(e) => roll({ id })}
-      variant="ghost"
-      p={0}
     >
-      <Box ref={el} style={{ paddingLeft: '2px' }}>
+      <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeSquare} height="5rem" color={bgColor} />
-      </Box>
-      <Box style={{ position: 'absolute', left: '40%', top: '42%' }}>
+      </div>
+      <div style={{ position: 'absolute', left: '42%', top: '42%' }}>
         <Icon
           icon={getNumberIcon(curNumber)}
           // @ts-ignore
           color={theme.colors.text}
         />
-      </Box>
-    </Button>
+      </div>
+    </button>
   );
 }
 function D8Die({
@@ -887,6 +844,7 @@ function D8Die({
   onSelect,
   selected,
   bgColor,
+  theme,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -896,40 +854,30 @@ function D8Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
-  const theme = emotionTheme();
   return (
-    <Button
-      m={0}
+    <button
       id={id}
       key={id}
-      sx={(style) => ({
-        cursor: 'pointer',
-        border: selected
-          ? `1px solid ${style.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-        position: 'relative',
-      })}
+      data-selected={selected}
+      className={styles.die}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
       }}
       onDoubleClick={(e) => roll({ id })}
-      variant="ghost"
-      p={0}
     >
-      <Box ref={el} style={{ paddingLeft: '2px' }}>
+      <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeRhombus} height="5rem" color={bgColor} />
-      </Box>
-      <Box style={{ position: 'absolute', left: '40%', top: '35%' }}>
+      </div>
+      <div style={{ position: 'absolute', left: '40%', top: '35%' }}>
         <Icon
           icon={getNumberIcon(curNumber)}
           // @ts-ignore
           color={theme.colors.text}
         />
-      </Box>
+      </div>
       <Text fontSize={1}>D8</Text>
-    </Button>
+    </button>
   );
 }
 function D10Die({
@@ -940,6 +888,7 @@ function D10Die({
   onSelect,
   selected,
   bgColor,
+  theme,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -949,38 +898,27 @@ function D10Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
-  const theme = emotionTheme();
   return (
-    <Button
-      m={0}
+    <button
       id={id}
       key={id}
-      sx={(style) => ({
-        cursor: 'pointer',
-        border: selected
-          ? `1px solid ${style.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-        position: 'relative',
-      })}
+      data-selected={selected}
+      className={styles.die}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
       }}
       onDoubleClick={(e) => roll({ id })}
-      variant="ghost"
-      p={0}
     >
-      <Box ref={el} style={{ paddingLeft: '2px' }}>
+      <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeRhombus} height="5rem" color={bgColor} />
-      </Box>
-      <Box
+      </div>
+      <div
         style={{
           position: 'absolute',
           left: String(curNumber).length > 1 ? '33%' : '40%',
-          top: '30%',
+          top: '35%',
         }}
-        pt={1}
       >
         {String(curNumber)
           .split('')
@@ -993,9 +931,9 @@ function D10Die({
               color={theme.colors.text}
             />
           ))}
-      </Box>
+      </div>
       <Text fontSize={1}>D10</Text>
-    </Button>
+    </button>
   );
 }
 function D12Die({
@@ -1006,6 +944,7 @@ function D12Die({
   onSelect,
   selected,
   bgColor,
+  theme,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1015,32 +954,22 @@ function D12Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
-  const theme = emotionTheme();
   return (
-    <Button
-      m={0}
+    <button
       id={id}
       key={id}
-      sx={(style) => ({
-        cursor: 'pointer',
-        border: selected
-          ? `1px solid ${style.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-        position: 'relative',
-      })}
+      data-selected={selected}
+      className={styles.die}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
       }}
       onDoubleClick={(e) => roll({ id })}
-      variant="ghost"
-      p={0}
     >
-      <Box ref={el} style={{ paddingLeft: '3px' }}>
+      <div ref={el} style={{ paddingLeft: '3px' }}>
         <Icon icon={shapeHexagon} height="5rem" color={bgColor} />
-      </Box>
-      <Box
+      </div>
+      <div
         style={{
           position: 'absolute',
           left: String(curNumber).length > 1 ? '34%' : '40%',
@@ -1058,8 +987,8 @@ function D12Die({
               color={theme.colors.text}
             />
           ))}
-      </Box>
-    </Button>
+      </div>
+    </button>
   );
 }
 function D20Die({
@@ -1070,6 +999,7 @@ function D20Die({
   onSelect,
   selected,
   bgColor,
+  theme,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1079,32 +1009,22 @@ function D20Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
-  const theme = emotionTheme();
   return (
-    <Button
-      m={0}
+    <button
       id={id}
       key={id}
-      sx={(style) => ({
-        cursor: 'pointer',
-        border: selected
-          ? `1px solid ${style.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-        position: 'relative',
-      })}
+      data-selected={selected}
+      className={styles.die}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
       }}
       onDoubleClick={(e) => roll({ id })}
-      variant="ghost"
-      p={0}
     >
-      <Box ref={el} style={{ paddingLeft: '2px' }}>
+      <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeOctagon} height="5rem" color={bgColor} />
-      </Box>
-      <Box
+      </div>
+      <div
         style={{
           position: 'absolute',
           left: String(curNumber).length > 1 ? '34%' : '40%',
@@ -1122,8 +1042,8 @@ function D20Die({
               color={theme.colors.text}
             />
           ))}
-      </Box>
-    </Button>
+      </div>
+    </button>
   );
 }
 function DXDie({
@@ -1135,6 +1055,7 @@ function DXDie({
   onSelect,
   selected,
   bgColor,
+  theme,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1144,36 +1065,26 @@ function DXDie({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
-  const theme = emotionTheme();
   return (
-    <Button
-      m={0}
+    <button
       id={id}
       key={id}
-      sx={(style) => ({
-        cursor: 'pointer',
-        border: selected
-          ? `1px solid ${style.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-        position: 'relative',
-      })}
+      data-selected={selected}
+      className={styles.die}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
       }}
       onDoubleClick={(e) => roll({ id })}
-      variant="ghost"
-      p={0}
     >
-      <Box ref={el} style={{ paddingLeft: '2px' }}>
+      <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={decagramOutline} height="5rem" color={bgColor} />
-      </Box>
-      <Box
+      </div>
+      <div
         style={{
           position: 'absolute',
-          left: String(curNumber).length > 1 ? '34%' : '40%',
-          top: '33%',
+          left: String(curNumber).length > 1 ? '37%' : '43%',
+          top: '35%',
         }}
       >
         {String(curNumber)
@@ -1187,9 +1098,9 @@ function DXDie({
               color={theme.colors.text}
             />
           ))}
-      </Box>
+      </div>
       <Text fontSize={1}>D{sides}</Text>
-    </Button>
+    </button>
   );
 }
 
@@ -1197,6 +1108,7 @@ interface ClockProps extends Clock {
   socket: SocketIOClient.Socket;
   selected: boolean;
   onSelect: (id: string) => void;
+  theme: { colors: { [index: string]: string } };
 }
 function ClockPie({
   id,
@@ -1206,6 +1118,7 @@ function ClockPie({
   segments,
   selected,
   socket,
+  theme,
 }: ClockProps) {
   const el = React.useRef();
   const time = (curSegment / segments) * 100;
@@ -1226,12 +1139,12 @@ function ClockPie({
         e.stopPropagation();
         onSelect(id);
       }}
-      sx={(style) => ({
+      sx={{
         border: selected
-          ? `1px solid ${style.colors.special}`
+          ? `1px solid ${theme.colors.special}`
           : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${style.colors.special}` : 'none',
-      })}
+        boxShadow: selected ? `0 0px 15px ${theme.colors.special}` : 'none',
+      }}
     >
       <Text fontSize={1} color="text">
         {name}

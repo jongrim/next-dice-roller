@@ -101,36 +101,36 @@ const DiceSidebar = ({
   removeImg,
   imgs,
 }: DiceSidebarProps): React.ReactElement => {
-  const element = React.useRef(null);
-  const openMenu = React.useCallback(() => {
-    return new Promise((resolve) => {
-      gsap.to(element.current || {}, 0.5, {
-        left: 0,
-        backdropFilter: 'blur(5px)',
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: resolve,
-      });
-    });
-  }, []);
-  const closeMenu = React.useCallback(() => {
-    return new Promise((resolve) => {
-      gsap.to(element.current || {}, 0.5, {
-        left: -200,
-        backdropFilter: 'blur(0px)',
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: resolve,
-      });
-    });
-  }, []);
+  // const element = React.useRef(null);
+  // const openMenu = React.useCallback(() => {
+  //   return new Promise((resolve) => {
+  //     gsap.to(element.current || {}, 0.5, {
+  //       left: 0,
+  //       backdropFilter: 'blur(5px)',
+  //       ease: Elastic.easeOut.config(1, 1),
+  //       onComplete: resolve,
+  //     });
+  //   });
+  // }, []);
+  // const closeMenu = React.useCallback(() => {
+  //   return new Promise((resolve) => {
+  //     gsap.to(element.current || {}, 0.5, {
+  //       left: -200,
+  //       backdropFilter: 'blur(0px)',
+  //       ease: Elastic.easeOut.config(1, 1),
+  //       onComplete: resolve,
+  //     });
+  //   });
+  // }, []);
 
-  const [current, send] = useMachine(SidebarMachine, {
-    services: {
-      openMenu,
-      closeMenu,
-    },
-  });
+  // const [current, send] = useMachine(SidebarMachine, {
+  //   services: {
+  //     openMenu,
+  //     closeMenu,
+  //   },
+  // });
 
-  const nextMessage: SidebarEvent = nextMessageMap[current.value.toString()];
+  // const nextMessage: SidebarEvent = nextMessageMap[current.value.toString()];
 
   const [addClockModalIsOpen, setAddClockModalIsOpen] = React.useState(false);
   const [addImgModalIsOpen, setAddImgModalIsOpen] = React.useState(false);
@@ -153,7 +153,6 @@ const DiceSidebar = ({
   return (
     <Flex
       className="sidebar"
-      ref={element}
       width={100}
       flexDirection="column"
       justifyContent="space-around"

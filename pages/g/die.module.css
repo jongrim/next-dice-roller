@@ -1,0 +1,13 @@
+.die {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.die[data-selected='true'] {
+  border: 1px solid #3075ab;
+  box-shadow: 0 0px 15px #3075ab;
+}

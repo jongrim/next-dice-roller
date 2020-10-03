@@ -28,6 +28,7 @@ import decagramOutline from '@iconify/icons-mdi/decagram-outline';
 import refreshIcon from '@iconify/icons-mdi-light/refresh';
 import deleteIcon from '@iconify/icons-mdi-light/delete';
 import pictureIcon from '@iconify/icons-mdi-light/picture';
+import coinIcon from '@iconify/icons-system-uicons/coin';
 
 import arrowRight from '@iconify/icons-mdi-light/arrow-right';
 import arrowLeft from '@iconify/icons-mdi-light/arrow-left';
@@ -47,6 +48,7 @@ import BetaWarningModal from '../../components/BetaWarningModal';
 import { Img } from '../../types/image';
 
 import { CLIENT_ID } from '../../components/DiceSidebar';
+import Token from '../../types/token';
 
 const getNumberIcon = (num: number) => {
   switch (num) {
@@ -86,6 +88,7 @@ interface GraphicDiceResultsState {
   dice: GraphicDie[];
   clocks: Clock[];
   imgs: Img[];
+  tokens: Token[];
   roller: string;
 }
 
@@ -94,6 +97,7 @@ const diceInitialResultsState: GraphicDiceResultsState = {
   dice: [],
   clocks: [],
   imgs: [],
+  tokens: [],
   roller: 'anonymous',
 };
 
@@ -134,6 +138,14 @@ type DiceEvent =
       payload: { id: string };
     }
   | {
+      type: 'add-token';
+      payload: { token: Token };
+    }
+  | {
+      type: 'remove-token';
+      payload: { id: string };
+    }
+  | {
       type: 'roll';
       payload: { id: string; randNumbers: number[]; roller: string };
     }
@@ -162,11 +174,17 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         ...state,
         dice: state.dice.concat(event.payload.die),
       };
+    case 'add-token':
+      return {
+        ...state,
+        tokens: state.tokens.concat(event.payload.token),
+      };
     case 'remove-item':
       return {
         ...state,
         dice: state.dice.filter(({ id }) => id !== event.payload.id),
         clocks: state.clocks.filter(({ id }) => id !== event.payload.id),
+        tokens: state.tokens.filter(({ id }) => id !== event.payload.id),
       };
     case 'add-clock':
       return {
@@ -377,6 +395,9 @@ export default function GraphicDiceRoom(): React.ReactElement {
       ioSocket.on('remove-img', ({ id }) => {
         dispatch({ type: 'remove-img', payload: { id } });
       });
+      ioSocket.on('add-token', ({ token }) => {
+        dispatch({ type: 'add-token', payload: { token } });
+      });
       ioSocket.on(
         'sync',
         ({
@@ -434,7 +455,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
     return () => document.removeEventListener('keydown', listeners);
   }, [selectedItems, socket, roll]);
 
-  // Draggable dice
+  // Load draggable
   React.useEffect(() => {
     async function load() {
       const { Draggable: D } = await import('gsap/all');
@@ -443,6 +464,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
     load();
   }, []);
 
+  // Register draggable
   React.useEffect(() => {
     if (gsap && Draggable) {
       // @ts-ignore
@@ -450,6 +472,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
     }
   }, [Draggable]);
 
+  // Draggable dice
   React.useEffect(() => {
     if (Draggable) {
       Draggable.create(
@@ -516,7 +539,40 @@ export default function GraphicDiceRoom(): React.ReactElement {
     }
   }, [Draggable, state.clocks, selectedItems, socket]);
 
-  // Drag dice when moved
+  // Draggable tokens
+  React.useEffect(() => {
+    if (Draggable) {
+      Draggable.create(
+        state.tokens.map(({ id }) => `#${id}`),
+        {
+          type: 'x,y',
+          bounds: document.getElementById('dicebox'),
+          onDragEnd: function () {
+            if (selectedItems.length) {
+              selectedItems.forEach((id) => {
+                socket.emit('drag', {
+                  dragEvent: {
+                    id,
+                    left: this.endX,
+                    top: this.endY,
+                  },
+                });
+              });
+            }
+            socket.emit('drag', {
+              dragEvent: {
+                id: this.target.id,
+                left: this.endX,
+                top: this.endY,
+              },
+            });
+          },
+        }
+      );
+    }
+  }, [Draggable, state.tokens, selectedItems, socket]);
+
+  // Drag things when moved
   React.useEffect(() => {
     if (socket && Draggable) {
       socket.on('drag', ({ dragEvent }) => {
@@ -554,6 +610,10 @@ export default function GraphicDiceRoom(): React.ReactElement {
           ])}
           removeImg={React.useCallback(
             (id) => socket.emit('remove-img', { id }),
+            [socket]
+          )}
+          addToken={React.useCallback(
+            (token: Token) => socket?.emit('add-token', { token }),
             [socket]
           )}
           imgs={state.imgs}
@@ -655,6 +715,20 @@ export default function GraphicDiceRoom(): React.ReactElement {
               onSelect={onSelect}
               theme={theme.value}
             />
+          ))}
+          {state.tokens.map((token) => (
+            <button
+              className={styles.die}
+              data-selected={selectedItems.includes(token.id)}
+              id={token.id}
+              key={token.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(token.id);
+              }}
+            >
+              <Icon icon={coinIcon} height="2rem" color={token.bgColor} />
+            </button>
           ))}
           {selectedItems.length > 0 && (
             <Flex

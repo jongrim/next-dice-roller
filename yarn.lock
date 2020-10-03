@@ -1617,6 +1617,11 @@
   resolved "https://registry.yarnpkg.com/@iconify/icons-ri/-/icons-ri-1.0.1.tgz#223da84bf9f91293c469f97d611b329a57c6f546"
   integrity sha512-Qe0TLvlQb8W6g6gwLY6LkpyUg3oo/G5eD67Nc5BvcTN0Bt4oZNW9zW3fdUZ5/b36a/bq3r8A2Xt+aM9QaGO7Ow==
 
+"@iconify/icons-system-uicons@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@iconify/icons-system-uicons/-/icons-system-uicons-1.0.0.tgz#df56b874bf813419a862ed6b5b6e436929b68273"
+  integrity sha512-d1S2rWdJfGSY80egAxxMooESHnq7UDQvCGZ9o++ed89zxz9Z5t0DioC5tK8dZRNY7Chrh9Esw48h9jBBv6bmyA==
+
 "@iconify/react@^1.1.3":
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/@iconify/react/-/react-1.1.3.tgz#ebe4d3e5f5dea23cd6a9634acd7a0a25c7414a59"

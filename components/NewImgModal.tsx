@@ -10,7 +10,7 @@ import { Img } from '../types/image';
 
 interface NewImgModalProps {
   isOpen: boolean;
-  onDone: (urls?: { [x: number]: string }) => void;
+  onDone: (urls?: { [x: number]: string }, bgImage?: string) => void;
   removeImg: (id: string) => void;
   imgs: Img[];
 }
@@ -22,13 +22,14 @@ function NewImgModal({
   removeImg,
 }: NewImgModalProps): React.ReactElement {
   const theme = useTheme();
+  const [bgImage, setBgImage] = React.useState('');
   const [urls, setUrls] = React.useState({ [uuidv4()]: '' });
   const [board, setBoard] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
   const finish = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    onDone(urls);
+    onDone(urls, bgImage);
     setUrls({ [uuidv4()]: '' });
   };
 
@@ -41,16 +42,36 @@ function NewImgModal({
       style={{ backgroundColor: theme.colors.background }}
     >
       <Box py={2} bg="background">
-        <Heading as="h2" fontSize={[3, 4, 5]} color="text">
-          New Image
+        <Heading as="h3" fontSize={[2, 3, 4]} color="text">
+          New Background Image
+        </Heading>
+        <Text fontSize={2} color="text">
+          Add an image as a background
+        </Text>
+        <Label htmlFor="background-image" color="text">
+          Image URL
+        </Label>
+        <Input
+          color="text"
+          name="background-image"
+          id="background-image"
+          value={bgImage}
+          onChange={(e) => setBgImage(e.target.value)}
+          mt={2}
+        />
+      </Box>
+      <hr />
+      <Box py={2} bg="background">
+        <Heading as="h2" fontSize={[2, 3, 4]} color="text">
+          Add to Image Gallery
         </Heading>
         <Text fontSize={2} color="text">
           Add full URLs for images. Come back to here to manage images later.
         </Text>
       </Box>
-      <Box as="form" mt={2}>
+      <Box as="form">
         {Object.keys(urls).map((id) => (
-          <Box key={id} mt={3}>
+          <Box key={id}>
             <Label htmlFor={id} color="text">
               Image URL
             </Label>
@@ -73,7 +94,7 @@ function NewImgModal({
           Add another
         </Button>
         <hr />
-        <Heading as="h3" color="text">
+        <Heading as="h3" fontSize={[1, 2, 3]} color="text">
           Load a Pinterest Board
         </Heading>
         <Text fontSize={2} color="text">
@@ -129,7 +150,7 @@ function NewImgModal({
           {loading ? 'Loading' : 'Load'}
         </Button>
         <hr />
-        <Text as="h3" color="text">
+        <Text as="h3" fontSize={[1, 2, 3]} color="text">
           Already Loaded
         </Text>
         {imgs.map(({ id, url }) => (

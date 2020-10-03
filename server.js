@@ -57,6 +57,9 @@ app.prepare().then(() => {
       socket.on('rewind-clock', (data) => {
         room.emit('rewind-clock', data);
       });
+      socket.on('add-token', (data) => {
+        room.emit('add-token', data);
+      });
       socket.on('add-img', (data) => {
         room.emit('add-img', data);
       });

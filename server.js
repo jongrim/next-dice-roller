@@ -72,6 +72,9 @@ app.prepare().then(() => {
       socket.on('request-sync', (data) => {
         room.emit('request-sync', data);
       });
+      socket.on('set-bg', (data) => {
+        room.emit('set-bg', data);
+      });
       socket.on('sync', (data) => {
         room.emit('sync', data);
       });

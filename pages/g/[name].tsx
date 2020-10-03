@@ -35,8 +35,7 @@ import arrowLeft from '@iconify/icons-mdi-light/arrow-left';
 
 import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
-import RollBubbleManager from '../../components/RollBubbleManager';
-import RollHistory from '../../components/RollHistory';
+import GraphicRollHistory from '../../components/GraphicRollHistory';
 import DiceSidebar from '../../components/DiceSidebar';
 
 import { GraphicDie } from '../../types/dice';
@@ -83,12 +82,18 @@ const diceStates = {
   finished: 'finished',
 };
 
+interface Roll {
+  roller: string;
+  total: number;
+  dice: GraphicDie[];
+}
 interface GraphicDiceResultsState {
   state: string;
   dice: GraphicDie[];
   clocks: Clock[];
   imgs: Img[];
   tokens: Token[];
+  rolls: Roll[];
   roller: string;
 }
 
@@ -98,6 +103,7 @@ const diceInitialResultsState: GraphicDiceResultsState = {
   clocks: [],
   imgs: [],
   tokens: [],
+  rolls: [],
   roller: 'anonymous',
 };
 
@@ -164,6 +170,7 @@ type DiceEvent =
         clocks: Clock[];
         imgs: Img[];
         tokens: Token[];
+        rolls: Roll[];
       };
     };
 
@@ -244,13 +251,14 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         clocks: state.clocks,
         imgs: state.imgs,
         tokens: state.tokens,
+        rolls: state.rolls,
       });
       return state;
     case 'sync':
       interface IdObject {
         id: string;
       }
-      const { dice, clocks, imgs, tokens } = event.payload;
+      const { dice, clocks, imgs, tokens, rolls } = event.payload;
       function itemsNotShared<T extends IdObject>(arrA: T[], arrB: T[]): T[] {
         return arrB.filter(({ id }) => !arrA.find(({ id: i }) => id === i));
       }
@@ -260,33 +268,69 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         clocks: state.clocks.concat(itemsNotShared(state.clocks, clocks)),
         imgs: state.imgs.concat(itemsNotShared(state.imgs, imgs)),
         tokens: state.tokens.concat(itemsNotShared(state.tokens, tokens)),
+        rolls: [...rolls],
       };
     case 'roll':
+      let newDie: GraphicDie;
       const newDice = state.dice.map((die) => {
         if (die.id === event.payload.id) {
-          return {
+          newDie = {
             ...die,
             curNumber: (event.payload.randNumbers[0] % die.sides) + 1,
             rollVersion: die.rollVersion + 1,
           };
+          return newDie;
         }
         return die;
       });
-      return { ...state, state: diceStates.finished, dice: newDice };
+      return {
+        ...state,
+        state: diceStates.finished,
+        dice: newDice,
+        rolls: [
+          {
+            roller: event.payload.roller,
+            total: newDie.curNumber,
+            dice: [newDie],
+          },
+          ...state.rolls,
+        ],
+      };
     case 'group-roll':
       const numbers = [...event.payload.randNumbers];
+      const rolledIds: { [index: string]: GraphicDie } = {};
       const updated = state.dice.map((die) => {
         if (event.payload.items.includes(die.id)) {
           const nextNum = numbers.splice(0, 1);
-          return {
+          const newDie = {
             ...die,
             curNumber: (nextNum[0] % die.sides) + 1,
             rollVersion: die.rollVersion + 1,
           };
+          rolledIds[die.id] = newDie;
+          return newDie;
         }
         return die;
       });
-      return { ...state, state: diceStates.finished, dice: updated };
+      const rollTotal = updated.reduce((acc, { id }) => {
+        if (rolledIds[id]) {
+          return acc + rolledIds[id].curNumber;
+        }
+        return acc;
+      }, 0);
+      return {
+        ...state,
+        state: diceStates.finished,
+        dice: updated,
+        rolls: [
+          {
+            roller: event.payload.roller,
+            total: rollTotal,
+            dice: Object.values(rolledIds),
+          },
+          ...state.rolls,
+        ],
+      };
   }
 };
 
@@ -323,14 +367,14 @@ export default function GraphicDiceRoom(): React.ReactElement {
         })
         .then((res) => res.json())
         .then(({ nums }) => {
-          socket.emit('roll', { id, nums });
+          socket.emit('roll', { id, nums, user: storedUsername });
         });
     },
-    [socket]
+    [socket, storedUsername]
   );
 
   const groupRoll = React.useCallback(
-    (items: string[]) => {
+    (items: string[], user: string) => {
       dispatch({
         type: 'submit',
       });
@@ -343,7 +387,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
         })
         .then((res) => res.json())
         .then(({ nums }) => {
-          socket.emit('group-roll', { items, nums });
+          socket.emit('group-roll', { items, nums, user });
         });
     },
     [socket]
@@ -387,7 +431,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
       ioSocket.on('update-users', (users) => {
         setConnectedUsers(users);
       });
-      ioSocket.on('roll', ({ id, nums }) => {
+      ioSocket.on('roll', ({ id, nums, user }) => {
         /**
          * Note: every socket receives this, including the person that emitted it
          */
@@ -396,12 +440,11 @@ export default function GraphicDiceRoom(): React.ReactElement {
           payload: {
             id,
             randNumbers: nums.data,
-            // TODO: fix this. I'm ignoring this dep because it doesn't work yet
-            roller: storedUsername,
+            roller: user,
           },
         });
       });
-      ioSocket.on('group-roll', ({ items, nums }) => {
+      ioSocket.on('group-roll', ({ items, nums, user }) => {
         /**
          * Note: every socket receives this, including the person that emitted it
          */
@@ -410,8 +453,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
           payload: {
             items,
             randNumbers: nums.data,
-            // TODO: fix this. I'm ignoring this dep because it doesn't work yet
-            roller: storedUsername,
+            roller: user,
           },
         });
       });
@@ -454,6 +496,9 @@ export default function GraphicDiceRoom(): React.ReactElement {
       ioSocket.on('add-token', ({ token }) => {
         dispatch({ type: 'add-token', payload: { token } });
       });
+      ioSocket.on('set-bg', ({ bgImg }) => {
+        setBgImage(bgImg);
+      });
       ioSocket.on(
         'sync',
         ({
@@ -464,6 +509,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
           clocks: Clock[];
           imgs: Img[];
           tokens: Token[];
+          rolls: Roll[];
           clientId: string;
         }) => {
           dispatch({ type: 'sync', payload: rest });
@@ -491,11 +537,6 @@ export default function GraphicDiceRoom(): React.ReactElement {
   React.useEffect(() => {
     const listeners = (ev: KeyboardEvent) => {
       switch (ev.key) {
-        case 'Enter':
-          if (selectedItems.length) {
-            selectedItems.forEach((id) => roll({ id }));
-          }
-          break;
         case 'Backspace':
           if (selectedItems.length) {
             socket.emit('remove-items', { items: selectedItems });
@@ -510,7 +551,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
     };
     document.addEventListener('keydown', listeners);
     return () => document.removeEventListener('keydown', listeners);
-  }, [selectedItems, socket, roll]);
+  }, [selectedItems, storedUsername, groupRoll, socket, roll]);
 
   // Load draggable
   React.useEffect(() => {
@@ -652,7 +693,13 @@ export default function GraphicDiceRoom(): React.ReactElement {
         theme={theme}
         toggleTheme={toggleTheme}
       />
-      <Flex bg="background" width="100%" flex="1" minHeight="0">
+      <Flex
+        bg="background"
+        width="100%"
+        flex="1"
+        minHeight="0"
+        sx={{ position: 'relative', overflow: 'hidden' }}
+      >
         <DiceSidebar
           addDie={React.useCallback(
             (die: GraphicDie) => socket?.emit('add-g-die', { die }),
@@ -674,7 +721,10 @@ export default function GraphicDiceRoom(): React.ReactElement {
             [socket]
           )}
           imgs={state.imgs}
-          setBgImage={setBgImage}
+          setBgImage={React.useCallback(
+            (bgImg: string) => socket?.emit('set-bg', { bgImg }),
+            [socket]
+          )}
         />
         <Box
           id="dicebox"
@@ -682,13 +732,11 @@ export default function GraphicDiceRoom(): React.ReactElement {
           onClick={() => {
             setSelectedItems([]);
           }}
-          sx={
-            bgImage
-              ? {
-                  background: `center / contain no-repeat url(${bgImage})`,
-                }
-              : undefined
-          }
+          sx={{
+            background: bgImage
+              ? `center / contain no-repeat url(${bgImage})`
+              : undefined,
+          }}
         >
           {state.dice.map((d) => {
             switch (d.sides) {
@@ -798,13 +846,14 @@ export default function GraphicDiceRoom(): React.ReactElement {
           {selectedItems.length > 0 && (
             <Flex
               sx={{ position: 'absolute', bottom: '3rem' }}
-              width={window.innerWidth - 100}
+              width="100%"
               justifyContent="center"
             >
               <Tooltip arrow title="Roll selected dice">
                 <Button
-                  onClick={() => {
-                    groupRoll(selectedItems);
+                  onClick={(e) => {
+                    groupRoll(selectedItems, storedUsername);
+                    e.stopPropagation();
                   }}
                   variant="ghost"
                   bg="background"
@@ -832,9 +881,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
               sx={{
                 position: 'absolute',
                 right: '3rem',
-                top: '50%',
+                top: '48%',
               }}
-              height="5rem"
             >
               <Tooltip
                 arrow
@@ -859,10 +907,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
             </Box>
           )}
         </Box>
-        {/* <Box as="main" flex="1" minHeight="0" maxWidth="1280px" bg="background">
-          <RollHistory rolls={state.rolls} />
-        </Box> */}
-        {/* <RollBubbleManager rolls={state.rolls} /> */}
+        <GraphicRollHistory rolls={state.rolls} />
         <BetaWarningModal />
         <UserSetupModal
           storedUsername={storedUsername}
@@ -1015,7 +1060,9 @@ function D8Die({
           color={theme.colors.text}
         />
       </div>
-      <Text fontSize={1}>D8</Text>
+      <Text fontSize={1} color="text">
+        D8
+      </Text>
     </button>
   );
 }
@@ -1071,7 +1118,9 @@ function D10Die({
             />
           ))}
       </div>
-      <Text fontSize={1}>D10</Text>
+      <Text fontSize={1} color="text">
+        D10
+      </Text>
     </button>
   );
 }

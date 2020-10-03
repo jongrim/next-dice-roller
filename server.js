@@ -33,6 +33,9 @@ app.prepare().then(() => {
       socket.on('roll', (data) => {
         room.emit('roll', data);
       });
+      socket.on('group-roll', (data) => {
+        room.emit('group-roll', data);
+      });
       socket.on('add-die', (data) => {
         room.emit('add-die', data);
       });

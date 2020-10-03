@@ -150,6 +150,10 @@ type DiceEvent =
       payload: { id: string; randNumbers: number[]; roller: string };
     }
   | {
+      type: 'group-roll';
+      payload: { items: string[]; randNumbers: number[]; roller: string };
+    }
+  | {
       type: 'emit-state';
       payload: { socket: SocketIOClient.Socket };
     }
@@ -159,6 +163,7 @@ type DiceEvent =
         dice: GraphicDie[];
         clocks: Clock[];
         imgs: Img[];
+        tokens: Token[];
       };
     };
 
@@ -238,13 +243,14 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         dice: state.dice,
         clocks: state.clocks,
         imgs: state.imgs,
+        tokens: state.tokens,
       });
       return state;
     case 'sync':
       interface IdObject {
         id: string;
       }
-      const { dice, clocks, imgs } = event.payload;
+      const { dice, clocks, imgs, tokens } = event.payload;
       function itemsNotShared<T extends IdObject>(arrA: T[], arrB: T[]): T[] {
         return arrB.filter(({ id }) => !arrA.find(({ id: i }) => id === i));
       }
@@ -253,6 +259,7 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         dice: state.dice.concat(itemsNotShared(state.dice, dice)),
         clocks: state.clocks.concat(itemsNotShared(state.clocks, clocks)),
         imgs: state.imgs.concat(itemsNotShared(state.imgs, imgs)),
+        tokens: state.tokens.concat(itemsNotShared(state.tokens, tokens)),
       };
     case 'roll':
       const newDice = state.dice.map((die) => {
@@ -266,6 +273,20 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         return die;
       });
       return { ...state, state: diceStates.finished, dice: newDice };
+    case 'group-roll':
+      const numbers = [...event.payload.randNumbers];
+      const updated = state.dice.map((die) => {
+        if (event.payload.items.includes(die.id)) {
+          const nextNum = numbers.splice(0, 1);
+          return {
+            ...die,
+            curNumber: (nextNum[0] % die.sides) + 1,
+            rollVersion: die.rollVersion + 1,
+          };
+        }
+        return die;
+      });
+      return { ...state, state: diceStates.finished, dice: updated };
   }
 };
 
@@ -303,6 +324,26 @@ export default function GraphicDiceRoom(): React.ReactElement {
         .then((res) => res.json())
         .then(({ nums }) => {
           socket.emit('roll', { id, nums });
+        });
+    },
+    [socket]
+  );
+
+  const groupRoll = React.useCallback(
+    (items: string[]) => {
+      dispatch({
+        type: 'submit',
+      });
+      window
+        .fetch('/api/random', {
+          method: 'POST',
+          body: JSON.stringify({
+            size: items.length,
+          }),
+        })
+        .then((res) => res.json())
+        .then(({ nums }) => {
+          socket.emit('group-roll', { items, nums });
         });
     },
     [socket]
@@ -360,6 +401,20 @@ export default function GraphicDiceRoom(): React.ReactElement {
           },
         });
       });
+      ioSocket.on('group-roll', ({ items, nums }) => {
+        /**
+         * Note: every socket receives this, including the person that emitted it
+         */
+        dispatch({
+          type: 'group-roll',
+          payload: {
+            items,
+            randNumbers: nums.data,
+            // TODO: fix this. I'm ignoring this dep because it doesn't work yet
+            roller: storedUsername,
+          },
+        });
+      });
       ioSocket.on('add-g-die', ({ die }) =>
         dispatch({ type: 'add-die', payload: { die } })
       );
@@ -408,6 +463,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
           dice: GraphicDie[];
           clocks: Clock[];
           imgs: Img[];
+          tokens: Token[];
           clientId: string;
         }) => {
           dispatch({ type: 'sync', payload: rest });
@@ -748,9 +804,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
               <Tooltip arrow title="Roll selected dice">
                 <Button
                   onClick={() => {
-                    selectedItems.forEach((id) => {
-                      roll({ id });
-                    });
+                    groupRoll(selectedItems);
                   }}
                   variant="ghost"
                   bg="background"

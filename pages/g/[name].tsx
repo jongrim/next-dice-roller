@@ -278,6 +278,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
     diceInitialResultsState
   );
   const [connected, setConnected] = React.useState(false);
+  const [bgImage, setBgImage] = React.useState('');
   const [connectedUsers, setConnectedUsers] = React.useState([]);
   const [storedUsername, setStoredUsername] = React.useState('');
   const [selectedItems, setSelectedItems] = React.useState<string[]>([]);
@@ -617,6 +618,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
             [socket]
           )}
           imgs={state.imgs}
+          setBgImage={setBgImage}
         />
         <Box
           id="dicebox"
@@ -624,6 +626,13 @@ export default function GraphicDiceRoom(): React.ReactElement {
           onClick={() => {
             setSelectedItems([]);
           }}
+          sx={
+            bgImage
+              ? {
+                  background: `center / contain no-repeat url(${bgImage})`,
+                }
+              : undefined
+          }
         >
           {state.dice.map((d) => {
             switch (d.sides) {
@@ -744,6 +753,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     });
                   }}
                   variant="ghost"
+                  bg="background"
                   mr={2}
                 >
                   <Icon icon={refreshIcon} height="3rem" />
@@ -755,6 +765,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
                     socket.emit('remove-items', { items: selectedItems });
                   }}
                   variant="ghost"
+                  bg="background"
                   ml={2}
                 >
                   <Icon icon={deleteIcon} height="3rem" />

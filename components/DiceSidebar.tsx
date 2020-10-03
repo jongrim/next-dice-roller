@@ -32,6 +32,7 @@ interface DiceSidebarProps {
   addImg: (img: Img) => void;
   addToken: (token: Token) => void;
   removeImg: (id: string) => void;
+  setBgImage: (url: string) => void;
   imgs: Img[];
 }
 
@@ -41,6 +42,7 @@ const DiceSidebar = ({
   addImg,
   addToken,
   removeImg,
+  setBgImage,
   imgs,
 }: DiceSidebarProps): React.ReactElement => {
   const [addClockModalIsOpen, setAddClockModalIsOpen] = React.useState(false);
@@ -57,7 +59,7 @@ const DiceSidebar = ({
     bgColor: color,
     fontColor: invert(color),
     id: uniqueId(`die-${CLIENT_ID}-`),
-    curNumber: sides,
+    curNumber: (Math.floor(Math.random() * 100) % sides) + 1,
     rollVersion: 1,
   });
 
@@ -175,7 +177,7 @@ const DiceSidebar = ({
         }}
       />
       <NewImgModal
-        onDone={(urls?: { [x: number]: string }) => {
+        onDone={(urls?: { [x: number]: string }, bgImage = '') => {
           if (urls) {
             Object.keys(urls).forEach((id) => {
               if (urls[id]) {
@@ -183,6 +185,7 @@ const DiceSidebar = ({
               }
             });
           }
+          setBgImage(bgImage);
           setAddImgModalIsOpen(false);
         }}
         imgs={imgs}

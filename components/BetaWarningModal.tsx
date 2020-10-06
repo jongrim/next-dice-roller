@@ -22,19 +22,17 @@ const BetaWarningModal = ({}) => {
     >
       <Box py={2} bg="background">
         <Heading as="h2" fontSize={[3, 4, 5]} color="text">
-          Secrets!
+          New Stuff!
         </Heading>
         <Text fontSize={2} color="text">
-          Hey! If you found you're way here I either told you about it or you're
-          very good at snooping. Either way, just know that this area is all
-          pretty new and still being tested out for issues. Trying to roll lots
-          of dice (10 or more) doesn't have super smooth animations. I'm working
-          on improving that performance.
+          Hey! This area is all pretty new and still being tested out for
+          issues. It's under active development so stuff may move and change as
+          well.
         </Text>
         <Text fontSize={2} color="text" mt={1}>
-          Still, you're welcome to try these bits out and let me know what you
-          think. Is there something vital that is missing? Is something hard to
-          use or set up in a weird way? Found a bug? Feel free to{' '}
+          I would love to hear your feedback. Is there something vital that is
+          missing? Is something hard to use or set up in a weird way? Found a
+          bug? Feel free to{' '}
           <a href="https://twitter.com/jonjongrim" style={{ color: '#3075AB' }}>
             message me
           </a>{' '}

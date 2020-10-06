@@ -82,16 +82,18 @@ const DiceSidebar = ({
         borderRight: `1px ${style.colors.text} solid`,
       })}
     >
-      <Input
-        aria-label="new die color"
-        type="color"
-        value={color}
-        onChange={(e) => setColor(e.target.value)}
-        p={0}
-        sx={{ border: 'none', cursor: 'pointer' }}
-        width="2.5rem"
-        height="2.5rem"
-      />
+      <Tooltip arrow title="Change new item color" position="right">
+        <Input
+          aria-label="new die color"
+          type="color"
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+          p={0}
+          sx={{ border: 'none', cursor: 'pointer' }}
+          width="2.5rem"
+          height="2.5rem"
+        />
+      </Tooltip>
       <Button
         variant="ghost"
         style={{ border: 'none' }}

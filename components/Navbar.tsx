@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
-import Router from 'next/router';
+import Router, { useRouter } from 'next/router';
 import { Box, Button, Flex, Text } from 'rebass';
 import { Switch } from '@rebass/forms';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -12,7 +12,8 @@ import ConnectedSvg from './ConnectedSvg';
 import NotConnectedSvg from './NotConnectedSvg';
 import AboutSvg from './AboutSvg';
 
-const Navbar = ({ connected, connectedUsers, name, toggleTheme, theme }) => {
+const Navbar = ({ connected, connectedUsers, toggleTheme, theme }) => {
+  const { asPath } = useRouter();
   return (
     <Flex
       height="60px"
@@ -52,7 +53,7 @@ const Navbar = ({ connected, connectedUsers, name, toggleTheme, theme }) => {
         checked={theme.label === 'dark'}
       />
       <Tooltip arrow title="Copy room URL">
-        <CopyToClipboard text={`https://rollwithme.xyz/room/${name}`}>
+        <CopyToClipboard text={`https://rollwithme.xyz${asPath}`}>
           <Button variant="clear" onClick={() => {}}>
             <CopySvg />
           </Button>

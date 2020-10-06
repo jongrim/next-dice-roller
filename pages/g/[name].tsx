@@ -745,7 +745,6 @@ export default function GraphicDiceRoom(): React.ReactElement {
       <Navbar
         connected={connected}
         connectedUsers={connectedUsers}
-        name={name}
         theme={theme}
         toggleTheme={toggleTheme}
       />

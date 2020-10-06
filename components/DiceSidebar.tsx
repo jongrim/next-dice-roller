@@ -24,7 +24,7 @@ import { Input } from '@rebass/forms';
 import invert from '../utils/invertColor';
 import Token from '../types/token';
 
-export const CLIENT_ID = uuidv4();
+export const CLIENT_ID = window?.Cypress ? 'cypress' : uuidv4();
 
 interface DiceSidebarProps {
   addDie: (die: GraphicDie) => void;
@@ -85,6 +85,7 @@ const DiceSidebar = ({
       <Tooltip arrow title="Change new item color" position="right">
         <Input
           aria-label="new die color"
+          data-testid="color-picker"
           type="color"
           value={color}
           onChange={(e) => setColor(e.target.value)}
@@ -95,6 +96,7 @@ const DiceSidebar = ({
         />
       </Tooltip>
       <Button
+        data-testid="d4"
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(4))}
@@ -102,6 +104,7 @@ const DiceSidebar = ({
         <Icon height="2rem" icon={diceD4Outline} />
       </Button>
       <Button
+        data-testid="d6"
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(6))}
@@ -109,6 +112,7 @@ const DiceSidebar = ({
         <Icon height="2rem" icon={diceD6Outline} />
       </Button>
       <Button
+        data-testid="d8"
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(8))}
@@ -116,6 +120,7 @@ const DiceSidebar = ({
         <Icon height="2rem" icon={diceD8Outline} />
       </Button>
       <Button
+        data-testid="d10"
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(10))}
@@ -123,6 +128,7 @@ const DiceSidebar = ({
         <Icon height="2rem" icon={diceD10Outline} />
       </Button>
       <Button
+        data-testid="d12"
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(12))}
@@ -130,6 +136,7 @@ const DiceSidebar = ({
         <Icon height="2rem" icon={diceD12Outline} />
       </Button>
       <Button
+        data-testid="d20"
         variant="ghost"
         style={{ border: 'none' }}
         onClick={() => addDie(makeDie(20))}
@@ -138,6 +145,7 @@ const DiceSidebar = ({
       </Button>
       <Tooltip arrow title="Add custom die" position="right">
         <Button
+          data-testid="dCustom"
           variant="ghost"
           style={{ border: 'none' }}
           onClick={showCustomDieModal}
@@ -147,6 +155,7 @@ const DiceSidebar = ({
       </Tooltip>
       <Tooltip arrow title="Add a clock" position="right">
         <Button
+          data-testid="clock"
           variant="ghost"
           style={{ border: 'none' }}
           onClick={() => setAddClockModalIsOpen(true)}
@@ -156,6 +165,7 @@ const DiceSidebar = ({
       </Tooltip>
       <Tooltip arrow title="Add token" position="right">
         <Button
+          data-testid="token"
           variant="ghost"
           style={{ border: 'none' }}
           onClick={() => addToken(makeToken())}
@@ -165,6 +175,7 @@ const DiceSidebar = ({
       </Tooltip>
       <Tooltip arrow title="Manage images" position="right">
         <Button
+          data-testid="image"
           variant="ghost"
           style={{ border: 'none' }}
           onClick={() => setAddImgModalIsOpen(true)}

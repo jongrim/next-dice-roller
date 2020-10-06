@@ -43,7 +43,7 @@ import { GraphicDie } from '../../types/dice';
 import useTheme from '../../hooks/useTheme';
 import _Draggable from 'gsap/Draggable';
 import { Icon } from '@iconify/react';
-import { Clock } from '../../types/clock';
+import { Clock, PositionedClock } from '../../types/clock';
 import BetaWarningModal from '../../components/BetaWarningModal';
 import { Img } from '../../types/image';
 
@@ -88,10 +88,16 @@ interface Roll {
   total: number;
   dice: GraphicDie[];
 }
+
+interface PositionedGraphicDie extends GraphicDie {
+  top: number;
+  left: number;
+}
+
 interface GraphicDiceResultsState {
   state: string;
-  dice: GraphicDie[];
-  clocks: Clock[];
+  dice: PositionedGraphicDie[];
+  clocks: PositionedClock[];
   imgs: Img[];
   tokens: Token[];
   rolls: Roll[];
@@ -167,15 +173,18 @@ type DiceEvent =
   | {
       type: 'sync';
       payload: {
-        dice: GraphicDie[];
-        clocks: Clock[];
+        dice: PositionedGraphicDie[];
+        clocks: PositionedClock[];
         imgs: Img[];
         tokens: Token[];
         rolls: Roll[];
       };
     };
 
-const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
+const diceReducer = (
+  state: GraphicDiceResultsState,
+  event: DiceEvent
+): GraphicDiceResultsState => {
   const getBoxes = () => {
     const diceboxEl = window.document.getElementById('dicebox');
     const diceboxRect = diceboxEl.getBoundingClientRect();
@@ -307,7 +316,7 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         rolls: [...rolls],
       };
     case 'roll':
-      let newDie: GraphicDie;
+      let newDie: PositionedGraphicDie;
       const newDice = state.dice.map((die) => {
         if (die.id === event.payload.id) {
           newDie = {
@@ -334,7 +343,7 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
       };
     case 'group-roll':
       const numbers = [...event.payload.randNumbers];
-      const rolledIds: { [index: string]: GraphicDie } = {};
+      const rolledIds: { [index: string]: PositionedGraphicDie } = {};
       const updated = state.dice.map((die) => {
         if (event.payload.items.includes(die.id)) {
           const nextNum = numbers.splice(0, 1);
@@ -541,8 +550,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
           clientId,
           ...rest
         }: {
-          dice: GraphicDie[];
-          clocks: Clock[];
+          dice: PositionedGraphicDie[];
+          clocks: PositionedClock[];
           imgs: Img[];
           tokens: Token[];
           rolls: Roll[];

@@ -26,10 +26,6 @@ import Token from '../types/token';
 
 export const CLIENT_ID = uuidv4();
 
-let LEFT_OFFSET = 0;
-let TOP_OFFSET = 0;
-const TOP_INCREASE = 75;
-
 interface DiceSidebarProps {
   addDie: (die: GraphicDie) => void;
   addClock: (clock: Clock) => void;
@@ -49,7 +45,6 @@ const DiceSidebar = ({
   setBgImage,
   imgs,
 }: DiceSidebarProps): React.ReactElement => {
-  const [maxHeight, setMaxHeight] = React.useState(0);
   const [addClockModalIsOpen, setAddClockModalIsOpen] = React.useState(false);
   const [addImgModalIsOpen, setAddImgModalIsOpen] = React.useState(false);
   const [addCustomDieModalIsOpen, setAddCustomDieModalIsOpen] = React.useState(
@@ -59,16 +54,6 @@ const DiceSidebar = ({
 
   const showCustomDieModal = () => setAddCustomDieModalIsOpen(true);
 
-  React.useEffect(() => {
-    const getMaxHeight = (ev: UIEvent) => {
-      // @ts-ignore
-      setMaxHeight(ev.target.innerHeight - 60);
-    };
-    window.addEventListener('resize', getMaxHeight);
-    setMaxHeight(window.innerHeight - 60);
-    return () => window.removeEventListener('resize', getMaxHeight);
-  }, [setMaxHeight]);
-
   const makeDie = (sides: number): GraphicDie => {
     const die = {
       sides,
@@ -77,10 +62,7 @@ const DiceSidebar = ({
       id: uniqueId(`die-${CLIENT_ID}-`),
       curNumber: (Math.floor(Math.random() * 100) % sides) + 1,
       rollVersion: 1,
-      left: LEFT_OFFSET,
-      top: TOP_OFFSET,
     };
-    TOP_OFFSET = (TOP_OFFSET % maxHeight) + TOP_INCREASE;
     return die;
   };
 
@@ -216,8 +198,7 @@ const DiceSidebar = ({
       <NewClockModal
         onDone={(clock?: Clock) => {
           if (clock) {
-            addClock({ ...clock, left: LEFT_OFFSET, top: TOP_OFFSET });
-            TOP_OFFSET = (TOP_OFFSET % maxHeight) + TOP_INCREASE;
+            addClock(clock);
           }
           setAddClockModalIsOpen(false);
         }}

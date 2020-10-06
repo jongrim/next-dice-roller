@@ -54,14 +54,17 @@ const DiceSidebar = ({
 
   const showCustomDieModal = () => setAddCustomDieModalIsOpen(true);
 
-  const makeDie = (sides: number): GraphicDie => ({
-    sides,
-    bgColor: color,
-    fontColor: invert(color),
-    id: uniqueId(`die-${CLIENT_ID}-`),
-    curNumber: (Math.floor(Math.random() * 100) % sides) + 1,
-    rollVersion: 1,
-  });
+  const makeDie = (sides: number): GraphicDie => {
+    const die = {
+      sides,
+      bgColor: color,
+      fontColor: invert(color),
+      id: uniqueId(`die-${CLIENT_ID}-`),
+      curNumber: (Math.floor(Math.random() * 100) % sides) + 1,
+      rollVersion: 1,
+    };
+    return die;
+  };
 
   const makeToken = (): Token => ({
     id: uniqueId(`token-${CLIENT_ID}-`),

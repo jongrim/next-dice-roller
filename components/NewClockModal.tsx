@@ -12,7 +12,10 @@ interface NewClockModalProps {
   onDone: (clock?: Clock) => void;
 }
 
-const NewClockModal: React.FC<NewClockModalProps> = ({ isOpen, onDone }) => {
+const NewClockModal = ({
+  isOpen,
+  onDone,
+}: NewClockModalProps): React.ReactElement => {
   const theme = useTheme();
   const [name, setName] = React.useState('');
   const [segments, setSegments] = React.useState('');

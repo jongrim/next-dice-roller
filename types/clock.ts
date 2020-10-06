@@ -4,3 +4,8 @@ export interface Clock {
   segments: number;
   name: string;
 }
+
+export interface PositionedClock extends Clock {
+  top: number;
+  left: number;
+}

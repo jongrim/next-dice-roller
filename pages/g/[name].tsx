@@ -37,12 +37,13 @@ import Navbar from '../../components/Navbar';
 import UserSetupModal from '../../components/UserSetupModal';
 import GraphicRollHistory from '../../components/GraphicRollHistory';
 import DiceSidebar from '../../components/DiceSidebar';
+import findEmptySpace from '../../utils/findEmptySpace';
 
 import { GraphicDie } from '../../types/dice';
 import useTheme from '../../hooks/useTheme';
 import _Draggable from 'gsap/Draggable';
 import { Icon } from '@iconify/react';
-import { Clock } from '../../types/clock';
+import { Clock, PositionedClock } from '../../types/clock';
 import BetaWarningModal from '../../components/BetaWarningModal';
 import { Img } from '../../types/image';
 
@@ -87,10 +88,16 @@ interface Roll {
   total: number;
   dice: GraphicDie[];
 }
+
+interface PositionedGraphicDie extends GraphicDie {
+  top: number;
+  left: number;
+}
+
 interface GraphicDiceResultsState {
   state: string;
-  dice: GraphicDie[];
-  clocks: Clock[];
+  dice: PositionedGraphicDie[];
+  clocks: PositionedClock[];
   imgs: Img[];
   tokens: Token[];
   rolls: Roll[];
@@ -166,15 +173,26 @@ type DiceEvent =
   | {
       type: 'sync';
       payload: {
-        dice: GraphicDie[];
-        clocks: Clock[];
+        dice: PositionedGraphicDie[];
+        clocks: PositionedClock[];
         imgs: Img[];
         tokens: Token[];
         rolls: Roll[];
       };
     };
 
-const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
+const diceReducer = (
+  state: GraphicDiceResultsState,
+  event: DiceEvent
+): GraphicDiceResultsState => {
+  const getBoxes = () => {
+    const diceboxEl = window.document.getElementById('dicebox');
+    const diceboxRect = diceboxEl.getBoundingClientRect();
+    const childrenBoxes = Array.from(diceboxEl.children).map((el) =>
+      el.getBoundingClientRect()
+    );
+    return { diceboxRect, childrenBoxes };
+  };
   switch (event.type) {
     case 'submit':
       return {
@@ -182,14 +200,32 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         state: diceStates.rolling,
       };
     case 'add-die':
+      const { top: dieTop, left: dieLeft } = findEmptySpace({
+        MIN_HEIGHT: 85,
+        MIN_WIDTH: 85,
+        ...getBoxes(),
+      });
       return {
         ...state,
-        dice: state.dice.concat(event.payload.die),
+        dice: state.dice.concat({
+          ...event.payload.die,
+          top: dieTop,
+          left: dieLeft,
+        }),
       };
     case 'add-token':
+      const { top: tokenTop, left: tokenLeft } = findEmptySpace({
+        MIN_HEIGHT: 35,
+        MIN_WIDTH: 35,
+        ...getBoxes(),
+      });
       return {
         ...state,
-        tokens: state.tokens.concat(event.payload.token),
+        tokens: state.tokens.concat({
+          ...event.payload.token,
+          top: tokenTop,
+          left: tokenLeft,
+        }),
       };
     case 'remove-item':
       return {
@@ -199,9 +235,18 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         tokens: state.tokens.filter(({ id }) => id !== event.payload.id),
       };
     case 'add-clock':
+      const { top: clockTop, left: clockLeft } = findEmptySpace({
+        MIN_HEIGHT: 85,
+        MIN_WIDTH: 145,
+        ...getBoxes(),
+      });
       return {
         ...state,
-        clocks: state.clocks.concat(event.payload.clock),
+        clocks: state.clocks.concat({
+          ...event.payload.clock,
+          top: clockTop,
+          left: clockLeft,
+        }),
       };
     case 'advance-clock':
       return {
@@ -271,7 +316,7 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
         rolls: [...rolls],
       };
     case 'roll':
-      let newDie: GraphicDie;
+      let newDie: PositionedGraphicDie;
       const newDice = state.dice.map((die) => {
         if (die.id === event.payload.id) {
           newDie = {
@@ -298,7 +343,7 @@ const diceReducer = (state: GraphicDiceResultsState, event: DiceEvent) => {
       };
     case 'group-roll':
       const numbers = [...event.payload.randNumbers];
-      const rolledIds: { [index: string]: GraphicDie } = {};
+      const rolledIds: { [index: string]: PositionedGraphicDie } = {};
       const updated = state.dice.map((die) => {
         if (event.payload.items.includes(die.id)) {
           const nextNum = numbers.splice(0, 1);
@@ -505,8 +550,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
           clientId,
           ...rest
         }: {
-          dice: GraphicDie[];
-          clocks: Clock[];
+          dice: PositionedGraphicDie[];
+          clocks: PositionedClock[];
           imgs: Img[];
           tokens: Token[];
           rolls: Roll[];
@@ -582,20 +627,23 @@ export default function GraphicDiceRoom(): React.ReactElement {
           onDragEnd: function () {
             if (selectedItems.length) {
               selectedItems.forEach((id) => {
-                socket.emit('drag', {
-                  dragEvent: {
-                    id,
-                    left: this.endX,
-                    top: this.endY,
-                  },
-                });
+                if (id !== this.target.id) {
+                  socket.emit('drag', {
+                    dragEvent: {
+                      id,
+                      deltaX: this.endX - this.startX,
+                      deltaY: this.endY - this.startY,
+                    },
+                  });
+                }
               });
             }
             socket.emit('drag', {
               dragEvent: {
                 id: this.target.id,
-                left: this.endX,
-                top: this.endY,
+                deltaX: this.endX - this.startX,
+                deltaY: this.endY - this.startY,
+                clientId: CLIENT_ID,
               },
             });
           },
@@ -615,20 +663,23 @@ export default function GraphicDiceRoom(): React.ReactElement {
           onDragEnd: function () {
             if (selectedItems.length) {
               selectedItems.forEach((id) => {
-                socket.emit('drag', {
-                  dragEvent: {
-                    id,
-                    left: this.endX,
-                    top: this.endY,
-                  },
-                });
+                if (id !== this.target.id) {
+                  socket.emit('drag', {
+                    dragEvent: {
+                      id,
+                      deltaX: this.endX - this.startX,
+                      deltaY: this.endY - this.startY,
+                    },
+                  });
+                }
               });
             }
             socket.emit('drag', {
               dragEvent: {
                 id: this.target.id,
-                left: this.endX,
-                top: this.endY,
+                deltaX: this.endX - this.startX,
+                deltaY: this.endY - this.startY,
+                clientId: CLIENT_ID,
               },
             });
           },
@@ -648,20 +699,23 @@ export default function GraphicDiceRoom(): React.ReactElement {
           onDragEnd: function () {
             if (selectedItems.length) {
               selectedItems.forEach((id) => {
-                socket.emit('drag', {
-                  dragEvent: {
-                    id,
-                    left: this.endX,
-                    top: this.endY,
-                  },
-                });
+                if (id !== this.target.id) {
+                  socket.emit('drag', {
+                    dragEvent: {
+                      id,
+                      deltaX: this.endX - this.startX,
+                      deltaY: this.endY - this.startY,
+                    },
+                  });
+                }
               });
             }
             socket.emit('drag', {
               dragEvent: {
                 id: this.target.id,
-                left: this.endX,
-                top: this.endY,
+                deltaX: this.endX - this.startX,
+                deltaY: this.endY - this.startY,
+                clientId: CLIENT_ID,
               },
             });
           },
@@ -674,9 +728,11 @@ export default function GraphicDiceRoom(): React.ReactElement {
   React.useEffect(() => {
     if (socket && Draggable) {
       socket.on('drag', ({ dragEvent }) => {
-        gsap.to(document.getElementById(dragEvent.id), {
-          x: dragEvent.left,
-          y: dragEvent.top,
+        if (dragEvent.clientId === CLIENT_ID) return;
+        const el = document.getElementById(dragEvent.id);
+        gsap.to(el, {
+          x: `+=${dragEvent.deltaX}`,
+          y: `+=${dragEvent.deltaY}`,
           ease: Elastic.easeOut.config(1, 1),
           duration: 0.5,
         });
@@ -835,6 +891,10 @@ export default function GraphicDiceRoom(): React.ReactElement {
               data-selected={selectedItems.includes(token.id)}
               id={token.id}
               key={token.id}
+              style={{
+                top: token.top,
+                left: token.left,
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(token.id);
@@ -932,6 +992,8 @@ interface DieProps extends GraphicDie {
   onSelect: (id: string) => void;
   selected: boolean;
   theme: { colors: { [index: string]: string } };
+  left: number;
+  top: number;
 }
 
 function D4Die({
@@ -943,6 +1005,8 @@ function D4Die({
   selected,
   bgColor,
   theme,
+  left,
+  top,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -961,6 +1025,10 @@ function D4Die({
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
+      }}
+      style={{
+        left,
+        top,
       }}
       onDoubleClick={(e) => roll({ id })}
     >
@@ -986,6 +1054,8 @@ function D6Die({
   selected,
   bgColor,
   theme,
+  left,
+  top,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1004,6 +1074,10 @@ function D6Die({
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
+      }}
+      style={{
+        left,
+        top,
       }}
       onDoubleClick={(e) => roll({ id })}
     >
@@ -1029,6 +1103,8 @@ function D8Die({
   selected,
   bgColor,
   theme,
+  left,
+  top,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1047,6 +1123,10 @@ function D8Die({
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
+      }}
+      style={{
+        left,
+        top,
       }}
       onDoubleClick={(e) => roll({ id })}
     >
@@ -1075,6 +1155,8 @@ function D10Die({
   selected,
   bgColor,
   theme,
+  left,
+  top,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1093,6 +1175,10 @@ function D10Die({
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
+      }}
+      style={{
+        left,
+        top,
       }}
       onDoubleClick={(e) => roll({ id })}
     >
@@ -1133,6 +1219,8 @@ function D12Die({
   selected,
   bgColor,
   theme,
+  left,
+  top,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1151,6 +1239,10 @@ function D12Die({
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
+      }}
+      style={{
+        left,
+        top,
       }}
       onDoubleClick={(e) => roll({ id })}
     >
@@ -1188,6 +1280,8 @@ function D20Die({
   selected,
   bgColor,
   theme,
+  left,
+  top,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1206,6 +1300,10 @@ function D20Die({
       onClick={(e) => {
         e.stopPropagation();
         onSelect(id);
+      }}
+      style={{
+        left,
+        top,
       }}
       onDoubleClick={(e) => roll({ id })}
     >
@@ -1244,6 +1342,8 @@ function DXDie({
   selected,
   bgColor,
   theme,
+  left,
+  top,
 }: DieProps) {
   const el = React.useRef();
   React.useEffect(() => {
@@ -1253,6 +1353,16 @@ function DXDie({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  const getLeftPosition = (length: number) => {
+    switch (length) {
+      case 3:
+        return '34%';
+      case 2:
+        return '37%';
+      default:
+        return '43%';
+    }
+  };
   return (
     <button
       id={id}
@@ -1263,6 +1373,10 @@ function DXDie({
         e.stopPropagation();
         onSelect(id);
       }}
+      style={{
+        left,
+        top,
+      }}
       onDoubleClick={(e) => roll({ id })}
     >
       <div ref={el} style={{ paddingLeft: '2px' }}>
@@ -1271,7 +1385,7 @@ function DXDie({
       <div
         style={{
           position: 'absolute',
-          left: String(curNumber).length > 1 ? '37%' : '43%',
+          left: getLeftPosition(String(curNumber).length),
           top: '35%',
         }}
       >
@@ -1281,13 +1395,15 @@ function DXDie({
             <Icon
               key={`${id}-${i}`}
               icon={getNumberIcon(parseInt(n, 10))}
-              style={{ marginLeft: i === 1 ? '-5px' : '' }}
+              style={{ marginLeft: i > 0 ? '-5px' : '' }}
               // @ts-ignore
               color={theme.colors.text}
             />
           ))}
       </div>
-      <Text fontSize={1}>D{sides}</Text>
+      <Text fontSize={1} color="text">
+        D{sides}
+      </Text>
     </button>
   );
 }
@@ -1297,6 +1413,8 @@ interface ClockProps extends Clock {
   selected: boolean;
   onSelect: (id: string) => void;
   theme: { colors: { [index: string]: string } };
+  left: number;
+  top: number;
 }
 function ClockPie({
   id,
@@ -1306,7 +1424,8 @@ function ClockPie({
   segments,
   selected,
   socket,
-  theme,
+  left,
+  top,
 }: ClockProps) {
   const el = React.useRef();
   const time = (curSegment / segments) * 100;
@@ -1327,12 +1446,12 @@ function ClockPie({
         e.stopPropagation();
         onSelect(id);
       }}
-      sx={{
-        border: selected
-          ? `1px solid ${theme.colors.special}`
-          : '1px solid transparent',
-        boxShadow: selected ? `0 0px 15px ${theme.colors.special}` : 'none',
+      style={{
+        left,
+        top,
       }}
+      className={styles.die}
+      data-selected={selected}
     >
       <Text fontSize={1} color="text">
         {name}

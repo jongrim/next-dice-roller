@@ -3,4 +3,6 @@ export interface Clock {
   curSegment: number;
   segments: number;
   name: string;
+  left: number;
+  top: number;
 }

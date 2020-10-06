@@ -13,6 +13,8 @@ export interface GraphicDie {
   sides: number;
   curNumber: number;
   rollVersion: number;
+  left: number;
+  top: number;
 }
 
 export interface DiceBlock {

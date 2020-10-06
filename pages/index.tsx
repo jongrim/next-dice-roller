@@ -50,8 +50,6 @@ export default function Home() {
         <Flex justifyContent="center" alignItems="center" mt={1}>
           <Button
             variant="primary"
-            minWidth="250px"
-            width="33%"
             height="3rem"
             onClick={() => {
               window
@@ -63,6 +61,21 @@ export default function Home() {
             }}
           >
             Make a new room
+          </Button>
+          <Button
+            ml={2}
+            variant="primary"
+            height="3rem"
+            onClick={() => {
+              window
+                .fetch('/api/new-room', { method: 'POST' })
+                .then((res) => res.json())
+                .then(({ name }) => {
+                  Router.push(`/g/${name}`);
+                });
+            }}
+          >
+            Make a new interactive room (BETA)
           </Button>
         </Flex>
       </Flex>

@@ -311,7 +311,6 @@ export default function Home(): React.ReactChild {
       <Navbar
         connected={connected}
         connectedUsers={connectedUsers}
-        name={name}
         theme={theme}
         toggleTheme={toggleTheme}
       />

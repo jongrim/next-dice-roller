@@ -1607,10 +1607,10 @@
   resolved "https://registry.yarnpkg.com/@iconify/icons-mdi-light/-/icons-mdi-light-1.0.5.tgz#5457c81a1df60240f6a05a7f367c72881774a316"
   integrity sha512-WSeCymN0g9Wf1/6ZPTMNQHIWW78FI/ejFamBztFjkN7rSN9NlWdWqMLd4ktwC7bX27ngjlLqJSSSZd4LUnaQrQ==
 
-"@iconify/icons-mdi@^1.0.140":
-  version "1.0.140"
-  resolved "https://registry.yarnpkg.com/@iconify/icons-mdi/-/icons-mdi-1.0.140.tgz#060a8d482c81adef191c8ce8c15726050064dd6a"
-  integrity sha512-PVMyiI71CQ/LntWst9yo0oNNyYYPT4oF1kxfcaRMOj6E7ORmjPG3R9vd1+1NZNjA0TDPHjNq4nrKY85OwXtQEg==
+"@iconify/icons-mdi@^1.0.142":
+  version "1.0.142"
+  resolved "https://registry.yarnpkg.com/@iconify/icons-mdi/-/icons-mdi-1.0.142.tgz#ea224006d427e195e300387646aab0bd580c0f82"
+  integrity sha512-GY2p96LaFj+LM9SR0qpVnqAqf0RlFEXOB050L3tO4BaoYPFnekEYHGoMx7b3BHpiGd2+XYvOAKZodrFZerGQ2g==
 
 "@iconify/icons-ri@^1.0.1":
   version "1.0.1"

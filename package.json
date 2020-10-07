@@ -8,7 +8,7 @@
     "start": "cross-env NODE_ENV=production node server.js",
     "test": "jest",
     "cy": "yarn run cypress open",
-    "cypress:ci": "yarn start & wait-on http://localhost:3000 && yarn run cypress run"
+    "cypress:ci": "NODE_ENV=test node server.js & wait-on http://localhost:3000 && yarn run cypress run"
   },
   "dependencies": {
     "@iconify/icons-mdi": "^1.0.142",

@@ -24,7 +24,7 @@ import { Input } from '@rebass/forms';
 import invert from '../utils/invertColor';
 import Token from '../types/token';
 
-export const CLIENT_ID = window?.Cypress ? 'cypress' : uuidv4();
+export const CLIENT_ID = process.env.NEXT_PUBLIC_CYPRESS ? 'cypress' : uuidv4();
 
 interface DiceSidebarProps {
   addDie: (die: GraphicDie) => void;

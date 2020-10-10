@@ -50,6 +50,9 @@ import { Img } from '../../types/image';
 import { CLIENT_ID } from '../../components/DiceSidebar';
 import Token from '../../types/token';
 
+const SIDEBAR_WIDTH = 100;
+const NAV_HEIGHT = 60;
+
 const getNumberIcon = (num: number) => {
   switch (num) {
     case 0:
@@ -73,7 +76,7 @@ const getNumberIcon = (num: number) => {
     case 9:
       return number9;
     default:
-      return null;
+      return number0;
   }
 };
 
@@ -188,9 +191,16 @@ const diceReducer = (
   const getBoxes = () => {
     const diceboxEl = window.document.getElementById('dicebox');
     const diceboxRect = diceboxEl.getBoundingClientRect();
-    const childrenBoxes = Array.from(diceboxEl.children).map((el) =>
-      el.getBoundingClientRect()
-    );
+    const childrenBoxes = Array.from(diceboxEl.children).map((el) => {
+      const box = el.getBoundingClientRect();
+      return {
+        id: el.getAttribute('id'),
+        left: box.left,
+        top: box.top,
+        right: box.right,
+        bottom: box.bottom,
+      };
+    });
     return { diceboxRect, childrenBoxes };
   };
   switch (event.type) {
@@ -205,6 +215,7 @@ const diceReducer = (
         MIN_WIDTH: 85,
         ...getBoxes(),
       });
+      console.log({ dieTop, dieLeft });
       return {
         ...state,
         dice: state.dice.concat({
@@ -290,12 +301,27 @@ const diceReducer = (
         imgs: state.imgs.filter(({ id }) => id !== event.payload.id),
       };
     case 'emit-state':
+      const { childrenBoxes } = getBoxes();
+      interface IdObject {
+        id: string;
+      }
+      function updateWithElementPosition<T extends IdObject>(cur: T) {
+        const element = childrenBoxes.find((box) => box.id === cur.id);
+        return {
+          ...cur,
+          left: element.left,
+          top: element.top - NAV_HEIGHT,
+        };
+      }
+      const positionedDice = state.dice.map(updateWithElementPosition);
+      const positionedClocks = state.clocks.map(updateWithElementPosition);
+      const positionedTokens = state.tokens.map(updateWithElementPosition);
       event.payload.socket.emit('sync', {
         clientId: CLIENT_ID,
-        dice: state.dice,
-        clocks: state.clocks,
+        dice: positionedDice,
+        clocks: positionedClocks,
         imgs: state.imgs,
-        tokens: state.tokens,
+        tokens: positionedTokens,
         rolls: state.rolls,
       });
       return state;
@@ -303,11 +329,17 @@ const diceReducer = (
       interface IdObject {
         id: string;
       }
-      const { dice, clocks, imgs, tokens, rolls } = event.payload;
+      const {
+        dice = [],
+        clocks = [],
+        imgs = [],
+        tokens = [],
+        rolls = [],
+      } = event.payload;
       function itemsNotShared<T extends IdObject>(arrA: T[], arrB: T[]): T[] {
         return arrB.filter(({ id }) => !arrA.find(({ id: i }) => id === i));
       }
-      return {
+      const syncedState = {
         ...state,
         dice: state.dice.concat(itemsNotShared(state.dice, dice)),
         clocks: state.clocks.concat(itemsNotShared(state.clocks, clocks)),
@@ -315,6 +347,7 @@ const diceReducer = (
         tokens: state.tokens.concat(itemsNotShared(state.tokens, tokens)),
         rolls: [...rolls],
       };
+      return syncedState;
     case 'roll':
       let newDie: PositionedGraphicDie;
       const newDice = state.dice.map((die) => {
@@ -557,6 +590,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
           rolls: Roll[];
           clientId: string;
         }) => {
+          if (clientId === CLIENT_ID) return;
           dispatch({ type: 'sync', payload: rest });
         }
       );
@@ -631,6 +665,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
                   socket.emit('drag', {
                     dragEvent: {
                       id,
+                      endX: this.endX,
+                      endY: this.endY,
                       deltaX: this.endX - this.startX,
                       deltaY: this.endY - this.startY,
                     },
@@ -641,6 +677,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
             socket.emit('drag', {
               dragEvent: {
                 id: this.target.id,
+                endX: this.endX,
+                endY: this.endY,
                 deltaX: this.endX - this.startX,
                 deltaY: this.endY - this.startY,
                 clientId: CLIENT_ID,
@@ -667,6 +705,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
                   socket.emit('drag', {
                     dragEvent: {
                       id,
+                      endX: this.endX,
+                      endY: this.endY,
                       deltaX: this.endX - this.startX,
                       deltaY: this.endY - this.startY,
                     },
@@ -677,6 +717,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
             socket.emit('drag', {
               dragEvent: {
                 id: this.target.id,
+                endX: this.endX,
+                endY: this.endY,
                 deltaX: this.endX - this.startX,
                 deltaY: this.endY - this.startY,
                 clientId: CLIENT_ID,
@@ -703,6 +745,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
                   socket.emit('drag', {
                     dragEvent: {
                       id,
+                      endX: this.endX,
+                      endY: this.endY,
                       deltaX: this.endX - this.startX,
                       deltaY: this.endY - this.startY,
                     },
@@ -713,6 +757,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
             socket.emit('drag', {
               dragEvent: {
                 id: this.target.id,
+                endX: this.endX,
+                endY: this.endY,
                 deltaX: this.endX - this.startX,
                 deltaY: this.endY - this.startY,
                 clientId: CLIENT_ID,
@@ -731,8 +777,14 @@ export default function GraphicDiceRoom(): React.ReactElement {
         if (dragEvent.clientId === CLIENT_ID) return;
         const el = document.getElementById(dragEvent.id);
         gsap.to(el, {
+          /**
+           * The delta can be used to keep established placement relative to each other.
+           * I can't decide when this is useful versus not. Maybe it should be an alternative?
+           */
           x: `+=${dragEvent.deltaX}`,
           y: `+=${dragEvent.deltaY}`,
+          // x: dragEvent.endX,
+          // y: dragEvent.endY,
           ease: Elastic.easeOut.config(1, 1),
           duration: 0.5,
         });
@@ -885,22 +937,12 @@ export default function GraphicDiceRoom(): React.ReactElement {
             />
           ))}
           {state.tokens.map((token) => (
-            <button
-              className={styles.die}
-              data-selected={selectedItems.includes(token.id)}
-              id={token.id}
+            <DraggableToken
+              token={token}
               key={token.id}
-              style={{
-                top: token.top,
-                left: token.left,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect(token.id);
-              }}
-            >
-              <Icon icon={coinIcon} height="2rem" color={token.bgColor} />
-            </button>
+              selected={selectedItems.includes(token.id)}
+              onSelect={onSelect}
+            />
           ))}
           {selectedItems.length > 0 && (
             <Flex
@@ -985,6 +1027,41 @@ export default function GraphicDiceRoom(): React.ReactElement {
     </ThemeProvider>
   );
 }
+
+function DraggableToken({
+  token,
+  selected,
+  onSelect,
+}: {
+  token: Token;
+  selected: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const { left, top, id, bgColor } = token;
+  const buttonEl = React.useRef();
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
+  return (
+    <button
+      className={styles.die}
+      data-selected={selected}
+      id={id}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(id);
+      }}
+      ref={buttonEl}
+    >
+      <Icon icon={coinIcon} height="2rem" color={bgColor} />
+    </button>
+  );
+}
 interface DieProps extends GraphicDie {
   roll: ({ id: string }) => void;
   rollVersion: number;
@@ -1008,6 +1085,7 @@ function D4Die({
   top,
 }: DieProps) {
   const el = React.useRef();
+  const buttonEl = React.useRef();
   React.useEffect(() => {
     gsap.from(el.current, {
       duration: 1.25,
@@ -1015,6 +1093,14 @@ function D4Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   return (
     <button
       id={id}
@@ -1025,11 +1111,8 @@ function D4Die({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
       onDoubleClick={(e) => roll({ id })}
+      ref={buttonEl}
     >
       <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeTriangle} height="5rem" color={bgColor} />
@@ -1056,14 +1139,23 @@ function D6Die({
   left,
   top,
 }: DieProps) {
-  const el = React.useRef();
+  const diceShapeEl = React.useRef();
+  const buttonEl = React.useRef();
   React.useEffect(() => {
-    gsap.from(el.current, {
+    gsap.from(diceShapeEl.current, {
       duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   return (
     <button
       id={id}
@@ -1074,13 +1166,10 @@ function D6Die({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
       onDoubleClick={(e) => roll({ id })}
+      ref={buttonEl}
     >
-      <div ref={el} style={{ paddingLeft: '2px' }}>
+      <div ref={diceShapeEl} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeSquare} height="5rem" color={bgColor} />
       </div>
       <div style={{ position: 'absolute', left: '42%', top: '42%' }}>
@@ -1106,6 +1195,7 @@ function D8Die({
   top,
 }: DieProps) {
   const el = React.useRef();
+  const buttonEl = React.useRef();
   React.useEffect(() => {
     gsap.from(el.current, {
       duration: 1.25,
@@ -1113,6 +1203,14 @@ function D8Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   return (
     <button
       id={id}
@@ -1123,11 +1221,8 @@ function D8Die({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
       onDoubleClick={(e) => roll({ id })}
+      ref={buttonEl}
     >
       <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={shapeRhombus} height="5rem" color={bgColor} />
@@ -1158,6 +1253,7 @@ function D10Die({
   top,
 }: DieProps) {
   const el = React.useRef();
+  const buttonEl = React.useRef();
   React.useEffect(() => {
     gsap.from(el.current, {
       duration: 1.25,
@@ -1165,6 +1261,14 @@ function D10Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   return (
     <button
       id={id}
@@ -1175,10 +1279,7 @@ function D10Die({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
+      ref={buttonEl}
       onDoubleClick={(e) => roll({ id })}
     >
       <div ref={el} style={{ paddingLeft: '2px' }}>
@@ -1222,6 +1323,7 @@ function D12Die({
   top,
 }: DieProps) {
   const el = React.useRef();
+  const buttonEl = React.useRef();
   React.useEffect(() => {
     gsap.from(el.current, {
       duration: 1.25,
@@ -1229,6 +1331,14 @@ function D12Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   return (
     <button
       id={id}
@@ -1239,10 +1349,7 @@ function D12Die({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
+      ref={buttonEl}
       onDoubleClick={(e) => roll({ id })}
     >
       <div ref={el} style={{ paddingLeft: '3px' }}>
@@ -1283,6 +1390,7 @@ function D20Die({
   top,
 }: DieProps) {
   const el = React.useRef();
+  const buttonEl = React.useRef();
   React.useEffect(() => {
     gsap.from(el.current, {
       duration: 1.25,
@@ -1290,6 +1398,14 @@ function D20Die({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   return (
     <button
       id={id}
@@ -1300,10 +1416,7 @@ function D20Die({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
+      ref={buttonEl}
       onDoubleClick={(e) => roll({ id })}
     >
       <div ref={el} style={{ paddingLeft: '2px' }}>
@@ -1345,6 +1458,7 @@ function DXDie({
   top,
 }: DieProps) {
   const el = React.useRef();
+  const buttonEl = React.useRef();
   React.useEffect(() => {
     gsap.from(el.current, {
       duration: 1.25,
@@ -1352,6 +1466,14 @@ function DXDie({
       ease: Elastic.easeOut.config(1, 1),
     });
   }, [rollVersion]);
+  React.useEffect(() => {
+    gsap.to(buttonEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   const getLeftPosition = (length: number) => {
     switch (length) {
       case 3:
@@ -1372,11 +1494,8 @@ function DXDie({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
       onDoubleClick={(e) => roll({ id })}
+      ref={buttonEl}
     >
       <div ref={el} style={{ paddingLeft: '2px' }}>
         <Icon icon={decagramOutline} height="5rem" color={bgColor} />
@@ -1427,6 +1546,7 @@ function ClockPie({
   top,
 }: ClockProps) {
   const el = React.useRef();
+  const clockEl = React.useRef();
   const time = (curSegment / segments) * 100;
   React.useEffect(() => {
     gsap.to(el.current, {
@@ -1434,6 +1554,14 @@ function ClockPie({
       strokeDasharray: `${time} 100`,
     });
   }, [time]);
+  React.useEffect(() => {
+    gsap.to(clockEl.current, {
+      x: left - SIDEBAR_WIDTH,
+      y: top,
+      duration: 0.25,
+      ease: Elastic.easeOut.config(1, 1),
+    });
+  }, [left, top]);
   return (
     <Flex
       width="5rem"
@@ -1445,12 +1573,9 @@ function ClockPie({
         e.stopPropagation();
         onSelect(id);
       }}
-      style={{
-        left,
-        top,
-      }}
       className={styles.die}
       data-selected={selected}
+      ref={clockEl}
     >
       <Text fontSize={1} color="text">
         {name}

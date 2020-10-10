@@ -7,7 +7,13 @@ export default function findEmptySpace({
   diceboxRect: DOMRect;
   MIN_HEIGHT: number;
   MIN_WIDTH: number;
-  childrenBoxes: DOMRect[];
+  childrenBoxes: {
+    id: string;
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  }[];
 }): { top: number; left: number } {
   if (childrenBoxes.length === 0) {
     return { top: 0, left: diceboxRect.left };
@@ -18,8 +24,13 @@ export default function findEmptySpace({
   let bottom = top + MIN_HEIGHT;
   let left = diceboxRect.left;
   let right = left + MIN_WIDTH;
+  const MAX_LOOPS = 2000;
+  let currentLoop = 0;
   while (!spotFound) {
     spotFound = true;
+    if (currentLoop >= MAX_LOOPS) {
+      break;
+    }
     for (const box of childrenBoxes) {
       if (doOverlap({ box1: box, box2: { top, left, bottom, right } })) {
         if (bottom + MIN_HEIGHT < diceboxRect.bottom) {
@@ -34,6 +45,7 @@ export default function findEmptySpace({
           right += MIN_WIDTH / 4;
         }
         spotFound = false;
+        currentLoop += 1;
         break;
       }
     }

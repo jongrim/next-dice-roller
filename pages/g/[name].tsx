@@ -952,6 +952,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
             >
               <Tooltip arrow title="Roll selected dice">
                 <Button
+                  data-testid={`roll-${selectedItems.length}`}
                   onClick={(e) => {
                     groupRoll(selectedItems, storedUsername);
                     e.stopPropagation();
@@ -1105,6 +1106,7 @@ function D4Die({
     <button
       id={id}
       key={id}
+      data-testid={id}
       data-selected={selected}
       className={styles.die}
       onClick={(e) => {
@@ -1160,6 +1162,7 @@ function D6Die({
     <button
       id={id}
       key={id}
+      data-testid={id}
       data-selected={selected}
       className={styles.die}
       onClick={(e) => {
@@ -1215,6 +1218,7 @@ function D8Die({
     <button
       id={id}
       key={id}
+      data-testid={id}
       data-selected={selected}
       className={styles.die}
       onClick={(e) => {
@@ -1273,6 +1277,7 @@ function D10Die({
     <button
       id={id}
       key={id}
+      data-testid={id}
       data-selected={selected}
       className={styles.die}
       onClick={(e) => {
@@ -1343,6 +1348,7 @@ function D12Die({
     <button
       id={id}
       key={id}
+      data-testid={id}
       data-selected={selected}
       className={styles.die}
       onClick={(e) => {
@@ -1410,6 +1416,7 @@ function D20Die({
     <button
       id={id}
       key={id}
+      data-testid={id}
       data-selected={selected}
       className={styles.die}
       onClick={(e) => {
@@ -1488,6 +1495,7 @@ function DXDie({
     <button
       id={id}
       key={id}
+      data-testid={id}
       data-selected={selected}
       className={styles.die}
       onClick={(e) => {
@@ -1566,6 +1574,7 @@ function ClockPie({
     <Flex
       width="5rem"
       id={id}
+      data-testid={id}
       flexDirection="column"
       alignItems="center"
       m={0}
@@ -1581,6 +1590,7 @@ function ClockPie({
         {name}
       </Text>
       <svg
+        data-testid={`${id}-svg`}
         viewBox="0 0 32 32"
         style={{
           background: 'transparent',
@@ -1605,6 +1615,7 @@ function ClockPie({
       </svg>
       <Flex justifyContent="space-around" alignItems="center">
         <Button
+          data-testid={`${id}-back`}
           variant="ghost"
           p={1}
           sx={{ border: 'none' }}
@@ -1616,6 +1627,7 @@ function ClockPie({
           <Icon icon={arrowLeft} width="2rem" />
         </Button>
         <Button
+          data-testid={`${id}-forward`}
           variant="ghost"
           p={1}
           sx={{ border: 'none' }}

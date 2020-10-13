@@ -18,5 +18,5 @@ workflows:
             - cypress/install
           yarn: true
           executor: cypress/base-14
-          start: yarn start
-          wait-on: https://localhost:3000
+          start: yarn cypress:ci
+          wait-on: http://localhost:3000

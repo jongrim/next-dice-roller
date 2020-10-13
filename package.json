@@ -8,7 +8,7 @@
     "start": "cross-env NODE_ENV=production node server.js",
     "test": "jest",
     "cy": "yarn run cypress open",
-    "cypress:ci": "yarn start & wait-on http://localhost:3000 && yarn run cypress run"
+    "cypress:ci": "cross-env NODE_ENV=test node server.js"
   },
   "dependencies": {
     "@reach/dialog": "^0.10.3",

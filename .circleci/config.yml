@@ -1,19 +1,11 @@
 version: 2.1
 orbs:
   cypress: cypress-io/cypress@1
-jobs:
-  jest/test:
-    steps:
-      - checkout
-      - run: npm run test
 workflows:
   build:
     jobs:
       - cypress/install:
           build: npm run build
-      - jest/test:
-          requires:
-            - cypress/install
       - cypress/run:
           requires:
             - cypress/install

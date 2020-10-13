@@ -51,9 +51,6 @@
     "typescript": "^3.9.5",
     "wait-on": "^5.0.1"
   },
-  "engines": {
-    "node": ">=12.X"
-  },
   "jest": {
     "testMatch": [
       "**/*.test.[jt]s?(x)"

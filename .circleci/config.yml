@@ -5,7 +5,9 @@ workflows:
   build:
     jobs:
       - cypress/install:
-          build: npm run build
+          yarn: true
+          build: yarn build
       - cypress/run:
+          yarn: true
           requires:
             - cypress/install

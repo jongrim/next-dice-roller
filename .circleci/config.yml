@@ -6,6 +6,12 @@ workflows:
     jobs:
       - cypress/install:
           build: npm run build
+      - jest/test:
+          steps:
+            - checkout
+            - run: npm run test
+          requires:
+            - cypress/install
       - cypress/run:
           requires:
             - cypress/install

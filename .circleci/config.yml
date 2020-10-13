@@ -1,0 +1,22 @@
+version: 2.1
+orbs:
+  cypress: cypress-io/cypress@1.26.0
+executors:
+  cypress/base-14:
+    docker:
+      - image: 'cypress/base:14'
+    environment:
+      NODE_ENV: test
+workflows:
+  build:
+    jobs:
+      - cypress/install:
+          build: yarn build
+          yarn: true
+      - cypress/run:
+          requires:
+            - cypress/install
+          yarn: true
+          executor: cypress/base-14
+          start: yarn cypress:ci
+          wait-on: http://localhost:3000

@@ -1,7 +1,6 @@
 describe('Rolling dice', () => {
   beforeEach(() => {
-    cy.visit('http://localhost:3000/');
-    cy.findByText('Make a new interactive room (BETA)').click();
+    cy.visit('http://localhost:3000/g/new-dice');
     cy.findByLabelText('Username').type('cypress');
     cy.findByText('Done').click();
     // beta warning

@@ -1051,6 +1051,7 @@ function DraggableToken({
   return (
     <button
       className={styles.die}
+      data-testid={token.id}
       data-selected={selected}
       id={id}
       onClick={(e) => {

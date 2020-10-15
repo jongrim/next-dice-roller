@@ -42,6 +42,9 @@ app.prepare().then(() => {
       socket.on('drag', (data) => {
         room.emit('drag', data);
       });
+      socket.on('move', (data) => {
+        room.emit('move', data);
+      });
       socket.on('add-g-die', (data) => {
         room.emit('add-g-die', data);
       });
@@ -77,6 +80,15 @@ app.prepare().then(() => {
       });
       socket.on('sync', (data) => {
         room.emit('sync', data);
+      });
+      socket.on('create-stack', (data) => {
+        room.emit('create-stack', data);
+      });
+      socket.on('add-to-stack', (data) => {
+        room.emit('add-to-stack', data);
+      });
+      socket.on('remove-from-stack', (data) => {
+        room.emit('remove-from-stack', data);
       });
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));

@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import { useRouter } from 'next/router';
 import { Box, Button, Flex, Text } from 'rebass';
 import { ThemeProvider } from 'emotion-theming';
-import gsap, { Elastic } from 'gsap';
+import gsap, { Elastic, Expo } from 'gsap';
 import FsLightbox from 'fslightbox-react';
 import { Tooltip } from 'react-tippy';
 import styles from './die.module.css';
@@ -18,7 +18,6 @@ import number6 from '@iconify/icons-ri/number-6';
 import number7 from '@iconify/icons-ri/number-7';
 import number8 from '@iconify/icons-ri/number-8';
 import number9 from '@iconify/icons-ri/number-9';
-
 import shapeTriangle from '@iconify/icons-mdi-light/shape-triangle';
 import shapeSquare from '@iconify/icons-mdi-light/shape-square';
 import shapeRhombus from '@iconify/icons-mdi-light/shape-rhombus';
@@ -29,7 +28,6 @@ import refreshIcon from '@iconify/icons-mdi-light/refresh';
 import deleteIcon from '@iconify/icons-mdi-light/delete';
 import pictureIcon from '@iconify/icons-mdi-light/picture';
 import coinIcon from '@iconify/icons-system-uicons/coin';
-
 import arrowRight from '@iconify/icons-mdi-light/arrow-right';
 import arrowLeft from '@iconify/icons-mdi-light/arrow-left';
 
@@ -50,8 +48,9 @@ import { Img } from '../../types/image';
 import { CLIENT_ID } from '../../components/DiceSidebar';
 import Token from '../../types/token';
 
-const SIDEBAR_WIDTH = 100;
+const SIDEBAR_WIDTH = 88.5;
 const NAV_HEIGHT = 60;
+const DIE_WIDTH = 85;
 
 const getNumberIcon = (num: number) => {
   switch (num) {
@@ -100,6 +99,7 @@ interface PositionedGraphicDie extends GraphicDie {
 interface GraphicDiceResultsState {
   state: string;
   dice: PositionedGraphicDie[];
+  diceMap: { [key: string]: PositionedGraphicDie };
   clocks: PositionedClock[];
   imgs: Img[];
   tokens: Token[];
@@ -110,6 +110,7 @@ interface GraphicDiceResultsState {
 const diceInitialResultsState: GraphicDiceResultsState = {
   state: diceStates.waiting,
   dice: [],
+  diceMap: {},
   clocks: [],
   imgs: [],
   tokens: [],
@@ -123,7 +124,7 @@ type DiceEvent =
     }
   | {
       type: 'add-die';
-      payload: { die: GraphicDie };
+      payload: { die: GraphicDie; roller: string };
     }
   | {
       type: 'remove-item';
@@ -177,6 +178,7 @@ type DiceEvent =
       type: 'sync';
       payload: {
         dice: PositionedGraphicDie[];
+        diceMap: { [key: string]: PositionedGraphicDie };
         clocks: PositionedClock[];
         imgs: Img[];
         tokens: Token[];
@@ -211,18 +213,30 @@ const diceReducer = (
       };
     case 'add-die':
       const { top: dieTop, left: dieLeft } = findEmptySpace({
-        MIN_HEIGHT: 85,
-        MIN_WIDTH: 85,
+        MIN_HEIGHT: DIE_WIDTH,
+        MIN_WIDTH: DIE_WIDTH,
         ...getBoxes(),
       });
-      console.log({ dieTop, dieLeft });
+      const newPositionedDie = {
+        ...event.payload.die,
+        top: dieTop,
+        left: dieLeft,
+      };
       return {
         ...state,
-        dice: state.dice.concat({
-          ...event.payload.die,
-          top: dieTop,
-          left: dieLeft,
-        }),
+        rolls: [
+          {
+            roller: event.payload.roller,
+            total: event.payload.die.curNumber,
+            dice: [event.payload.die],
+          },
+          ...state.rolls,
+        ],
+        dice: state.dice.concat(newPositionedDie),
+        diceMap: {
+          ...state.diceMap,
+          [event.payload.die.id]: newPositionedDie,
+        },
       };
     case 'add-token':
       const { top: tokenTop, left: tokenLeft } = findEmptySpace({
@@ -244,6 +258,9 @@ const diceReducer = (
         dice: state.dice.filter(({ id }) => id !== event.payload.id),
         clocks: state.clocks.filter(({ id }) => id !== event.payload.id),
         tokens: state.tokens.filter(({ id }) => id !== event.payload.id),
+        diceMap: state.diceMap[event.payload.id]
+          ? { ...state.diceMap, [event.payload.id]: undefined }
+          : state.diceMap,
       };
     case 'add-clock':
       const { top: clockTop, left: clockLeft } = findEmptySpace({
@@ -305,6 +322,7 @@ const diceReducer = (
       interface IdObject {
         id: string;
       }
+      const updatedDiceMap = { ...state.diceMap };
       function updateWithElementPosition<T extends IdObject>(cur: T) {
         const element = childrenBoxes.find((box) => box.id === cur.id);
         return {
@@ -313,12 +331,21 @@ const diceReducer = (
           top: element.top - NAV_HEIGHT,
         };
       }
-      const positionedDice = state.dice.map(updateWithElementPosition);
+      childrenBoxes.forEach((box) => {
+        if (updatedDiceMap[box.id]) {
+          updatedDiceMap[box.id] = {
+            ...updatedDiceMap[box.id],
+            left: box.left,
+            top: box.top - NAV_HEIGHT,
+          };
+        }
+      });
       const positionedClocks = state.clocks.map(updateWithElementPosition);
       const positionedTokens = state.tokens.map(updateWithElementPosition);
       event.payload.socket.emit('sync', {
         clientId: CLIENT_ID,
-        dice: positionedDice,
+        dice: state.dice,
+        diceMap: updatedDiceMap,
         clocks: positionedClocks,
         imgs: state.imgs,
         tokens: positionedTokens,
@@ -331,6 +358,7 @@ const diceReducer = (
       }
       const {
         dice = [],
+        diceMap = {},
         clocks = [],
         imgs = [],
         tokens = [],
@@ -342,6 +370,7 @@ const diceReducer = (
       const syncedState = {
         ...state,
         dice: state.dice.concat(itemsNotShared(state.dice, dice)),
+        diceMap: { ...state.diceMap, ...diceMap },
         clocks: state.clocks.concat(itemsNotShared(state.clocks, clocks)),
         imgs: state.imgs.concat(itemsNotShared(state.imgs, imgs)),
         tokens: state.tokens.concat(itemsNotShared(state.tokens, tokens)),
@@ -349,22 +378,19 @@ const diceReducer = (
       };
       return syncedState;
     case 'roll':
-      let newDie: PositionedGraphicDie;
-      const newDice = state.dice.map((die) => {
-        if (die.id === event.payload.id) {
-          newDie = {
-            ...die,
-            curNumber: (event.payload.randNumbers[0] % die.sides) + 1,
-            rollVersion: die.rollVersion + 1,
-          };
-          return newDie;
-        }
-        return die;
-      });
+      const activeDie = state.diceMap[event.payload.id];
+      const newDie = {
+        ...activeDie,
+        curNumber: (event.payload.randNumbers[0] % activeDie.sides) + 1,
+        rollVersion: activeDie.rollVersion + 1,
+      };
       return {
         ...state,
         state: diceStates.finished,
-        dice: newDice,
+        diceMap: {
+          ...state.diceMap,
+          [event.payload.id]: newDie,
+        },
         rolls: [
           {
             roller: event.payload.roller,
@@ -376,35 +402,32 @@ const diceReducer = (
       };
     case 'group-roll':
       const numbers = [...event.payload.randNumbers];
-      const rolledIds: { [index: string]: PositionedGraphicDie } = {};
-      const updated = state.dice.map((die) => {
-        if (event.payload.items.includes(die.id)) {
-          const nextNum = numbers.splice(0, 1);
-          const newDie = {
-            ...die,
-            curNumber: (nextNum[0] % die.sides) + 1,
-            rollVersion: die.rollVersion + 1,
-          };
-          rolledIds[die.id] = newDie;
-          return newDie;
-        }
-        return die;
-      });
-      const rollTotal = updated.reduce((acc, { id }) => {
-        if (rolledIds[id]) {
-          return acc + rolledIds[id].curNumber;
+      const newDiceMap = event.payload.items.reduce(
+        (map, curId) => ({
+          ...map,
+          [curId]: {
+            ...map[curId],
+            curNumber: (numbers.splice(0, 1)[0] % map[curId].sides) + 1,
+            rollVersion: map[curId].rollVersion + 1,
+          },
+        }),
+        state.diceMap
+      );
+      const rollTotal = event.payload.items.reduce((acc, id) => {
+        if (newDiceMap[id]) {
+          return acc + newDiceMap[id].curNumber;
         }
         return acc;
       }, 0);
       return {
         ...state,
         state: diceStates.finished,
-        dice: updated,
+        diceMap: newDiceMap,
         rolls: [
           {
             roller: event.payload.roller,
             total: rollTotal,
-            dice: Object.values(rolledIds),
+            dice: event.payload.items.map((id) => newDiceMap[id]),
           },
           ...state.rolls,
         ],
@@ -535,8 +558,8 @@ export default function GraphicDiceRoom(): React.ReactElement {
           },
         });
       });
-      ioSocket.on('add-g-die', ({ die }) =>
-        dispatch({ type: 'add-die', payload: { die } })
+      ioSocket.on('add-g-die', ({ die, user }) =>
+        dispatch({ type: 'add-die', payload: { die, roller: user } })
       );
       ioSocket.on('remove-items', ({ items }) => {
         items.forEach((id) => {
@@ -584,6 +607,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
           ...rest
         }: {
           dice: PositionedGraphicDie[];
+          diceMap: { [key: string]: PositionedGraphicDie };
           clocks: PositionedClock[];
           imgs: Img[];
           tokens: Token[];
@@ -770,27 +794,113 @@ export default function GraphicDiceRoom(): React.ReactElement {
     }
   }, [Draggable, state.tokens, selectedItems, socket]);
 
-  // Drag things when moved
+  // Drag things when dragged
   React.useEffect(() => {
     if (socket && Draggable) {
       socket.on('drag', ({ dragEvent }) => {
         if (dragEvent.clientId === CLIENT_ID) return;
         const el = document.getElementById(dragEvent.id);
         gsap.to(el, {
-          /**
-           * The delta can be used to keep established placement relative to each other.
-           * I can't decide when this is useful versus not. Maybe it should be an alternative?
-           */
           x: `+=${dragEvent.deltaX}`,
           y: `+=${dragEvent.deltaY}`,
-          // x: dragEvent.endX,
-          // y: dragEvent.endY,
-          ease: Elastic.easeOut.config(1, 1),
+          ease: Expo.easeOut,
+          duration: 0.5,
+        });
+      });
+      socket.on('move', ({ dragEvent }) => {
+        const el = document.getElementById(dragEvent.id);
+        gsap.to(el, {
+          x: dragEvent.endX,
+          y: dragEvent.endY,
+          ease: Expo.easeOut,
           duration: 0.5,
         });
       });
     }
   }, [socket, Draggable]);
+
+  function renderDieBySides(d: string) {
+    const die = state.diceMap[d];
+    switch (die.sides) {
+      case 4:
+        return (
+          <D4Die
+            {...die}
+            roll={roll}
+            onSelect={onSelect}
+            selected={selectedItems.includes(die.id)}
+            key={die.id}
+            theme={theme.value}
+          />
+        );
+      case 6:
+        return (
+          <D6Die
+            {...die}
+            roll={roll}
+            onSelect={onSelect}
+            selected={selectedItems.includes(die.id)}
+            key={die.id}
+            theme={theme.value}
+          />
+        );
+      case 8:
+        return (
+          <D8Die
+            {...die}
+            roll={roll}
+            onSelect={onSelect}
+            selected={selectedItems.includes(die.id)}
+            key={die.id}
+            theme={theme.value}
+          />
+        );
+      case 10:
+        return (
+          <D10Die
+            {...die}
+            roll={roll}
+            onSelect={onSelect}
+            selected={selectedItems.includes(die.id)}
+            key={die.id}
+            theme={theme.value}
+          />
+        );
+      case 12:
+        return (
+          <D12Die
+            {...die}
+            roll={roll}
+            onSelect={onSelect}
+            selected={selectedItems.includes(die.id)}
+            key={die.id}
+            theme={theme.value}
+          />
+        );
+      case 20:
+        return (
+          <D20Die
+            {...die}
+            roll={roll}
+            onSelect={onSelect}
+            selected={selectedItems.includes(die.id)}
+            key={die.id}
+            theme={theme.value}
+          />
+        );
+      default:
+        return (
+          <DXDie
+            {...die}
+            roll={roll}
+            onSelect={onSelect}
+            selected={selectedItems.includes(die.id)}
+            key={die.id}
+            theme={theme.value}
+          />
+        );
+    }
+  }
 
   return (
     <ThemeProvider theme={theme.value}>
@@ -809,8 +919,9 @@ export default function GraphicDiceRoom(): React.ReactElement {
       >
         <DiceSidebar
           addDie={React.useCallback(
-            (die: GraphicDie) => socket?.emit('add-g-die', { die }),
-            [socket]
+            (die: GraphicDie) =>
+              socket?.emit('add-g-die', { die, user: storedUsername }),
+            [socket, storedUsername]
           )}
           addClock={React.useCallback(
             (clock) => socket?.emit('add-clock', { clock }),
@@ -845,87 +956,7 @@ export default function GraphicDiceRoom(): React.ReactElement {
               : undefined,
           }}
         >
-          {state.dice.map((d) => {
-            switch (d.sides) {
-              case 4:
-                return (
-                  <D4Die
-                    {...d}
-                    roll={roll}
-                    onSelect={onSelect}
-                    selected={selectedItems.includes(d.id)}
-                    key={d.id}
-                    theme={theme.value}
-                  />
-                );
-              case 6:
-                return (
-                  <D6Die
-                    {...d}
-                    roll={roll}
-                    onSelect={onSelect}
-                    selected={selectedItems.includes(d.id)}
-                    key={d.id}
-                    theme={theme.value}
-                  />
-                );
-              case 8:
-                return (
-                  <D8Die
-                    {...d}
-                    roll={roll}
-                    onSelect={onSelect}
-                    selected={selectedItems.includes(d.id)}
-                    key={d.id}
-                    theme={theme.value}
-                  />
-                );
-              case 10:
-                return (
-                  <D10Die
-                    {...d}
-                    roll={roll}
-                    onSelect={onSelect}
-                    selected={selectedItems.includes(d.id)}
-                    key={d.id}
-                    theme={theme.value}
-                  />
-                );
-              case 12:
-                return (
-                  <D12Die
-                    {...d}
-                    roll={roll}
-                    onSelect={onSelect}
-                    selected={selectedItems.includes(d.id)}
-                    key={d.id}
-                    theme={theme.value}
-                  />
-                );
-              case 20:
-                return (
-                  <D20Die
-                    {...d}
-                    roll={roll}
-                    onSelect={onSelect}
-                    selected={selectedItems.includes(d.id)}
-                    key={d.id}
-                    theme={theme.value}
-                  />
-                );
-              default:
-                return (
-                  <DXDie
-                    {...d}
-                    roll={roll}
-                    onSelect={onSelect}
-                    selected={selectedItems.includes(d.id)}
-                    key={d.id}
-                    theme={theme.value}
-                  />
-                );
-            }
-          })}
+          {state.dice.map((d) => renderDieBySides(d.id))}
           {state.clocks.map((c) => (
             <ClockPie
               key={c.id}
@@ -1089,7 +1120,7 @@ function D4Die({
   const el = React.useRef();
   const buttonEl = React.useRef();
   React.useEffect(() => {
-    gsap.from(el.current, {
+    gsap.to(el.current, {
       duration: 1.25,
       rotation: 360,
       ease: Elastic.easeOut.config(1, 1),
@@ -1617,9 +1648,18 @@ function ClockPie({
       <Flex justifyContent="space-around" alignItems="center">
         <Button
           data-testid={`${id}-back`}
+          disabled={curSegment === 0}
           variant="ghost"
           p={1}
-          sx={{ border: 'none' }}
+          sx={{
+            border: 'none',
+            ':disabled': {
+              color: 'secondary',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'not-allowed',
+            },
+          }}
           onClick={(e) => {
             e.stopPropagation();
             socket.emit('rewind-clock', { id });
@@ -1629,9 +1669,18 @@ function ClockPie({
         </Button>
         <Button
           data-testid={`${id}-forward`}
+          disabled={curSegment === segments}
           variant="ghost"
           p={1}
-          sx={{ border: 'none' }}
+          sx={{
+            border: 'none',
+            ':disabled': {
+              color: 'secondary',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'not-allowed',
+            },
+          }}
           onClick={(e) => {
             e.stopPropagation();
             socket.emit('advance-clock', { id });

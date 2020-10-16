@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@200;400;600;900&display=swap');
 
+@font-face {
+  font-family: 'QuiteMagicalRegular';
+  src: url('../public/QuiteMagicalRegular.ttf') format('truetype');
+}
+
 html,
 body {
   padding: 0;

@@ -1,0 +1,41 @@
+.wave {
+  background-image: url('../public/wave.svg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.video {
+  box-shadow: 0 2.8px 2.8px rgba(0, 0, 0, 0.034),
+    0 6.7px 6.7px rgba(0, 0, 0, 0.048), 0 12.5px 12.5px rgba(0, 0, 0, 0.06),
+    0 22.3px 22.3px rgba(0, 0, 0, 0.072), 0 41.8px 41.8px rgba(0, 0, 0, 0.086),
+    0 100px 100px rgba(0, 0, 0, 0.12);
+  max-width: 90%;
+}
+
+@media (min-width: 500px) {
+  .video {
+    max-width: 75%;
+  }
+}
+
+@media (min-width: 600px) {
+  .video {
+    max-width: 70%;
+  }
+}
+
+@media (min-width: 700px) {
+  .video {
+    max-width: 65%;
+  }
+}
+
+@media (min-width: 780px) {
+  .video {
+    max-width: 90%;
+  }
+}
+
+.list {
+  color: white;
+}

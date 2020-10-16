@@ -140,7 +140,7 @@ describe('Configuring rolls', () => {
       'b8aa1619-39ac-47af-9fc1-1e4a6681d020',
       '{"rollName":"Kick Some Ass","dice":["6","6"],"modifier":"-1","id":"b8aa1619-39ac-47af-9fc1-1e4a6681d020"}'
     );
-    cy.findByText('Make a new room').click();
+    cy.findByText('Make a new text room').click();
     cy.findByLabelText('Username').type('cypress');
     cy.findByText('Done').click();
   });

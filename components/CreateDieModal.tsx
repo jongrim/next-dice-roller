@@ -92,12 +92,18 @@ const CreateDieModal: React.FC<CreateDieModalProps> = ({
           />
         </Box>
         <Box mt={3}>
-          <Label htmlFor="emit-die-to-room" color="text" fontSize={2}>
+          <Label
+            htmlFor="emit-die-to-room"
+            color="text"
+            fontSize={2}
+            flexDirection={['column', 'row', 'row']}
+          >
             <Checkbox
               color="text"
               id="emit-die-to-room"
               name="emit-die-to-room"
               checked={emitToRoom}
+              sx={{ minWidth: '25px' }}
               onChange={() => {
                 setEmitToRoom((val) => !val);
               }}

@@ -12,7 +12,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={theme}>
       <Head>
         <title>Roll With Me</title>
-        <link rel="icon" href="/favicon.png" />
+        <link rel="icon" href="/TheR.png" />
       </Head>
       <div className="container">
         <Component {...pageProps} />

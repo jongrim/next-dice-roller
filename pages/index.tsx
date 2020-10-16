@@ -196,7 +196,9 @@ export default function Home() {
               muted
               playsInline
               onPlay={() => {
-                const el = document.getElementById('text-room-features');
+                const el = document.getElementById(
+                  'text-room-features'
+                ) as HTMLMediaElement;
                 el.playbackRate = 1.6;
               }}
             />

@@ -43,9 +43,7 @@ const RollHistory: React.FC<{ rolls: Roll[] }> = ({ rolls }) => {
             arrow
             key={`roll-${roll.id}`}
             theme="light"
-            position="bottom"
-            distance={-30}
-            trigger="click"
+            style={{ display: 'inherit' }}
             html={
               <Box
                 data-testid={`roll-history-popup-${i}`}
@@ -60,9 +58,13 @@ const RollHistory: React.FC<{ rolls: Roll[] }> = ({ rolls }) => {
                         </Text>
                         <Flex alignItems="center">
                           <Text color="text" key={`${key}-${i}`}>
-                            {val.results
-                              .map((num) => (num % val.sides) + 1)
-                              .join(', ')}
+                            {key === 'coin'
+                              ? val.results[0] % 2 === 0
+                                ? 'Heads'
+                                : 'Tails'
+                              : val.results
+                                  .map((num) => (num % val.sides) + 1)
+                                  .join(', ')}
                           </Text>
                         </Flex>
                       </Box>
@@ -94,7 +96,11 @@ const RollHistory: React.FC<{ rolls: Roll[] }> = ({ rolls }) => {
                   {roll.name}
                 </Text>
                 <Text color="text" textAlign="center" width={1 / 3}>
-                  {rollTotal(roll)}
+                  {roll.name === 'coin flip'
+                    ? roll.dice.coin?.results[0] % 2 === 0
+                      ? 'Heads'
+                      : 'Tails'
+                    : rollTotal(roll)}
                 </Text>
               </Flex>
             </Box>

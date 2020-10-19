@@ -122,6 +122,19 @@ describe('Rolling dice', () => {
       cy.findByText('Roll Modifier');
     });
   });
+
+  it('can flip a coin', () => {
+    cy.findByText('Flip a Coin').click();
+    cy.findByTestId('roll-results-column').within(() => {
+      cy.findByText(/Heads|Tails/)
+    })
+    cy.findByTestId('roll-history-item-0').within(() => {
+      // roller name
+      cy.findByText(/Heads|Tails/);
+      // roll name
+      cy.findByText('coin flip');
+    });
+  })
 });
 
 describe('Configuring rolls', () => {

@@ -27,7 +27,6 @@ const diceDisplayString = (mode: modes, dice: number[]): string => {
 const RollResultsTable = ({ roll }: { roll: Roll }) => {
   const [mode, setMode] = React.useState<modes>(modes.sum);
   const theme = useTheme();
-
   return (
     <Flex
       data-testid="roll-results-column"
@@ -72,6 +71,13 @@ const RollResultsTable = ({ roll }: { roll: Roll }) => {
       <Flex flexWrap="wrap" justifyContent="space-around">
         {roll &&
           Object.entries(roll.dice).map(([key, val], i) => {
+            if (key === 'coin') {
+              return (
+                <Text color="text" key={roll.name}>
+                  {val.results[0] % 2 === 0 ? 'Heads' : 'Tails'}
+                </Text>
+              );
+            }
             if (val.results.length > 0) {
               return (
                 <Flex
@@ -131,7 +137,7 @@ const RollResultsTable = ({ roll }: { roll: Roll }) => {
           </Text>
         </Flex>
       )}
-      {mode === modes.sum && (
+      {mode === modes.sum && roll?.name !== 'coin flip' && (
         <Flex flexDirection="column" alignItems="center" minWidth={128} mt={2}>
           <Heading color="text" as="h3" fontWeight="200">
             Total

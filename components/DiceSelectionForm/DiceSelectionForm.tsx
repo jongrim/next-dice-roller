@@ -118,14 +118,22 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
         Your Configured Rolls
       </Heading>
       <Box mt={2}>
-        {rolls.length === 0 && (
+        {rolls.length === 0 && storedRollIds.length > 0 && (
           <Box>
             <Text color="text" fontSize={2}>
-              You haven't created any rolls yet.
+              You haven&apos;t loaded your rolls. Click load to add them.
+            </Text>
+          </Box>
+        )}
+        {rolls.length === 0 && storedRollIds.length === 0 && (
+          <Box>
+            <Text color="text" fontSize={2}>
+              You haven&apos;t created any rolls yet.
             </Text>
             <Text color="text" fontSize={2}>
               Configured rolls can be quickly rolled and saved for reuse in
-              future sessions. Click "Create a roll" below to get started.
+              future sessions. Click &quot;Create a roll&quot; below to get
+              started.
             </Text>
           </Box>
         )}
@@ -382,10 +390,10 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
 
 interface VisibilityMachineSchema {
   states: {
-    invisible: {};
-    hiding: {};
-    visible: {};
-    showing: {};
+    invisible: Record<string, unknown>;
+    hiding: Record<string, unknown>;
+    visible: Record<string, unknown>;
+    showing: Record<string, unknown>;
   };
 }
 
@@ -492,7 +500,7 @@ function CustomDice({
           p="0px"
           fontSize={1}
           onClick={(e) => {
-            e.preventDefault;
+            e.preventDefault();
             state.value === 'visible' ? dispatch('HIDE') : dispatch('SHOW');
           }}
         >
@@ -675,7 +683,7 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
           p="0px"
           fontSize={1}
           onClick={(e) => {
-            e.preventDefault;
+            e.preventDefault();
             state.value === 'visible' ? dispatch('HIDE') : dispatch('SHOW');
           }}
         >
@@ -687,7 +695,7 @@ function StandardDice({ updateCustomDiceValue, customDiceValues }) {
           p="0px"
           fontSize={1}
           onClick={(e) => {
-            e.preventDefault;
+            e.preventDefault();
             standardDice.forEach((die) => die.setter(''));
           }}
         >
@@ -716,7 +724,7 @@ function DieInput({
   value,
 }: {
   name: string;
-  setter: Function;
+  setter: (val: string) => void;
   value: string;
 }) {
   return (

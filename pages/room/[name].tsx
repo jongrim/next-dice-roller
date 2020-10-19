@@ -1,7 +1,7 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Flex } from 'rebass';
+import { Box, Button, Flex } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import { ThemeProvider } from 'emotion-theming';
 import * as R from 'ramda';
@@ -67,7 +67,14 @@ type DiceEvent =
         addToCurrentRoll: boolean;
       };
     }
-  | { type: 'roll'; payload: DiceState };
+  | { type: 'roll'; payload: DiceState }
+  | {
+      type: 'coinFlip';
+      payload: {
+        data: number[];
+        roller: string;
+      };
+    };
 
 const diceNeedsMet = (dieBlock: DiceBlock): boolean =>
   dieBlock.results.length === dieBlock.needs;
@@ -175,6 +182,24 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
             ...state.rolls,
           ];
       return { ...event.payload, state: diceStates.finished, rolls: newRolls };
+    case 'coinFlip':
+      const flipId = uuidv4();
+      const coin: DiceInterface = {
+        coin: {
+          results: event.payload.data,
+          needs: 1,
+          sides: 2,
+        },
+      };
+      const flipResult = {
+        ...state,
+        dice: coin,
+        state: diceStates.rolling,
+        roller: event.payload.roller,
+        name: 'coin flip',
+        id: flipId,
+      };
+      return flipResult;
   }
 };
 
@@ -255,6 +280,27 @@ export default function Home(): React.ReactChild {
             name,
             modifier,
             addToCurrentRoll,
+          },
+        });
+      });
+  };
+
+  const flipACoin = () => {
+    window
+      .fetch('/api/random', {
+        method: 'POST',
+        body: JSON.stringify({
+          // figure out the amount of numbers we need - sum of all quantities
+          size: 1,
+        }),
+      })
+      .then((res) => res.json())
+      .then(({ nums }) => {
+        dispatch({
+          type: 'coinFlip',
+          payload: {
+            data: nums.data,
+            roller: storedUsername,
           },
         });
       });
@@ -350,6 +396,9 @@ export default function Home(): React.ReactChild {
                 hasRolls={state.rolls.length > 0}
                 socket={socket}
               />
+              <Button variant="ghost" mt={2} width="100%" onClick={flipACoin}>
+                Flip a Coin
+              </Button>
             </Box>
             <Flex
               as="section"

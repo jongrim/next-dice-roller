@@ -1,0 +1,177 @@
+{
+  "name": "dark",
+  "breakpoints": ["480px", "780px", "1024px"],
+  "space": [0, 4, 8, 12, 16, 24, 32, 64, 96, 128, 192, 256, 512, 640, 768],
+  "fonts": {
+    "body": "'Roboto Slab', serif",
+    "heading": "'Faith Collapsing', 'EB Garamond', serif",
+    "monospace": "Menlo, monospace"
+  },
+  "fontSizes": [11, 12, 14, 16, 20, 24, 32, 48, 64, 96],
+  "fontWeights": {
+    "body": 400,
+    "heading": 900,
+    "bold": 700
+  },
+  "lineHeights": {
+    "body": 1.625,
+    "heading": 1.25
+  },
+  "colors": {
+    "text": "hsl(37, 10%, 85%)",
+    "secondaryText": "hsl(37, 10%, 75%)",
+    "background": "#222",
+    "primary": "hsl(37, 10%, 85%)",
+    "secondary": "#44ffd2",
+    "muted": "hsl(37, 10%, 50%)",
+    "danger": "#C20114",
+    "dangerText": "#F26DF9",
+    "special": "#3075AB"
+  },
+  "forms": {
+    "label": {
+      "fontSize": 3
+    }
+  },
+  "text": {
+    "root": {
+      "fontFamily": "body",
+      "lineHeight": "body",
+      "fontWeight": "body"
+    },
+    "h1": {
+      "color": "text",
+      "fontFamily": "heading",
+      "lineHeight": "heading",
+      "fontWeight": "heading",
+      "fontSize": 8
+    },
+    "h2": {
+      "color": "text",
+      "fontFamily": "heading",
+      "lineHeight": "heading",
+      "fontWeight": "heading",
+      "fontSize": 6
+    },
+    "h3": {
+      "color": "text",
+      "fontFamily": "heading",
+      "lineHeight": "heading",
+      "fontWeight": "heading",
+      "fontSize": 5
+    },
+    "h4": {
+      "color": "text",
+      "fontFamily": "heading",
+      "lineHeight": "heading",
+      "fontWeight": "heading",
+      "fontSize": 4
+    },
+    "h5": {
+      "color": "text",
+      "fontFamily": "heading",
+      "lineHeight": "heading",
+      "fontWeight": "heading",
+      "fontSize": 3
+    },
+    "h6": {
+      "color": "text",
+      "fontFamily": "heading",
+      "lineHeight": "heading",
+      "fontWeight": "heading",
+      "fontSize": 0
+    },
+    "p": {
+      "color": "text",
+      "fontFamily": "body",
+      "fontWeight": "body",
+      "lineHeight": "body",
+      "fontSize": 3
+    },
+    "label": {
+      "color": "secondaryText",
+      "fontFamily": "body",
+      "fontWeight": "body",
+      "lineHeight": "body",
+      "fontSize": 2,
+      "textTransform": "uppercase"
+    },
+    "name": {
+      "color": "text",
+      "fontFamily": "body",
+      "fontWeight": "body",
+      "lineHeight": "body",
+      "fontSize": 4,
+      "textTransform": "uppercase",
+      "border": "none",
+      "padding": 0,
+      "textAlign": "right"
+    },
+    "pronouns": {
+      "color": "text",
+      "fontFamily": "body",
+      "fontWeight": "body",
+      "lineHeight": "body",
+      "fontSize": 2,
+      "textTransform": "uppercase",
+      "border": "none",
+      "padding": 0,
+      "textAlign": "right"
+    },
+    "activeLink": {
+      "fontFamily": "body",
+      "fontWeight": 600,
+      "color": "text",
+      "cursor": "pointer"
+    },
+    "link": {
+      "fontFamily": "body",
+      "color": "secondaryText",
+      "cursor": "pointer"
+    },
+    "pre": {
+      "fontFamily": "monospace",
+      "overflowX": "auto",
+      "code": {
+        "color": "inherit"
+      }
+    },
+    "code": {
+      "fontFamily": "monospace",
+      "fontSize": "inherit"
+    }
+  },
+  "buttons": {
+    "ghost": {
+      "fontFamily": "body",
+      "bg": "transparent",
+      "color": "text",
+      "cursor": "pointer",
+      "border": "1px hsl(37, 10%, 85%) solid",
+      "borderRadius": "2px",
+      ":disabled": {
+        "bg": "transparent",
+        "color": "hsl(37, 10%, 55%)",
+        "cursor": "default",
+        "border": "1px #444 solid"
+      }
+    },
+    "clear": {
+      "fontFamily": "body",
+      "bg": "transparent",
+      "color": "text",
+      "cursor": "pointer"
+    }
+  },
+  "variants": {
+    "card": {
+      "padding": 2,
+      "border": "1px #f6f6f6 solid",
+      "borderRadius": "12px",
+      "boxShadow": "0 0px 0.7px rgba(0, 0, 0, 0.042), 0 0px 1.7px rgba(0, 0, 0, 0.061), 0 0px 3.1px rgba(0, 0, 0, 0.075), 0 0px 5.6px rgba(0, 0, 0, 0.089), 0 0px 10.4px rgba(0, 0, 0, 0.108), 0 0px 25px rgba(0, 0, 0, 0.15)"
+    },
+    "avatar": {
+      "borderRadius": "2px"
+    }
+  }
+}

@@ -5,6 +5,11 @@
   src: url('../public/QuiteMagicalRegular.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Faith Collapsing';
+  src: url('../public/FaithCollapsing.ttf') format('truetype');
+}
+
 html,
 body {
   padding: 0;

@@ -83,94 +83,106 @@ export default function TrophyDark(): React.ReactElement {
               Trophy Dark
             </Heading>
           </Flex>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplate: [
-                '100px 1fr / 1fr',
-                '100px 1fr / 1fr',
-                '1fr / minmax(124px, 1fr) 6fr 1fr',
-              ],
-              gridRowGap: 6,
-            }}
-            height="100%"
-            minHeight="640px"
-          >
-            <Flex
-              flexDirection={['row', 'row', 'column']}
-              justifyContent={['space-around', 'space-around', '']}
-              alignItems={['flex-start', 'flex-start', 'flex-end']}
-              px={4}
-              height="64px"
+          {name ? (
+            <Box
               sx={{
-                position: ['', '', 'sticky', 'sticky'],
-                top: ['', '', '24px', '24px'],
+                display: 'grid',
+                gridTemplate: [
+                  '100px 1fr / 1fr',
+                  '100px 1fr / 1fr',
+                  '1fr / minmax(124px, 1fr) 6fr 1fr',
+                ],
+                gridRowGap: 6,
               }}
+              height="100%"
+              minHeight="640px"
             >
-              <Link href={`/trophy-dark/${name}?tab=table`}>
-                <StyledLink
-                  variant={
-                    router.query.tab === 'table'
-                      ? 'text.activeLink'
-                      : 'text.link'
-                  }
-                  pb={[0, 0, 2]}
-                  sx={(styles) => ({
-                    borderBottom: ['', '', `1px solid ${styles.colors.muted}`],
-                  })}
-                >
-                  Table
-                </StyledLink>
-              </Link>
-              <Link href={`/trophy-dark/${name}?tab=safety`}>
-                <StyledLink
-                  variant={
-                    router.query.tab === 'safety'
-                      ? 'text.activeLink'
-                      : 'text.link'
-                  }
-                  pt={[0, 0, 2]}
-                >
-                  Safety
-                </StyledLink>
-              </Link>
-            </Flex>
-            <Box sx={{ display: 'grid', gridTemplate: '1fr / 1fr' }}>
-              <Box
-                className={styles.tab}
-                data-hidden={router.query.tab !== 'table'}
+              <Flex
+                flexDirection={['row', 'row', 'column']}
+                justifyContent={['space-around', 'space-around', '']}
+                alignItems={['flex-start', 'flex-start', 'flex-end']}
+                px={4}
+                height="64px"
+                sx={{
+                  position: ['', '', 'sticky', 'sticky'],
+                  top: ['', '', '24px', '24px'],
+                }}
               >
+                <Link href={`/trophy-dark/${name}?tab=table`}>
+                  <StyledLink
+                    variant={
+                      router.query.tab === 'table'
+                        ? 'text.activeLink'
+                        : 'text.link'
+                    }
+                    pb={[0, 0, 2]}
+                    sx={(styles) => ({
+                      borderBottom: [
+                        '',
+                        '',
+                        `1px solid ${styles.colors.muted}`,
+                      ],
+                    })}
+                  >
+                    Table
+                  </StyledLink>
+                </Link>
+                <Link href={`/trophy-dark/${name}?tab=safety`}>
+                  <StyledLink
+                    variant={
+                      router.query.tab === 'safety'
+                        ? 'text.activeLink'
+                        : 'text.link'
+                    }
+                    pt={[0, 0, 2]}
+                  >
+                    Safety
+                  </StyledLink>
+                </Link>
+              </Flex>
+              <Box sx={{ display: 'grid', gridTemplate: '1fr / 1fr' }}>
                 <Box
-                  sx={{
-                    display: 'grid',
-                    gridGap: 6,
-                    gridTemplate: [
-                      '1fr / 1fr',
-                      '1fr / 1fr',
-                      '1fr / 1fr',
-                      '1fr / 2fr 1fr',
-                    ],
-                    justifyItems: 'center',
-                    height: '100%',
-                  }}
+                  className={styles.tab}
+                  data-hidden={router.query.tab !== 'table'}
                 >
-                  {role === 'gm' ? (
-                    <div>GM</div>
-                  ) : (
-                    <CharacterCard socket={socket} />
-                  )}
-                  <DiceArea socket={socket} />
-                  <Characters socket={socket} />
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridGap: 6,
+                      gridTemplate: [
+                        '1fr / 1fr',
+                        '1fr / 1fr',
+                        '1fr / 1fr',
+                        '1fr / 2fr 1fr',
+                      ],
+                      justifyItems: 'center',
+                      height: '100%',
+                    }}
+                  >
+                    {role === 'gm' ? (
+                      <div>GM</div>
+                    ) : (
+                      <CharacterCard
+                        socket={socket}
+                        playerName={playerName}
+                        roomName={Array.isArray(name) ? name[0] : name}
+                      />
+                    )}
+                    <DiceArea socket={socket} />
+                    <Characters socket={socket} />
+                  </Box>
+                </Box>
+                <Box
+                  className={styles.tab}
+                  data-hidden={router.query.tab !== 'safety'}
+                >
+                  <LinesAndVeils />
                 </Box>
               </Box>
-              <Box
-                className={styles.tab}
-                data-hidden={router.query.tab !== 'safety'}
-              >
-                <LinesAndVeils />
-              </Box>
             </Box>
-          </Box>
+          ) : (
+            <div>Loading</div>
+          )}
         </Flex>
         <GameEnterModal
           onDone={(name, role) => {

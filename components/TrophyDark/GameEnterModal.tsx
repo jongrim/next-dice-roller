@@ -59,7 +59,7 @@ function GameEnterModal({ onDone }: GameEnterModalProps): React.ReactElement {
               cursor: 'pointer',
             }}
             checked={role === 'player'}
-            onChange={() => console.log('player') || setRole('player')}
+            onChange={() => setRole('player')}
             id="player"
             name="role"
             value="player"

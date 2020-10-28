@@ -13,6 +13,7 @@ export default function Characters({
     Record<
       string,
       {
+        playerName: string;
         clientID: string;
         imageSrc?: string;
         name: string;
@@ -35,7 +36,10 @@ export default function Characters({
         if (data.clientID !== CLIENT_ID) {
           setCharacters((characterMap) => ({
             ...characterMap,
-            [data.clientID]: data,
+            [data.clientID]: {
+              ...characterMap[data.clientID],
+              ...data,
+            },
           }));
         }
       });

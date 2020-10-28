@@ -7,7 +7,23 @@ import { useTheme } from 'emotion-theming';
 import NewImgModal from './NewImgModal';
 import { CLIENT_ID } from '../../pages/trophy-dark/[name]';
 
+const debounce = (cb, timeout: number) => {
+  let minTime: number;
+  let updatedArgs;
+  return function callInFuture(...args) {
+    minTime = Date.now() + timeout;
+    updatedArgs = args;
+    setTimeout(() => {
+      if (Date.now() >= minTime) {
+        cb(...updatedArgs);
+      }
+    }, timeout);
+  };
+};
+
 interface CharacterCardState {
+  playerName: string;
+  hydrated: boolean;
   imageSrc?: string;
   socket?: SocketIOClient.Socket;
   name: string;
@@ -24,9 +40,16 @@ interface CharacterCardState {
 
 type characterCardEvent =
   | {
+      type: 'hydrate';
+      payload: {
+        savedCharacter: CharacterCardState;
+      };
+    }
+  | {
       type: 'setField';
       payload: {
         field:
+          | 'playerName'
           | 'imageSrc'
           | 'name'
           | 'pronouns'
@@ -62,6 +85,11 @@ const characterCardReducer = (
   event: characterCardEvent
 ): CharacterCardState => {
   switch (event.type) {
+    case 'hydrate':
+      return {
+        ...event.payload.savedCharacter,
+        hydrated: true,
+      };
     case 'setSocket':
       return {
         ...state,
@@ -69,6 +97,7 @@ const characterCardReducer = (
       };
     case 'emitUpdate':
       state.socket.emit('character-update', {
+        playerName: state.playerName,
         clientID: CLIENT_ID,
         imageSrc: state.imageSrc,
         name: state.name,
@@ -104,16 +133,6 @@ const characterCardReducer = (
       };
       state.socket.emit('character-update', {
         clientID: CLIENT_ID,
-        imageSrc: increasedRuinState.imageSrc,
-        name: increasedRuinState.name,
-        pronouns: increasedRuinState.pronouns,
-        occupation: increasedRuinState.occupation,
-        background: increasedRuinState.background,
-        ritual1: increasedRuinState.ritual1,
-        ritual2: increasedRuinState.ritual2,
-        ritual3: increasedRuinState.ritual3,
-        drive: increasedRuinState.drive,
-        baseRuin: state.baseRuin,
         ruin: increasedRuinState.ruin,
       });
       return increasedRuinState;
@@ -127,16 +146,6 @@ const characterCardReducer = (
       };
       state.socket.emit('character-update', {
         clientID: CLIENT_ID,
-        imageSrc: decreasedRuinState.imageSrc,
-        name: decreasedRuinState.name,
-        pronouns: decreasedRuinState.pronouns,
-        occupation: decreasedRuinState.occupation,
-        background: decreasedRuinState.background,
-        ritual1: decreasedRuinState.ritual1,
-        ritual2: decreasedRuinState.ritual2,
-        ritual3: decreasedRuinState.ritual3,
-        drive: decreasedRuinState.drive,
-        baseRuin: decreasedRuinState.baseRuin,
         ruin: decreasedRuinState.ruin,
       });
       return decreasedRuinState;
@@ -146,6 +155,8 @@ const characterCardReducer = (
 };
 
 const initialState: CharacterCardState = {
+  hydrated: false,
+  playerName: '',
   imageSrc: '',
   name: '',
   pronouns: '',
@@ -160,9 +171,13 @@ const initialState: CharacterCardState = {
 };
 
 export default function CharacterCard({
+  roomName,
   socket,
+  playerName,
 }: {
+  roomName: string;
   socket: SocketIOClient.Socket;
+  playerName: string;
 }): React.ReactElement {
   const theme = useTheme();
   const [state, dispatch] = React.useReducer(
@@ -170,6 +185,19 @@ export default function CharacterCard({
     initialState
   );
   const [showNewImgModal, setShowNewImgInput] = React.useState(false);
+
+  React.useEffect(() => {
+    dispatch({
+      type: 'setField',
+      payload: { field: 'playerName', value: playerName },
+    });
+  }, [playerName]);
+
+  React.useEffect(() => {
+    const savedCharacter =
+      JSON.parse(window.localStorage.getItem(roomName)) || initialState;
+    dispatch({ type: 'hydrate', payload: { savedCharacter } });
+  }, [roomName]);
 
   React.useEffect(() => {
     if (socket) {
@@ -182,25 +210,21 @@ export default function CharacterCard({
     }
   }, [socket]);
 
-  React.useEffect(() => {
-    const debounce = (cb, timeout: number) => {
-      let minTime: number;
-      let updatedArgs;
-      return function callInFuture(...args) {
-        minTime = Date.now() + timeout;
-        updatedArgs = args;
-        setTimeout(() => {
-          if (Date.now() >= minTime) {
-            cb(updatedArgs);
-          }
-        }, timeout);
-      };
-    };
+  const emitAndSave = React.useCallback(
+    (receivedState: CharacterCardState, receivedName: string) => {
+      dispatch({ type: 'emitUpdate' });
+      const { socket, playerName, hydrated, ...characterState } = receivedState;
+      window.localStorage.setItem(receivedName, JSON.stringify(characterState));
+    },
+    []
+  );
 
-    const cb = debounce(() => dispatch({ type: 'emitUpdate' }), 3000);
-    document.addEventListener('keydown', cb);
-    return () => document.removeEventListener('keypress', cb);
-  }, []);
+  const cb = React.useCallback(debounce(emitAndSave, 3000), [emitAndSave]);
+
+  React.useEffect(() => {
+    cb(state, roomName);
+  }, [state, roomName, cb]);
+
   return (
     <Box width="500px">
       <Box

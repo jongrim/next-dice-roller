@@ -6,6 +6,7 @@ import cameraPlusOutline from '@iconify/icons-mdi/camera-plus-outline';
 import { useTheme } from 'emotion-theming';
 
 export default function StaticCharacterCard({
+  playerName,
   imageSrc,
   name,
   pronouns,
@@ -18,6 +19,7 @@ export default function StaticCharacterCard({
   baseRuin,
   ruin,
 }: {
+  playerName: string;
   imageSrc?: string;
   name: string;
   pronouns: string;
@@ -66,6 +68,7 @@ export default function StaticCharacterCard({
           </Flex>
         )}
         <Flex flexDirection="column" alignItems="flex-end">
+          <Text variant="text.p">Played by {playerName}</Text>
           <Input
             disabled
             variant="text.name"

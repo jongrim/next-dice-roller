@@ -15,7 +15,7 @@ import styles from './trophy.module.css';
 import LinesAndVeils from '../../components/TrophyShared/LinesAndVeils';
 import Characters from '../../components/TrophyDark/Characters';
 
-const CLIENT_ID = uuidv4();
+export const CLIENT_ID = uuidv4();
 
 export default function TrophyDark(): React.ReactElement {
   const router = useRouter();
@@ -90,8 +90,10 @@ export default function TrophyDark(): React.ReactElement {
                 '100px 1fr / 1fr',
                 '1fr / minmax(124px, 1fr) 6fr 1fr',
               ],
+              gridRowGap: 6,
             }}
             height="100%"
+            minHeight="640px"
           >
             <Flex
               flexDirection={['row', 'row', 'column']}
@@ -141,14 +143,18 @@ export default function TrophyDark(): React.ReactElement {
                   sx={{
                     display: 'grid',
                     gridGap: 6,
-                    gridTemplateColumns: ['1fr', '1fr', '1fr', '2fr 1fr'],
+                    gridTemplate: [
+                      '1fr / 1fr',
+                      '1fr / 1fr',
+                      '1fr / 1fr',
+                      '1fr / 2fr 1fr',
+                    ],
                     justifyItems: 'center',
+                    height: '100%',
                   }}
                 >
                   <CharacterCard socket={socket} />
                   <DiceArea socket={socket} />
-                </Box>
-                <Box my={6}>
                   <Characters socket={socket} />
                 </Box>
               </Box>

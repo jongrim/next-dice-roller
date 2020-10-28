@@ -5,6 +5,7 @@ import { Icon } from '@iconify/react';
 import cameraPlusOutline from '@iconify/icons-mdi/camera-plus-outline';
 import { useTheme } from 'emotion-theming';
 import NewImgModal from './NewImgModal';
+import { CLIENT_ID } from '../../pages/trophy-dark/[name]';
 
 interface CharacterCardState {
   imageSrc?: string;
@@ -68,6 +69,7 @@ const characterCardReducer = (
       };
     case 'emitUpdate':
       state.socket.emit('character-update', {
+        clientID: CLIENT_ID,
         imageSrc: state.imageSrc,
         name: state.name,
         pronouns: state.pronouns,
@@ -101,6 +103,7 @@ const characterCardReducer = (
         ruin: event.payload.value,
       };
       state.socket.emit('character-update', {
+        clientID: CLIENT_ID,
         imageSrc: increasedRuinState.imageSrc,
         name: increasedRuinState.name,
         pronouns: increasedRuinState.pronouns,
@@ -123,6 +126,7 @@ const characterCardReducer = (
             : state.baseRuin,
       };
       state.socket.emit('character-update', {
+        clientID: CLIENT_ID,
         imageSrc: decreasedRuinState.imageSrc,
         name: decreasedRuinState.name,
         pronouns: decreasedRuinState.pronouns,

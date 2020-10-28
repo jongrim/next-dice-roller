@@ -1,6 +1,8 @@
 import * as React from 'react';
-import { Box } from 'rebass';
+import { Box, Heading, Text } from 'rebass';
+import { CLIENT_ID } from '../../pages/trophy-dark/[name]';
 import StaticCharacterCard from './StaticCharacterCard';
+import styles from './characters.module.css';
 
 export default function Characters({
   socket,
@@ -11,6 +13,7 @@ export default function Characters({
     Record<
       string,
       {
+        clientID: string;
         imageSrc?: string;
         name: string;
         pronouns: string;
@@ -29,24 +32,36 @@ export default function Characters({
   React.useEffect(() => {
     if (socket) {
       socket.on('character-update', (data) => {
-        setCharacters((characterMap) => ({
-          ...characterMap,
-          [data.name]: data,
-        }));
+        if (data.clientID !== CLIENT_ID) {
+          setCharacters((characterMap) => ({
+            ...characterMap,
+            [data.clientID]: data,
+          }));
+        }
       });
     }
   }, [socket]);
+  const characterArray = Object.values(characters);
   return (
-    <Box
-      px={2}
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))',
-        gridGap: 5,
-      }}
-    >
-      {Object.values(characters).map((character) => (
-        <StaticCharacterCard {...character} key={character.name} />
+    <Box width="500px" my={6}>
+      <Box mb={6}>
+        <Heading
+          as="h2"
+          id="characters"
+          sx={{ gridColumn: '1 / 3' }}
+          variant="text.h2"
+        >
+          Characters
+        </Heading>
+        <hr className={styles.hr} />
+      </Box>
+      {characterArray.length === 0 && (
+        <Text as="p" variant="text.p">
+          Waiting for some brave adventurers...
+        </Text>
+      )}
+      {characterArray.map((character) => (
+        <StaticCharacterCard {...character} key={character.clientID} />
       ))}
     </Box>
   );

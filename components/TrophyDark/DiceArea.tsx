@@ -73,7 +73,10 @@ export default function DiceArea({
   }, [socket]);
 
   return (
-    <Box width="100%">
+    <Box
+      width="100%"
+      sx={{ position: ['', '', '', 'sticky'], top: ['', '', '', '24px'] }}
+    >
       <Box
         sx={{
           display: 'grid',

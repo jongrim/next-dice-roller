@@ -32,7 +32,7 @@ export default function StaticCharacterCard({
 }): React.ReactElement {
   const theme = useTheme();
   return (
-    <Box width="500px">
+    <Box mb={8}>
       <Box
         sx={{
           display: 'grid',
@@ -72,9 +72,6 @@ export default function StaticCharacterCard({
             mb={1}
             value={name}
             placeholder="Character name"
-            onChange={({ target: { value } }) =>
-              dispatch({ type: 'setField', payload: { field: 'name', value } })
-            }
           />
           <Input
             disabled
@@ -98,6 +95,7 @@ export default function StaticCharacterCard({
                 data-value={num}
                 color={num <= baseRuin ? 'muted' : 'text'}
                 sx={(styles) => ({
+                  position: 'relative',
                   borderColor:
                     num <= baseRuin ? styles.colors.muted : styles.colors.text,
                 })}

@@ -20,7 +20,8 @@
   "colors": {
     "text": "hsl(37, 10%, 85%)",
     "secondaryText": "hsl(37, 10%, 75%)",
-    "background": "#222",
+    "background": "hsl(0, 7%, 13%)",
+    "secondaryBackground": "hsl(0, 7%, 10%)",
     "primary": "hsl(37, 10%, 85%)",
     "secondary": "#44ffd2",
     "muted": "hsl(37, 10%, 50%)",

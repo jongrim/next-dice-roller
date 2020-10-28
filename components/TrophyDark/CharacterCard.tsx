@@ -174,6 +174,11 @@ export default function CharacterCard({
   React.useEffect(() => {
     if (socket) {
       dispatch({ type: 'setSocket', payload: { socket } });
+      socket.on('request-sync', (clientID) => {
+        if (clientID !== CLIENT_ID) {
+          dispatch({ type: 'emitUpdate' });
+        }
+      });
     }
   }, [socket]);
 

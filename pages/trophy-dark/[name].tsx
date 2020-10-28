@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import { ThemeProvider } from 'emotion-theming';
-import { Heading, Flex, Box, Link as StyledLink, Text } from 'rebass';
+import { Heading, Flex, Box, Link as StyledLink } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import theme from '../trophyDarkTheme.json';
 
@@ -14,12 +14,15 @@ import { useRouter } from 'next/router';
 import styles from './trophy.module.css';
 import LinesAndVeils from '../../components/TrophyShared/LinesAndVeils';
 import Characters from '../../components/TrophyDark/Characters';
+import GameEnterModal from '../../components/TrophyDark/GameEnterModal';
 
 export const CLIENT_ID = uuidv4();
 
 export default function TrophyDark(): React.ReactElement {
   const router = useRouter();
   const { name } = router.query;
+  const [playerName, setPlayerName] = React.useState('');
+  const [role, setRole] = React.useState('');
   React.useEffect(() => {
     if (router.query.name && !router.query.tab) {
       router.push(`/trophy-dark/${router.query.name}?tab=table`, undefined, {
@@ -41,15 +44,13 @@ export default function TrophyDark(): React.ReactElement {
       });
       ioSocket.on('reconnect', () => {
         console.log('reconnected');
+        ioSocket.emit('request-sync', { clientId: CLIENT_ID });
       });
       ioSocket.on('reconnecting', () => {
         console.log('reconnecting');
       });
       ioSocket.on('reconnect_failed', () => {
         console.log('reconnect failed');
-      });
-      ioSocket.on('sync', () => {
-        // TODO: sync
       });
       ioSocket.emit('request-sync', { clientId: CLIENT_ID });
       return () => {
@@ -153,7 +154,11 @@ export default function TrophyDark(): React.ReactElement {
                     height: '100%',
                   }}
                 >
-                  <CharacterCard socket={socket} />
+                  {role === 'gm' ? (
+                    <div>GM</div>
+                  ) : (
+                    <CharacterCard socket={socket} />
+                  )}
                   <DiceArea socket={socket} />
                   <Characters socket={socket} />
                 </Box>
@@ -167,6 +172,12 @@ export default function TrophyDark(): React.ReactElement {
             </Box>
           </Box>
         </Flex>
+        <GameEnterModal
+          onDone={(name, role) => {
+            setPlayerName(name);
+            setRole(role);
+          }}
+        />
       </ThemeProvider>
     </>
   );

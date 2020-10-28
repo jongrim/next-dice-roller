@@ -9,7 +9,7 @@
 
 .hr:after {
   color: hsl(37, 10%, 85%);
-  background: hsl(0, 7%, 13%);
+  background: hsl(0, 7%, 10%);
   content: '♰';
   position: relative;
   font-size: 28px;

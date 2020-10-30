@@ -39,7 +39,7 @@ export default function StaticCharacterCard({
         sx={{
           display: 'grid',
           gridGap: 4,
-          gridTemplateColumns: '150px 1fr',
+          gridTemplateColumns: ['1fr', '150px 1fr', '150px 1fr', '150px 1fr'],
           alignItems: 'end',
         }}
         mb={6}

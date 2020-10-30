@@ -76,7 +76,7 @@ export default function DiceArea({
     <Box
       width="100%"
       sx={{ position: ['', '', '', 'sticky'], top: ['', '', '', '24px'] }}
-      height="150px"
+      height="225px"
     >
       <Box
         sx={{
@@ -144,7 +144,7 @@ export default function DiceArea({
             })}
           />
         </Box>
-        <Box>
+        <Box height="75px">
           {state.lightDice.map((num, i) => (
             <LightDie num={num} key={`${num}-${i}`} color={theme.colors.text} />
           ))}

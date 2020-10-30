@@ -72,7 +72,7 @@ export default function TrophyDark(): React.ReactElement {
         <Flex
           flexDirection="column"
           minHeight="100vh"
-          width="100vw"
+          minWidth="100vw"
           bg="background"
         >
           <Flex flexDirection="column" mb={6}>
@@ -97,8 +97,9 @@ export default function TrophyDark(): React.ReactElement {
                 gridGap: 6,
               }}
               height="100%"
-              minHeight="640px"
-              mb={6}
+              minHeight="72vh"
+              mb={[0, 0, 0, 6]}
+              p={[4, 4, 0, 0]}
             >
               <Flex
                 flexDirection={['row', 'row', 'column']}
@@ -183,6 +184,7 @@ export default function TrophyDark(): React.ReactElement {
                 <Box
                   className={styles.tab}
                   data-hidden={router.query.tab !== 'safety'}
+                  overflowX="scroll"
                 >
                   <LinesAndVeils socket={socket} />
                 </Box>

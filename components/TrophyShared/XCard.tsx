@@ -30,7 +30,7 @@ export default function XCard({
       alignItems="center"
       ml="auto"
       mr="auto"
-      sx={{ position: ['', '', '', 'sticky'], top: ['', '', '', '175px'] }}
+      sx={{ position: ['', '', '', 'sticky'], top: ['', '', '', '250px'] }}
     >
       <Button
         width="100%"

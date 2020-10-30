@@ -174,7 +174,12 @@ export default function TrophyDark(): React.ReactElement {
                       />
                     )}
                     {role === '' && <Box />}
-                    <Box>
+                    <Box
+                      sx={{
+                        position: ['', '', '', 'sticky'],
+                        top: ['', '', '', '0'],
+                      }}
+                    >
                       <DiceArea socket={socket} />
                       <XCard socket={socket} />
                     </Box>

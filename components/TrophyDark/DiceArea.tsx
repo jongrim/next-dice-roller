@@ -61,7 +61,7 @@ export default function DiceArea({
   );
   const [lightDiceCount, setLightDiceCount] = React.useState('');
   const [darkDiceCount, setDarkDiceCount] = React.useState('');
-  const theme = useTheme();
+  const theme: { colors: { text: string } } = useTheme();
 
   React.useEffect(() => {
     if (socket) {

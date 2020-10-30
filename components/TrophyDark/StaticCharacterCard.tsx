@@ -32,7 +32,7 @@ export default function StaticCharacterCard({
   baseRuin: number;
   ruin: number;
 }): React.ReactElement {
-  const theme = useTheme();
+  const theme: { colors: { text: string } } = useTheme();
   return (
     <Box mb={8}>
       <Box

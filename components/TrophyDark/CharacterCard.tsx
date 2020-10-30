@@ -180,7 +180,7 @@ export default function CharacterCard({
   socket: SocketIOClient.Socket;
   playerName: string;
 }): React.ReactElement {
-  const theme = useTheme();
+  const theme: { colors: { text: string } } = useTheme();
   const [state, dispatch] = React.useReducer(
     characterCardReducer,
     initialState

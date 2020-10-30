@@ -50,6 +50,32 @@ export default function GM({
         Safety
       </Heading>
       <hr className={hrStyles.hr} />
+      <Text variant="text.p" mt={6} mb={4}>
+        This application includes digital tools for two safety tools: Lines and
+        Veils, and the X-Card. Use of these, and any other desired safety tools
+        is encouraged. The{' '}
+        <StyledLink
+          variant="text.paragraphLink"
+          href="https://drive.google.com/drive/folders/114jRmhzBpdqkAlhmveis0nmW73qkAZCj"
+        >
+          TTRPG Safety Toolkit
+        </StyledLink>{' '}
+        by{' '}
+        <StyledLink
+          href="https://twitter.com/KiennaS"
+          variant="text.paragraphLink"
+        >
+          Kienna Shaw
+        </StyledLink>{' '}
+        and{' '}
+        <StyledLink
+          href="https://twitter.com/jl_nicegirl"
+          variant="text.paragraphLink"
+        >
+          Lauren Bryant-Monk
+        </StyledLink>{' '}
+        contains excellent resources for using safety tools in your games.
+      </Text>
       <Heading variant="text.h3" mt={6} mb={4}>
         Lines and Veils
       </Heading>
@@ -61,6 +87,15 @@ export default function GM({
         tab to enter lines, veils, items of enthusiam, or items that should be
         asked about first. Notes can be entered for each and data is synced
         across users.
+      </Text>
+      <Heading variant="text.h3" mt={6} mb={4}>
+        X-Card
+      </Heading>
+      <Text variant="text.p">
+        The app has an x-card that is displayed below the Light and Dark dice.
+        To play the x-card, anyone may click it which will prompt everyone to
+        stop and discuss the content being x-carded. The x-card must be
+        acknowledged before the game can continue.
       </Text>
       <Heading id="SRD" variant="text.h2" mt={7} mb={4}>
         SRD
@@ -74,12 +109,15 @@ export default function GM({
         and ask the GM and the other players what could possibly go wrong. Then
         gather 6-sided dice. Take one light-colored die if the task is something
         your character would be able to do because of one of their Skills. Take
-        another light die for accepting a Devil&apos;s Bargain from another
-        player or the GM. Devil&apos;s Bargains are described in the following
-        section. Add a dark-colored die if you are willing to risk your
-        character&apos;s mind or body in order to succeed. You must include this
-        die whenever your character performs a Ritual. Roll the dice. If your
-        highest die is a:
+        another light die for accepting a{' '}
+        <StyledLink href="#devilsBargain" variant="text.paragraphLink">
+          Devil&apos;s Bargain
+        </StyledLink>{' '}
+        from another player or the GM. Devil&apos;s Bargains are described in
+        the following section. Add a dark-colored die if you are willing to risk
+        your character&apos;s mind or body in order to succeed. You must include
+        this die whenever your character performs a Ritual. Roll the dice. If
+        your highest die is a:
       </Text>
       <Box
         sx={(styles) => ({
@@ -128,9 +166,12 @@ export default function GM({
       </Box>
       <Text variant="text.p">
         If you included a dark die and it rolled equal to or higher than your
-        highest light die, it counts as a Ruin Roll as described under Ruin
-        Roll. If you are unhappy with your roll, you may add an additional dark
-        die to your dice and re-roll. You can keep adding more dark dice and
+        highest light die, it counts as a Ruin Roll as described under{' '}
+        <StyledLink href="#ruinRoll" variant="text.paragraphLink">
+          Ruin Roll
+        </StyledLink>
+        . If you are unhappy with your roll, you may add an additional dark die
+        to your dice and re-roll. You can keep adding more dark dice and
         re-rolling. You cannot re-roll when a dark die is the highest die in
         your roll. If you use a Risk Roll to try to defeat a monster in
         hand-to-hand combat, you will die. Instead, roll to hide, roll to
@@ -139,7 +180,7 @@ export default function GM({
         example, to fight your way past it), be clear about what you want from
         the fight, then roll normally.
       </Text>
-      <Heading variant="text.h3" mt={6} mb={4}>
+      <Heading id="devilsBargain" variant="text.h3" mt={6} mb={4}>
         Devil&apos;s Bargains
       </Heading>
       <Text variant="text.p" mb={2}>
@@ -165,7 +206,7 @@ export default function GM({
         proposed Devil&apos;s Bargain, especially if it would also impact their
         character.
       </Text>
-      <Heading variant="text.h3" mt={6} mb={4}>
+      <Heading id="ruinRoll" variant="text.h3" mt={6} mb={4}>
         Ruin Roll
       </Heading>
       <Text variant="text.p" mb={2}>

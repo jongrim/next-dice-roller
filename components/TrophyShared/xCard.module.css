@@ -1,0 +1,14 @@
+.xCard {
+  position: absolute;
+  height: 160px;
+  width: 120px;
+  transition: all 0.25s ease-in-out;
+}
+
+.xCardPlayed {
+  position: absolute;
+  top: 5%;
+  left: 32%;
+  height: 75vh;
+  width: 35vw;
+}

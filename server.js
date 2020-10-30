@@ -94,8 +94,13 @@ app.prepare().then(() => {
         room.emit('update-note', data);
       });
       socket.on('syncLinesAndVeils', (data) => {
-        console.log('sending sync data', data);
         room.emit('syncLinesAndVeils', data);
+      });
+      socket.on('play-x-card', (data) => {
+        room.emit('play-x-card', data);
+      });
+      socket.on('dismiss-x-card', (data) => {
+        room.emit('dismiss-x-card', data);
       });
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));

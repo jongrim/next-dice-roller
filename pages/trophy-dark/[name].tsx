@@ -16,6 +16,7 @@ import LinesAndVeils from '../../components/TrophyShared/LinesAndVeils';
 import Characters from '../../components/TrophyDark/Characters';
 import GameEnterModal from '../../components/TrophyDark/GameEnterModal';
 import GM from '../../components/TrophyDark/GM';
+import XCard from '../../components/TrophyShared/XCard';
 
 export const CLIENT_ID = uuidv4();
 
@@ -172,7 +173,10 @@ export default function TrophyDark(): React.ReactElement {
                       />
                     )}
                     {role === '' && <Box />}
-                    <DiceArea socket={socket} />
+                    <Box>
+                      <DiceArea socket={socket} />
+                      <XCard socket={socket} />
+                    </Box>
                     <Characters socket={socket} />
                   </Box>
                 </Box>
@@ -233,7 +237,15 @@ export default function TrophyDark(): React.ReactElement {
             </Box>
             <Box>
               <Link href="/">
-                <StyledLink variant="text.activeLink">Roll With Me</StyledLink>
+                <StyledLink
+                  variant="text.activeLink"
+                  sx={{
+                    fontFamily: 'QuiteMagicalRegular, Poppins',
+                    fontSize: '36px',
+                  }}
+                >
+                  Roll With Me
+                </StyledLink>
               </Link>
             </Box>
           </Box>

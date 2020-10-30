@@ -87,8 +87,8 @@ const characterCardReducer = (
   switch (event.type) {
     case 'hydrate':
       return {
-        ...state,
         ...event.payload.savedCharacter,
+        ...state,
         hydrated: true,
       };
     case 'setSocket':

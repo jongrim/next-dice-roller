@@ -208,6 +208,9 @@ export default function CharacterCard({
           dispatch({ type: 'emitUpdate' });
         }
       });
+      setInterval(() => {
+        socket.emit('heartbeat', { clientId: CLIENT_ID });
+      }, 5000);
     }
   }, [socket]);
 

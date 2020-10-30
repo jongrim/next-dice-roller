@@ -102,6 +102,9 @@ app.prepare().then(() => {
       socket.on('dismiss-x-card', (data) => {
         room.emit('dismiss-x-card', data);
       });
+      socket.on('heartbeat', (data) => {
+        room.emit('heartbeat', data);
+      });
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));
         room.emit('update-users', roomUsers);

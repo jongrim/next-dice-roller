@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Box, Heading, Text } from 'rebass';
 import { CLIENT_ID } from '../../pages/trophy-dark/[name]';
 import StaticCharacterCard from './StaticCharacterCard';
-import styles from './characters.module.css';
+import styles from './hr.module.css';
 
 export default function Characters({
   socket,
@@ -14,7 +14,7 @@ export default function Characters({
       string,
       {
         playerName: string;
-        clientID: string;
+        clientId: string;
         imageSrc?: string;
         name: string;
         pronouns: string;
@@ -33,11 +33,11 @@ export default function Characters({
   React.useEffect(() => {
     if (socket) {
       socket.on('character-update', (data) => {
-        if (data.clientID !== CLIENT_ID) {
+        if (data.clientId !== CLIENT_ID) {
           setCharacters((characterMap) => ({
             ...characterMap,
-            [data.clientID]: {
-              ...characterMap[data.clientID],
+            [data.clientId]: {
+              ...characterMap[data.clientId],
               ...data,
             },
           }));
@@ -47,7 +47,7 @@ export default function Characters({
   }, [socket]);
   const characterArray = Object.values(characters);
   return (
-    <Box width="500px" my={6}>
+    <Box width="100%" my={6}>
       <Box mb={6}>
         <Heading
           as="h2"
@@ -65,7 +65,7 @@ export default function Characters({
         </Text>
       )}
       {characterArray.map((character) => (
-        <StaticCharacterCard {...character} key={character.clientID} />
+        <StaticCharacterCard {...character} key={character.clientId} />
       ))}
     </Box>
   );

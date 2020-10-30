@@ -84,6 +84,19 @@ app.prepare().then(() => {
       socket.on('character-update', (data) => {
         room.emit('character-update', data);
       });
+      socket.on('addItem', (data) => {
+        room.emit('addItem', data);
+      });
+      socket.on('updateClassification', (data) => {
+        room.emit('updateClassification', data);
+      });
+      socket.on('update-note', (data) => {
+        room.emit('update-note', data);
+      });
+      socket.on('syncLinesAndVeils', (data) => {
+        console.log('sending sync data', data);
+        room.emit('syncLinesAndVeils', data);
+      });
       socket.on('disconnecting', (reason) => {
         updateUsers(roomUsers.filter(({ id }) => id !== socket.id));
         room.emit('update-users', roomUsers);

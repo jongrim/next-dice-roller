@@ -1,9 +1,23 @@
 import * as React from 'react';
 import { Box, Button, Text } from 'rebass';
 import { Radio as RebassRadio, Label, Input } from '@rebass/forms';
-import { v4 as uuidv4 } from 'uuid';
+import { CLIENT_ID } from '../../pages/trophy-dark/[name]';
 
-const itemFactory = (label) => ({ label, id: uuidv4(), notes: '' });
+const debounce = (cb, timeout: number) => {
+  let minTime: number;
+  let updatedArgs;
+  return function callInFuture(...args) {
+    minTime = Date.now() + timeout;
+    updatedArgs = args;
+    setTimeout(() => {
+      if (Date.now() >= minTime) {
+        cb(...updatedArgs);
+      }
+    }, timeout);
+  };
+};
+
+const itemFactory = (label: string): Item => ({ label, id: label });
 
 const Radio = (props) => (
   <RebassRadio
@@ -28,11 +42,11 @@ interface Item {
   id: string;
   label: string;
   classification?: classification;
-  notes?: string;
 }
 
 interface LinesAndVeils {
-  items: Item[];
+  items: Record<string, Item>;
+  socket?: SocketIOClient.Socket;
 }
 
 type linesAndVeilsEvents =
@@ -45,8 +59,15 @@ type linesAndVeilsEvents =
       payload: { id: string; classification: classification };
     }
   | {
-      type: 'updateNote';
-      payload: { id: string; note: string };
+      type: 'addSocket';
+      payload: { socket: SocketIOClient.Socket };
+    }
+  | {
+      type: 'emitLinesAndVeilsSync';
+    }
+  | {
+      type: 'sync';
+      payload: { items: Record<string, Item> };
     };
 
 const linesAndVeilsReducer = (
@@ -55,30 +76,39 @@ const linesAndVeilsReducer = (
 ): LinesAndVeils => {
   switch (event.type) {
     case 'addItem':
-      return { items: state.items.concat(event.payload.item) };
+      return {
+        socket: state.socket,
+        items: {
+          ...state.items,
+          [event.payload.item.label]: itemFactory(event.payload.item.label),
+        },
+      };
     case 'updateClassification':
       return {
-        items: state.items.map((item) => {
-          if (item.id === event.payload.id) {
-            return {
-              ...item,
-              classification: event.payload.classification,
-            };
-          }
-          return item;
-        }),
+        socket: state.socket,
+        items: {
+          ...state.items,
+          [event.payload.id]: {
+            ...state.items[event.payload.id],
+            classification: event.payload.classification,
+          },
+        },
       };
-    case 'updateNote':
+    case 'addSocket':
       return {
-        items: state.items.map((item) => {
-          if (item.id === event.payload.id) {
-            return {
-              ...item,
-              notes: event.payload.note,
-            };
-          }
-          return item;
-        }),
+        ...state,
+        socket: event.payload.socket,
+      };
+    case 'emitLinesAndVeilsSync':
+      state.socket.emit('syncLinesAndVeils', {
+        clientId: CLIENT_ID,
+        items: state.items,
+      });
+      return state;
+    case 'sync':
+      return {
+        ...state,
+        items: event.payload.items,
       };
     default:
       return state;
@@ -111,15 +141,51 @@ const initialLinesAndVeils: LinesAndVeils = {
     'Covid-19 / pandemics',
     "Celebrating others' misery",
     'Bystanders seriously hurt',
-  ].map(itemFactory),
+  ].reduce((acc, cur) => {
+    const item = itemFactory(cur);
+    return {
+      ...acc,
+      [cur]: item,
+    };
+  }, {}),
 };
 
-export default function LinesAndVeils(): React.ReactElement {
+export default function LinesAndVeils({
+  socket,
+}: {
+  socket: SocketIOClient.Socket;
+}): React.ReactElement {
   const [state, dispatch] = React.useReducer(
     linesAndVeilsReducer,
     initialLinesAndVeils
   );
   const [newItemLabel, setNewItemLabel] = React.useState('');
+  React.useEffect(() => {
+    if (socket) {
+      dispatch({ type: 'addSocket', payload: { socket } });
+      socket.on('addItem', (event) => {
+        if (event.clientId !== CLIENT_ID) {
+          dispatch(event);
+        }
+      });
+      socket.on('updateClassification', (event) => {
+        if (event.clientId !== CLIENT_ID) {
+          dispatch(event);
+        }
+      });
+      socket.on('request-sync', ({ clientId }) => {
+        if (clientId !== CLIENT_ID) {
+          dispatch({ type: 'emitLinesAndVeilsSync' });
+        }
+      });
+      socket.on('syncLinesAndVeils', ({ clientId, items }) => {
+        if (clientId !== CLIENT_ID) {
+          dispatch({ type: 'sync', payload: { items } });
+        }
+      });
+    }
+  }, [socket]);
+
   return (
     <Box
       px={4}
@@ -212,7 +278,7 @@ export default function LinesAndVeils(): React.ReactElement {
       >
         Notes
       </Text>
-      {state.items.map((item) => (
+      {Object.values(state.items).map((item) => (
         <React.Fragment key={item.id}>
           <Label htmlFor={item.label} variant="text.label">
             {item.label}
@@ -229,6 +295,14 @@ export default function LinesAndVeils(): React.ReactElement {
               name={item.label}
               value={`${item.label}-line`}
               onChange={() => {
+                socket?.emit('updateClassification', {
+                  clientId: CLIENT_ID,
+                  type: 'updateClassification',
+                  payload: {
+                    id: item.id,
+                    classification: 'line',
+                  },
+                });
                 dispatch({
                   type: 'updateClassification',
                   payload: { id: item.id, classification: 'line' },
@@ -247,12 +321,20 @@ export default function LinesAndVeils(): React.ReactElement {
               id={`${item.label}-veil`}
               name={item.label}
               value={`${item.label}-veil`}
-              onChange={() =>
+              onChange={() => {
+                socket?.emit('updateClassification', {
+                  clientId: CLIENT_ID,
+                  type: 'updateClassification',
+                  payload: {
+                    id: item.id,
+                    classification: 'veil',
+                  },
+                });
                 dispatch({
                   type: 'updateClassification',
                   payload: { id: item.id, classification: 'veil' },
-                })
-              }
+                });
+              }}
             />
           </Label>
           <Label
@@ -266,12 +348,20 @@ export default function LinesAndVeils(): React.ReactElement {
               id={`${item.label}-ask`}
               name={item.label}
               value={`${item.label}-ask`}
-              onChange={() =>
+              onChange={() => {
+                socket?.emit('updateClassification', {
+                  clientId: CLIENT_ID,
+                  type: 'updateClassification',
+                  payload: {
+                    id: item.id,
+                    classification: 'ask',
+                  },
+                });
                 dispatch({
                   type: 'updateClassification',
                   payload: { id: item.id, classification: 'ask' },
-                })
-              }
+                });
+              }}
             />
           </Label>
           <Label
@@ -285,30 +375,23 @@ export default function LinesAndVeils(): React.ReactElement {
               id={`${item.label}-consent`}
               name={item.label}
               value={`${item.label}-consent`}
-              onChange={() =>
+              onChange={() => {
+                socket?.emit('updateClassification', {
+                  clientId: CLIENT_ID,
+                  type: 'updateClassification',
+                  payload: {
+                    id: item.id,
+                    classification: 'consent',
+                  },
+                });
                 dispatch({
                   type: 'updateClassification',
                   payload: { id: item.id, classification: 'consent' },
-                })
-              }
+                });
+              }}
             />
           </Label>
-          <Input
-            id={`${item.label}-note`}
-            name={`${item.label}-note`}
-            value={item.notes}
-            variant="text.p"
-            sx={(styles) => ({
-              border: 'none',
-              borderBottom: `1px solid ${styles.colors.text}`,
-            })}
-            onChange={({ target }) => {
-              dispatch({
-                type: 'updateNote',
-                payload: { id: item.id, note: target.value },
-              });
-            }}
-          />
+          <NoteField label={item.id} socket={socket} />
         </React.Fragment>
       ))}
       <Input
@@ -334,6 +417,11 @@ export default function LinesAndVeils(): React.ReactElement {
           gridColumn: '6 / 6',
         }}
         onClick={() => {
+          socket?.emit('addItem', {
+            clientId: CLIENT_ID,
+            type: 'addItem',
+            payload: { item: itemFactory(newItemLabel) },
+          });
           dispatch({
             type: 'addItem',
             payload: { item: itemFactory(newItemLabel) },
@@ -346,3 +434,104 @@ export default function LinesAndVeils(): React.ReactElement {
     </Box>
   );
 }
+
+interface NoteFieldState {
+  value: string;
+  socket?: SocketIOClient.Socket;
+}
+
+type NoteFieldEvents =
+  | {
+      type: 'update';
+      payload: {
+        value: string;
+      };
+    }
+  | {
+      type: 'emit';
+      payload: {
+        label: string;
+      };
+    }
+  | {
+      type: 'addSocket';
+      payload: {
+        socket: SocketIOClient.Socket;
+      };
+    };
+
+const valueReducer = (state: NoteFieldState, event: NoteFieldEvents) => {
+  switch (event.type) {
+    case 'addSocket':
+      return {
+        ...state,
+        socket: event.payload.socket,
+      };
+    case 'update':
+      return {
+        ...state,
+        value: event.payload.value,
+      };
+    case 'emit':
+      state.socket?.emit('update-note', {
+        clientId: CLIENT_ID,
+        noteLabel: event.payload.label,
+        value: state.value,
+      });
+      return state;
+  }
+};
+
+const NoteField = ({
+  label,
+  socket,
+}: {
+  label: string;
+  socket: SocketIOClient.Socket;
+}): React.ReactElement => {
+  const [state, dispatch] = React.useReducer(valueReducer, { value: '' });
+  const emitNoteChange = React.useCallback(
+    debounce((value) => {
+      socket?.emit('update-note', {
+        clientId: CLIENT_ID,
+        noteLabel: label,
+        value,
+      });
+    }, 2500),
+    [socket, label]
+  );
+
+  React.useEffect(() => {
+    if (socket) {
+      dispatch({ type: 'addSocket', payload: { socket } });
+      socket.on('update-note', ({ clientId, noteLabel, value }) => {
+        if (clientId !== CLIENT_ID) {
+          if (noteLabel === label) {
+            dispatch({ type: 'update', payload: { value } });
+          }
+        }
+      });
+      socket.on('request-sync', ({ clientId }) => {
+        if (clientId !== CLIENT_ID) {
+          dispatch({ type: 'emit', payload: { label } });
+        }
+      });
+    }
+  }, [socket, label]);
+  return (
+    <Input
+      id={`${label}-note`}
+      name={`${label}-note`}
+      value={state.value}
+      variant="text.p"
+      sx={(styles) => ({
+        border: 'none',
+        borderBottom: `1px solid ${styles.colors.text}`,
+      })}
+      onChange={({ target: { value } }) => {
+        dispatch({ type: 'update', payload: { value } });
+        emitNoteChange(value);
+      }}
+    />
+  );
+};

@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import { ThemeProvider } from 'emotion-theming';
-import { Heading, Flex, Box, Link as StyledLink } from 'rebass';
+import { Heading, Flex, Box, Link as StyledLink, Text } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import theme from '../trophyDarkTheme.json';
 
@@ -15,6 +15,7 @@ import styles from './trophy.module.css';
 import LinesAndVeils from '../../components/TrophyShared/LinesAndVeils';
 import Characters from '../../components/TrophyDark/Characters';
 import GameEnterModal from '../../components/TrophyDark/GameEnterModal';
+import GM from '../../components/TrophyDark/GM';
 
 export const CLIENT_ID = uuidv4();
 
@@ -92,10 +93,11 @@ export default function TrophyDark(): React.ReactElement {
                   '100px 1fr / 1fr',
                   '1fr / minmax(124px, 1fr) 6fr 1fr',
                 ],
-                gridRowGap: 6,
+                gridGap: 6,
               }}
               height="100%"
               minHeight="640px"
+              mb={6}
             >
               <Flex
                 flexDirection={['row', 'row', 'column']}
@@ -148,7 +150,7 @@ export default function TrophyDark(): React.ReactElement {
                   <Box
                     sx={{
                       display: 'grid',
-                      gridGap: 6,
+                      gridGap: 4,
                       gridTemplate: [
                         '1fr / 1fr',
                         '1fr / 1fr',
@@ -159,15 +161,17 @@ export default function TrophyDark(): React.ReactElement {
                       height: '100%',
                     }}
                   >
-                    {role === 'gm' ? (
-                      <div>GM</div>
-                    ) : (
+                    {role === 'gm' && (
+                      <GM roomName={Array.isArray(name) ? name[0] : name} />
+                    )}
+                    {role === 'player' && (
                       <CharacterCard
                         socket={socket}
                         playerName={playerName}
                         roomName={Array.isArray(name) ? name[0] : name}
                       />
                     )}
+                    {role === '' && <Box />}
                     <DiceArea socket={socket} />
                     <Characters socket={socket} />
                   </Box>
@@ -176,13 +180,63 @@ export default function TrophyDark(): React.ReactElement {
                   className={styles.tab}
                   data-hidden={router.query.tab !== 'safety'}
                 >
-                  <LinesAndVeils />
+                  <LinesAndVeils socket={socket} />
                 </Box>
               </Box>
             </Box>
           ) : (
-            <div>Loading</div>
+            <Flex justifyContent="center" alignItems="center" height="70vh">
+              <Heading variant="Heading.h2">Loading</Heading>
+            </Flex>
           )}
+          <Box
+            p={4}
+            sx={(styles) => ({
+              borderTop: `1px solid ${styles.colors.muted}`,
+            })}
+          >
+            <Box sx={{ textAlign: 'center' }} mb={4}>
+              <Text variant="text.footer">
+                This work is based on{' '}
+                <StyledLink
+                  variant="text.paragraphLink"
+                  href="https://trophyrpg.com"
+                >
+                  Trophy
+                </StyledLink>
+                , product of Jesse Ross and Hedgemaze Press, and licensed for
+                our use under the{' '}
+                <StyledLink
+                  variant="text.paragraphLink"
+                  href="https://creativecommons.org/licenses/by/4.0/"
+                >
+                  Creative Commons Attribution 4.0 License
+                </StyledLink>
+                . Trophy is adapted from Cthulhu Dark with permission of Graham
+                Walmsley. Trophy is also based on{' '}
+                <StyledLink
+                  variant="text.paragraphLink"
+                  href="http://www.bladesinthedark.com/"
+                >
+                  Blades in the Dark
+                </StyledLink>
+                , product of One Seven Design, developed and authored by John
+                Harper, and licensed for our use under the{' '}
+                <StyledLink
+                  variant="text.paragraphLink"
+                  href="http://creativecommons.org/licenses/by/3.0/"
+                >
+                  Creative Commons Attribution 3.0 Unported license
+                </StyledLink>
+                .
+              </Text>
+            </Box>
+            <Box>
+              <Link href="/">
+                <StyledLink variant="text.activeLink">Roll With Me</StyledLink>
+              </Link>
+            </Box>
+          </Box>
         </Flex>
         <GameEnterModal
           onDone={(name, role) => {

@@ -88,6 +88,13 @@
       "lineHeight": "body",
       "fontSize": 3
     },
+    "footer": {
+      "color": "secondaryText",
+      "fontFamily": "body",
+      "fontWeight": "body",
+      "lineHeight": "body",
+      "fontSize": 2
+    },
     "label": {
       "color": "secondaryText",
       "fontFamily": "body",
@@ -128,6 +135,13 @@
       "fontFamily": "body",
       "color": "secondaryText",
       "cursor": "pointer"
+    },
+    "paragraphLink": {
+      "fontFamily": "body",
+      "color": "text",
+      "cursor": "pointer",
+      "textDecoration": "underline dotted",
+      "textDecorationThickness": "2px"
     },
     "pre": {
       "fontFamily": "monospace",

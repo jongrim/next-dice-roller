@@ -116,7 +116,8 @@ export default function StaticCharacterCard({
         <Label as="label" htmlFor="occupation" variant="text.label">
           Occupation
         </Label>
-        <Input
+        <Textarea
+          rows={1}
           disabled
           variant="text.p"
           id="occupation"
@@ -126,6 +127,7 @@ export default function StaticCharacterCard({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
       </Box>
@@ -133,7 +135,8 @@ export default function StaticCharacterCard({
         <Label as="label" htmlFor="background" variant="text.label">
           Background
         </Label>
-        <Input
+        <Textarea
+          rows={1}
           disabled
           variant="text.p"
           id="background"
@@ -143,12 +146,14 @@ export default function StaticCharacterCard({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
       </Box>
       <Box mb={6}>
         <Text variant="text.label">Rituals</Text>
-        <Input
+        <Textarea
+          rows={1}
           disabled
           variant="text.p"
           id="ritual-1"
@@ -159,9 +164,11 @@ export default function StaticCharacterCard({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
-        <Input
+        <Textarea
+          rows={1}
           disabled
           variant="text.p"
           id="ritual-2"
@@ -172,9 +179,11 @@ export default function StaticCharacterCard({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
-        <Input
+        <Textarea
+          rows={1}
           disabled
           variant="text.p"
           id="ritual-3"
@@ -185,6 +194,7 @@ export default function StaticCharacterCard({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
       </Box>

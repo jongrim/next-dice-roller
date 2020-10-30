@@ -76,6 +76,7 @@ export default function DiceArea({
     <Box
       width="100%"
       sx={{ position: ['', '', '', 'sticky'], top: ['', '', '', '24px'] }}
+      height="150px"
     >
       <Box
         sx={{

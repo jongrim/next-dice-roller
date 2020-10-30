@@ -87,6 +87,7 @@ const characterCardReducer = (
   switch (event.type) {
     case 'hydrate':
       return {
+        ...state,
         ...event.payload.savedCharacter,
         hydrated: true,
       };
@@ -98,7 +99,7 @@ const characterCardReducer = (
     case 'emitUpdate':
       state.socket.emit('character-update', {
         playerName: state.playerName,
-        clientID: CLIENT_ID,
+        clientId: CLIENT_ID,
         imageSrc: state.imageSrc,
         name: state.name,
         pronouns: state.pronouns,
@@ -132,7 +133,7 @@ const characterCardReducer = (
         ruin: event.payload.value,
       };
       state.socket.emit('character-update', {
-        clientID: CLIENT_ID,
+        clientId: CLIENT_ID,
         ruin: increasedRuinState.ruin,
       });
       return increasedRuinState;
@@ -145,7 +146,7 @@ const characterCardReducer = (
             : state.baseRuin,
       };
       state.socket.emit('character-update', {
-        clientID: CLIENT_ID,
+        clientId: CLIENT_ID,
         ruin: decreasedRuinState.ruin,
       });
       return decreasedRuinState;
@@ -202,8 +203,8 @@ export default function CharacterCard({
   React.useEffect(() => {
     if (socket) {
       dispatch({ type: 'setSocket', payload: { socket } });
-      socket.on('request-sync', (clientID) => {
-        if (clientID !== CLIENT_ID) {
+      socket.on('request-sync', ({ clientId }) => {
+        if (clientId !== CLIENT_ID) {
           dispatch({ type: 'emitUpdate' });
         }
       });
@@ -226,7 +227,7 @@ export default function CharacterCard({
   }, [state, roomName, cb]);
 
   return (
-    <Box width="500px">
+    <Box width="100%">
       <Box
         sx={{
           display: 'grid',
@@ -344,7 +345,7 @@ export default function CharacterCard({
         <Label as="label" htmlFor="occupation" variant="text.label">
           Occupation
         </Label>
-        <Input
+        <Textarea
           variant="text.p"
           id="occupation"
           value={state.occupation}
@@ -355,10 +356,12 @@ export default function CharacterCard({
             })
           }
           px={0}
+          rows={1}
           sx={(styles) => ({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
       </Box>
@@ -366,7 +369,7 @@ export default function CharacterCard({
         <Label as="label" htmlFor="background" variant="text.label">
           Background
         </Label>
-        <Input
+        <Textarea
           variant="text.p"
           id="background"
           value={state.background}
@@ -377,16 +380,18 @@ export default function CharacterCard({
             })
           }
           px={0}
+          rows={1}
           sx={(styles) => ({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
       </Box>
       <Box mb={6}>
         <Text variant="text.label">Rituals</Text>
-        <Input
+        <Textarea
           variant="text.p"
           id="ritual-1"
           value={state.ritual1}
@@ -398,13 +403,15 @@ export default function CharacterCard({
           }
           px={0}
           mb={1}
+          rows={1}
           sx={(styles) => ({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
-        <Input
+        <Textarea
           variant="text.p"
           id="ritual-2"
           value={state.ritual2}
@@ -416,13 +423,15 @@ export default function CharacterCard({
           }
           px={0}
           mb={1}
+          rows={1}
           sx={(styles) => ({
             color: 'text',
             border: 'none',
             borderBottom: `1px solid ${styles.colors.text}`,
+            resize: 'vertical',
           })}
         />
-        <Input
+        <Textarea
           variant="text.p"
           id="ritual-3"
           value={state.ritual3}
@@ -434,6 +443,7 @@ export default function CharacterCard({
           }
           px={0}
           mb={1}
+          rows={1}
           sx={(styles) => ({
             color: 'text',
             border: 'none',
@@ -454,6 +464,7 @@ export default function CharacterCard({
           px={0}
           mb={1}
           variant="text.p"
+          rows={2}
           sx={(styles) => ({
             color: 'text',
             border: 'none',

@@ -26,9 +26,22 @@ export default function Characters({
         drive: string;
         baseRuin: number;
         ruin: number;
+        lastSeenTime: number;
       }
     >
   >({});
+
+  const [characterHeartbeats, setCharacterHeartbeats] = React.useState<
+    { clientId: string; lastSeenTime: number }[]
+  >([]);
+
+  const deleteCharacter = (clientId: string) => {
+    setCharacters((characterMap) => {
+      const newMap = { ...characterMap };
+      delete newMap[clientId];
+      return newMap;
+    });
+  };
 
   React.useEffect(() => {
     if (socket) {
@@ -41,10 +54,35 @@ export default function Characters({
               ...data,
             },
           }));
+          setCharacterHeartbeats((cur) => [
+            ...cur,
+            { clientId: data.clientId, lastSeenTime: Date.now() },
+          ]);
+        }
+      });
+      socket.on('heartbeat', ({ clientId }) => {
+        if (clientId !== CLIENT_ID) {
+          setCharacterHeartbeats((cur) =>
+            cur.map((beat) => {
+              if (beat.clientId === clientId) {
+                return { clientId: clientId, lastSeenTime: Date.now() };
+              }
+              return beat;
+            })
+          );
         }
       });
     }
   }, [socket]);
+
+  React.useEffect(() => {
+    characterHeartbeats.forEach((beat) => {
+      if (beat.lastSeenTime < Date.now() - 7000) {
+        deleteCharacter(beat.clientId);
+      }
+    });
+  }, [characterHeartbeats]);
+
   const characterArray = Object.values(characters);
   return (
     <Box width="100%" my={6}>

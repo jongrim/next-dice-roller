@@ -156,6 +156,20 @@
     }
   },
   "buttons": {
+    "primary": {
+      "fontFamily": "body",
+      "bg": "text",
+      "color": "background",
+      "cursor": "pointer",
+      "border": "1px hsl(37, 10%, 85%) solid",
+      "borderRadius": "2px",
+      ":disabled": {
+        "bg": "transparent",
+        "color": "hsl(37, 10%, 55%)",
+        "cursor": "default",
+        "border": "1px #444 solid"
+      }
+    },
     "ghost": {
       "fontFamily": "body",
       "bg": "transparent",

@@ -75,8 +75,11 @@ export default function DiceArea({
   return (
     <Box
       width="100%"
-      sx={{ position: ['', '', '', 'sticky'], top: ['', '', '', '24px'] }}
-      height="225px"
+      sx={{
+        position: ['', '', '', 'sticky'],
+        top: ['', '', '', '24px'],
+        zIndex: 2,
+      }}
     >
       <Box
         sx={{
@@ -98,7 +101,6 @@ export default function DiceArea({
             step="1"
             min="0"
             max="5"
-            width={130}
             sx={(styles) => ({
               color: 'text',
               border: 'none',
@@ -127,7 +129,6 @@ export default function DiceArea({
             step="1"
             min="0"
             max="5"
-            width={130}
             sx={(styles) => ({
               color: 'text',
               border: 'none',
@@ -144,21 +145,11 @@ export default function DiceArea({
             })}
           />
         </Box>
-        <Box height="75px">
-          {state.lightDice.map((num, i) => (
-            <LightDie num={num} key={`${num}-${i}`} color={theme.colors.text} />
-          ))}
-        </Box>
-        <Box>
-          {state.darkDice.map((num, i) => (
-            <DarkDie num={num} key={`${num}-${i}`} color={theme.colors.text} />
-          ))}
-        </Box>
-      </Box>
-      <Flex justifyContent="center">
         <Button
+          sx={{
+            gridColumn: '1 / -1',
+          }}
           variant="clear"
-          mt={3}
           fontSize={4}
           onClick={() => {
             window
@@ -178,7 +169,17 @@ export default function DiceArea({
         >
           Roll
         </Button>
-      </Flex>
+        <Flex height="75px">
+          {state.lightDice.map((num, i) => (
+            <LightDie num={num} key={`${num}-${i}`} color={theme.colors.text} />
+          ))}
+        </Flex>
+        <Flex>
+          {state.darkDice.map((num, i) => (
+            <DarkDie num={num} key={`${num}-${i}`} color={theme.colors.text} />
+          ))}
+        </Flex>
+      </Box>
     </Box>
   );
 }

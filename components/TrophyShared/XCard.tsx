@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Button, Flex, Heading, Text } from 'rebass';
 import { Dialog } from '@reach/dialog';
 import { useTheme } from 'emotion-theming';
+import { Tooltip } from 'react-tippy';
 
 export default function XCard({
   socket,
@@ -9,7 +10,6 @@ export default function XCard({
   socket: SocketIOClient.Socket;
 }): React.ReactElement {
   const [played, setPlayed] = React.useState(false);
-  const el = React.useRef();
   React.useEffect(() => {
     if (socket) {
       socket.on('play-x-card', () => {
@@ -32,15 +32,17 @@ export default function XCard({
       mr="auto"
       sx={{ position: ['', '', '', 'sticky'], top: ['', '', '', '250px'] }}
     >
-      <Button
-        width="100%"
-        variant="ghost"
-        height="100%"
-        fontSize={9}
-        onClick={() => socket?.emit('play-x-card')}
-      >
-        X
-      </Button>
+      <Tooltip arrow title="Click to play the x-card" position="bottom">
+        <Button
+          width="100%"
+          variant="ghost"
+          height="100%"
+          fontSize={9}
+          onClick={() => socket?.emit('play-x-card')}
+        >
+          X
+        </Button>
+      </Tooltip>
       <XCardModal
         isOpen={played}
         onDone={() => socket?.emit('dismiss-x-card')}

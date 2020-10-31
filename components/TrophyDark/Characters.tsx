@@ -4,6 +4,28 @@ import { CLIENT_ID } from '../../pages/trophy-dark/[name]';
 import StaticCharacterCard from './StaticCharacterCard';
 import styles from './hr.module.css';
 
+function useInterval(callback: Function, delay?: number | null) {
+  const savedCallback = React.useRef<Function>();
+
+  // Remember the latest callback.
+  React.useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  React.useEffect(() => {
+    function tick() {
+      if (savedCallback && savedCallback.current) {
+        savedCallback.current();
+      }
+    }
+    if (delay !== null) {
+      const id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
 export default function Characters({
   socket,
 }: {
@@ -65,7 +87,7 @@ export default function Characters({
           setCharacterHeartbeats((cur) =>
             cur.map((beat) => {
               if (beat.clientId === clientId) {
-                return { clientId: clientId, lastSeenTime: Date.now() };
+                return { clientId, lastSeenTime: Date.now() };
               }
               return beat;
             })
@@ -75,13 +97,13 @@ export default function Characters({
     }
   }, [socket]);
 
-  React.useEffect(() => {
+  useInterval(() => {
     characterHeartbeats.forEach((beat) => {
       if (beat.lastSeenTime < Date.now() - 7000) {
         deleteCharacter(beat.clientId);
       }
     });
-  }, [characterHeartbeats]);
+  }, 6000);
 
   const characterArray = Object.values(characters);
   return (

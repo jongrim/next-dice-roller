@@ -398,6 +398,7 @@ export default function LinesAndVeils({
         mt={3}
         width="95%"
         id="new-item-label"
+        aria-label="New item"
         name="new-item-label"
         sx={(styles) => ({
           gridColumn: '1 / 6',
@@ -521,6 +522,7 @@ const NoteField = ({
   return (
     <Input
       id={`${label}-note`}
+      aria-label={`${label} note`}
       name={`${label}-note`}
       value={state.value}
       variant="text.p"

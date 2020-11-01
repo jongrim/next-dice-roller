@@ -187,33 +187,87 @@ export default function DiceArea({
 const DarkDie = ({ num, color }) => {
   switch (num) {
     case 1:
-      return <Icon icon={dice1Outline} color={color} width="4rem" />;
+      return (
+        <Icon
+          data-testid="dark-die"
+          icon={dice1Outline}
+          color={color}
+          width="4rem"
+        />
+      );
     case 2:
-      return <Icon icon={dice2Outline} color={color} width="4rem" />;
+      return (
+        <Icon
+          data-testid="dark-die"
+          icon={dice2Outline}
+          color={color}
+          width="4rem"
+        />
+      );
     case 3:
-      return <Icon icon={dice3Outline} color={color} width="4rem" />;
+      return (
+        <Icon
+          data-testid="dark-die"
+          icon={dice3Outline}
+          color={color}
+          width="4rem"
+        />
+      );
     case 4:
-      return <Icon icon={dice4Outline} color={color} width="4rem" />;
+      return (
+        <Icon
+          data-testid="dark-die"
+          icon={dice4Outline}
+          color={color}
+          width="4rem"
+        />
+      );
     case 5:
-      return <Icon icon={dice5Outline} color={color} width="4rem" />;
+      return (
+        <Icon
+          data-testid="dark-die"
+          icon={dice5Outline}
+          color={color}
+          width="4rem"
+        />
+      );
     case 6:
-      return <Icon icon={dice6Outline} color={color} width="4rem" />;
+      return (
+        <Icon
+          data-testid="dark-die"
+          icon={dice6Outline}
+          color={color}
+          width="4rem"
+        />
+      );
   }
 };
 
 const LightDie = ({ num, color }) => {
   switch (num) {
     case 1:
-      return <Icon icon={dice1} color={color} width="4rem" />;
+      return (
+        <Icon data-testid="light-die" icon={dice1} color={color} width="4rem" />
+      );
     case 2:
-      return <Icon icon={dice2} color={color} width="4rem" />;
+      return (
+        <Icon data-testid="light-die" icon={dice2} color={color} width="4rem" />
+      );
     case 3:
-      return <Icon icon={dice3} color={color} width="4rem" />;
+      return (
+        <Icon data-testid="light-die" icon={dice3} color={color} width="4rem" />
+      );
     case 4:
-      return <Icon icon={dice4} color={color} width="4rem" />;
+      return (
+        <Icon data-testid="light-die" icon={dice4} color={color} width="4rem" />
+      );
     case 5:
-      return <Icon icon={dice5} color={color} width="4rem" />;
+      return (
+        <Icon data-testid="light-die" icon={dice5} color={color} width="4rem" />
+      );
     case 6:
-      return <Icon icon={dice6} color={color} width="4rem" />;
+      return (
+        <Icon data-testid="light-die" icon={dice6} color={color} width="4rem" />
+      );
   }
 };

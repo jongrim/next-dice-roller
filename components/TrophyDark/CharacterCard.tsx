@@ -312,6 +312,9 @@ export default function CharacterCard({
                 variant="ghost"
                 key={`ruin-${num}`}
                 data-value={num}
+                data-testid={`ruin-${num}`}
+                data-marked={state.ruin >= num}
+                disabled={num <= state.baseRuin}
                 color={num <= state.baseRuin ? 'muted' : 'text'}
                 sx={(styles) => ({
                   borderColor:
@@ -397,6 +400,7 @@ export default function CharacterCard({
         <Textarea
           variant="text.p"
           id="ritual-1"
+          data-testid="ritual-1"
           value={state.ritual1}
           onChange={({ target: { value } }) =>
             dispatch({
@@ -417,6 +421,7 @@ export default function CharacterCard({
         <Textarea
           variant="text.p"
           id="ritual-2"
+          data-testid="ritual-2"
           value={state.ritual2}
           onChange={({ target: { value } }) =>
             dispatch({
@@ -437,6 +442,7 @@ export default function CharacterCard({
         <Textarea
           variant="text.p"
           id="ritual-3"
+          data-testid="ritual-3"
           value={state.ritual3}
           onChange={({ target: { value } }) =>
             dispatch({

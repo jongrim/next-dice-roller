@@ -11,6 +11,7 @@
     "cypress:ci": "cross-env NODE_ENV=test node server.js"
   },
   "dependencies": {
+    "@aws-amplify/ui-react": "^0.2.26",
     "@iconify/icons-mdi": "^1.0.148",
     "@iconify/icons-mdi-light": "^1.0.5",
     "@iconify/icons-ri": "^1.0.1",
@@ -23,6 +24,7 @@
     "@types/rebass": "^4.0.7",
     "@types/rebass__forms": "^4.0.4",
     "@xstate/react": "^1.0.1",
+    "aws-amplify": "^3.3.6",
     "axios": "^0.20.0",
     "cross-env": "^7.0.2",
     "emotion-theming": "^10.0.27",

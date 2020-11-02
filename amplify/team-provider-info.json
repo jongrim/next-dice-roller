@@ -1,0 +1,22 @@
+{
+    "main": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-rollwithme-main-192103-authRole",
+            "UnauthRoleArn": "arn:aws:iam::298644330995:role/amplify-rollwithme-main-192103-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::298644330995:role/amplify-rollwithme-main-192103-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-rollwithme-main-192103-deployment",
+            "UnauthRoleName": "amplify-rollwithme-main-192103-unauthRole",
+            "StackName": "amplify-rollwithme-main-192103",
+            "StackId": "arn:aws:cloudformation:us-east-1:298644330995:stack/amplify-rollwithme-main-192103/4cb2a2e0-1ca1-11eb-a3b7-0ac2c503da11",
+            "AmplifyAppId": "d1cub9i3pvdib8"
+        },
+        "categories": {
+            "auth": {
+                "rollwithme0840299f": {
+                    "hostedUIProviderCreds": "[{\"ProviderName\":\"Google\",\"client_id\":\"659861203559-5bglgveqpt8fcavfio5o72s8advoi9ui.apps.googleusercontent.com\",\"client_secret\":\"RP17yWVCKuUUdB5sxyGnSF35\"}]"
+                }
+            }
+        }
+    }
+}

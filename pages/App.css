@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@200;400;600;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins&family=Roboto:wght@200;400;600;900&display=swap');
 
 @font-face {
   font-family: 'QuiteMagicalRegular';
@@ -33,4 +33,10 @@ body {
 
 [data-reach-dialog-overlay] {
   z-index: 2000;
+}
+
+:root {
+  --amplify-primary-color: #660099;
+  --amplify-primary-tint: #5f008f;
+  --amplify-primary-shade: #7a00b8;
 }

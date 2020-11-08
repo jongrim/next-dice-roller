@@ -224,7 +224,7 @@ export default function Home() {
         </Box>
         <Box
           height="640px"
-          backgroundColor="hsl(0, 7%, 10%)"
+          backgroundColor="hsl(0, 0%, 15%)"
           color="hsl(37, 10%, 85%)"
           sx={{
             display: 'grid',
@@ -243,7 +243,8 @@ export default function Home() {
           <Image
             src="/TrophyDarkCharacter.png"
             alt="example trophy dark character"
-            height={['215px', '340px', '300px', '400px']}
+            width={['315px', '440px', '500px', '550px']}
+            // height={['215px', '340px', '300px', '400px']}
             sx={{
               boxShadow: `0 2.8px 2.2px rgba(0, 0, 0, 0.02),
                             0 6.7px 5.3px rgba(0, 0, 0, 0.028),

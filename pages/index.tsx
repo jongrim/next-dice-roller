@@ -39,7 +39,7 @@ export default function Home() {
             </Link>
           </Text>
         </Flex>
-        <Box height="560px">
+        <Box height={['740px', '740px', '640px']}>
           <Flex
             height="100%"
             justifyContent="center"
@@ -82,10 +82,10 @@ export default function Home() {
               />
             </Flex>
             <Flex
-              width={['100%', '100%', '560px']}
+              width={['100%', '100%', '100%', '800px']}
               justifyContent={['center', 'space-around', 'space-between']}
               alignItems="center"
-              flexDirection={['column', 'row', 'row']}
+              flexDirection={['column', 'column', 'column', 'row']}
             >
               <Button
                 width="220px"
@@ -105,7 +105,7 @@ export default function Home() {
               </Button>
               <Button
                 width="220px"
-                mt={[2, 0, 0]}
+                mt={[3, 3, 3, 0]}
                 variant="ghost"
                 height="3rem"
                 sx={{ cursor: 'pointer' }}
@@ -120,11 +120,29 @@ export default function Home() {
               >
                 Make a new interactive room (BETA)
               </Button>
+              <Button
+                width="220px"
+                mt={[3, 3, 3, 0]}
+                backgroundColor="hsl(0, 7%, 10%)"
+                color="white"
+                height="3rem"
+                sx={{ cursor: 'pointer' }}
+                onClick={() => {
+                  window
+                    .fetch('/api/new-room', { method: 'POST' })
+                    .then((res) => res.json())
+                    .then(({ name }) => {
+                      Router.push(`/trophy-dark/${name}`);
+                    });
+                }}
+              >
+                Make a new Trophy Dark room
+              </Button>
             </Flex>
           </Flex>
         </Box>
         <Box
-          height="560px"
+          height="640px"
           className={styles.wave}
           sx={{
             display: 'grid',
@@ -202,6 +220,72 @@ export default function Home() {
                 el.playbackRate = 1.6;
               }}
             />
+          </Flex>
+        </Box>
+        <Box
+          height="640px"
+          backgroundColor="hsl(0, 7%, 10%)"
+          color="hsl(37, 10%, 85%)"
+          sx={{
+            display: 'grid',
+            gridGap: 2, // theme.space[3]
+            gridTemplateColumns: [
+              '1fr',
+              '1fr',
+              'minmax(500px, 1fr) 300px',
+              'minmax(650px, 1fr) 1fr',
+            ],
+            gridTemplateRows: ['360px 1fr', '360px 1fr', '1fr', '1fr'],
+            alignItems: 'center',
+            justifyItems: 'center',
+          }}
+        >
+          <Image
+            src="/TrophyDarkCharacter.png"
+            alt="example trophy dark character"
+            height={['215px', '340px', '300px', '400px']}
+            sx={{
+              boxShadow: `0 2.8px 2.2px rgba(0, 0, 0, 0.02),
+                            0 6.7px 5.3px rgba(0, 0, 0, 0.028),
+                            0 12.5px 10px rgba(0, 0, 0, 0.035),
+                            0 22.3px 17.9px rgba(0, 0, 0, 0.042),
+                            0 41.8px 33.4px rgba(0, 0, 0, 0.05),
+                            0 100px 80px rgba(0, 0, 0, 0.07)`,
+            }}
+          />
+          <Flex
+            flexDirection="column"
+            justifyContent="center"
+            pr={4}
+            py={[2, 2, 0]}
+          >
+            <Heading
+              as="h3"
+              color="background"
+              fontWeight="200"
+              alignSelf="center"
+            >
+              Trophy Dark
+            </Heading>
+            <ul>
+              <li className={styles.list}>
+                <Text color="background">
+                  Full featured application with character sheets, dice roller,
+                  and safety tools
+                </Text>
+              </li>
+              <li className={styles.list}>
+                <Text color="background">
+                  Separate GM and Player roles give the user access to the tools
+                  they need to play
+                </Text>
+              </li>
+              <li className={styles.list}>
+                <Text color="background">
+                  Full Trophy SRD included for quick reference
+                </Text>
+              </li>
+            </ul>
           </Flex>
         </Box>
       </Flex>

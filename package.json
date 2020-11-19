@@ -30,7 +30,7 @@
     "fslightbox-react": "^1.5.0",
     "gsap": "^3.5.1",
     "lodash.uniqueid": "^4.0.1",
-    "next": "10.0.1",
+    "next": "10.0.2",
     "ramda": "^0.27.1",
     "random-words": "^1.1.1",
     "react": "16.13.1",

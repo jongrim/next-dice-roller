@@ -13,6 +13,7 @@ const ConfiguredRollListItem = ({
   storedRollIds,
   setStoredRollIds,
   setRolls,
+  socket,
 }) => {
   const [sideMenuOpen, setSideMenuOpen] = React.useState(false);
   return (
@@ -78,6 +79,16 @@ const ConfiguredRollListItem = ({
                 }}
               >
                 Edit
+              </Button>
+              <Button
+                mt={2}
+                type="button"
+                variant="special"
+                onClick={() => {
+                  socket.emit('share-roll', { roll });
+                }}
+              >
+                Send to room
               </Button>
               <Button
                 mt={2}

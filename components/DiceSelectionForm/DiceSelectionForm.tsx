@@ -86,6 +86,17 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
   }, [socket]);
 
   React.useEffect(() => {
+    socket?.on('share-roll', ({ roll }) => {
+      /**
+       * Note: every socket receives this, including the person that emitted it
+       */
+      if (rolls.find((r) => r.id === roll.id)) return;
+      setRolls((cur) => [...cur, roll]);
+    });
+    return () => socket?.removeEventListener('share-roll');
+  }, [socket, rolls]);
+
+  React.useEffect(() => {
     const localRolls = window.localStorage.getItem('rollIds');
     if (localRolls) {
       setStoredRollIds(JSON.parse(localRolls));
@@ -181,6 +192,7 @@ const DiceSelectionForm: React.FC<DiceSelectionFormProps> = ({
             storedRollIds={storedRollIds}
             setStoredRollIds={setStoredRollIds}
             setRolls={setRolls}
+            socket={socket}
           />
         ))}
         <Flex justifyContent="space-between" alignItems="center" mt={3}>

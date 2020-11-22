@@ -1,3 +1,4 @@
+import * as React from 'react';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 
 class MyDocument extends Document {
@@ -9,7 +10,23 @@ class MyDocument extends Document {
   render() {
     return (
       <Html>
-        <Head />
+        <Head>
+          <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-SZSQ2CQS22"
+          ></script>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-SZSQ2CQS22');
+            `,
+            }}
+          ></script>
+        </Head>
         <body>
           <Main />
           <NextScript />

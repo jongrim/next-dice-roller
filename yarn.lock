@@ -614,10 +614,10 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@iconify/icons-mdi-light@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@iconify/icons-mdi-light/-/icons-mdi-light-1.0.5.tgz#5457c81a1df60240f6a05a7f367c72881774a316"
-  integrity sha512-WSeCymN0g9Wf1/6ZPTMNQHIWW78FI/ejFamBztFjkN7rSN9NlWdWqMLd4ktwC7bX27ngjlLqJSSSZd4LUnaQrQ==
+"@iconify/icons-mdi-light@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@iconify/icons-mdi-light/-/icons-mdi-light-1.1.0.tgz#6555398866065686d89d77f986c395fe97f12364"
+  integrity sha512-HXOx7aCh9jHra50GZ5lcYIgPZXgqSVEKZl/AGhZPBOjqdGO7Wz6XdajckVNNiU/vMc3EPl4IF8gx31OZ88Bdmg==
 
 "@iconify/icons-mdi@^1.0.154":
   version "1.0.154"

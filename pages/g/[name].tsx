@@ -402,17 +402,19 @@ const diceReducer = (
       };
     case 'group-roll':
       const numbers = [...event.payload.randNumbers];
-      const newDiceMap = event.payload.items.reduce(
-        (map, curId) => ({
-          ...map,
-          [curId]: {
-            ...map[curId],
-            curNumber: (numbers.splice(0, 1)[0] % map[curId].sides) + 1,
-            rollVersion: map[curId].rollVersion + 1,
-          },
-        }),
-        state.diceMap
-      );
+      const newDiceMap = event.payload.items.reduce((map, curId) => {
+        if (curId.includes('die')) {
+          return {
+            ...map,
+            [curId]: {
+              ...map[curId],
+              curNumber: (numbers.splice(0, 1)[0] % map[curId]?.sides) + 1,
+              rollVersion: map[curId]?.rollVersion + 1,
+            },
+          };
+        }
+        return map;
+      }, state.diceMap);
       const rollTotal = event.payload.items.reduce((acc, id) => {
         if (newDiceMap[id]) {
           return acc + newDiceMap[id].curNumber;
@@ -427,7 +429,9 @@ const diceReducer = (
           {
             roller: event.payload.roller,
             total: rollTotal,
-            dice: event.payload.items.map((id) => newDiceMap[id]),
+            dice: event.payload.items
+              .filter((item) => item.includes('die'))
+              .map((id) => newDiceMap[id]),
           },
           ...state.rolls,
         ],

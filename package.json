@@ -33,7 +33,7 @@
     "next": "10.0.2",
     "ramda": "^0.27.1",
     "random-words": "^1.1.1",
-    "react": "16.13.1",
+    "react": "16.14.0",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "16.13.1",
     "react-tippy": "^1.4.0",

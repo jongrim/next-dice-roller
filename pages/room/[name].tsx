@@ -1,7 +1,7 @@
 import * as React from 'react';
 import io from 'socket.io-client';
 import { useRouter } from 'next/router';
-import { Box, Button, Flex } from 'rebass';
+import { Box, Button, Flex, Text } from 'rebass';
 import { v4 as uuidv4 } from 'uuid';
 import { ThemeProvider } from 'emotion-theming';
 import * as R from 'ramda';
@@ -204,6 +204,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
 };
 
 export default function Home(): React.ReactChild {
+  const [bannerVisible, setBannerVisible] = React.useState(true);
   const router = useRouter();
   const { name } = router.query;
   const [socket, setSocket] = React.useState<SocketIOClient.Socket>(null);
@@ -354,6 +355,37 @@ export default function Home(): React.ReactChild {
 
   return (
     <ThemeProvider theme={theme.value}>
+      {bannerVisible && (
+        <Box
+          width="100%"
+          p="32px 16px"
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 2,
+            textAlign: 'center',
+            boxShadow: `0 0px 2.2px rgba(0, 0, 0, 0.042),
+  0 0px 5.3px rgba(0, 0, 0, 0.061),
+  0 0px 10px rgba(0, 0, 0, 0.075),
+  0 0px 17.9px rgba(0, 0, 0, 0.089),
+  0 0px 33.4px rgba(0, 0, 0, 0.108),
+  0 0px 80px rgba(0, 0, 0, 0.15)`,
+          }}
+          backgroundColor="white"
+        >
+          <Text>
+            There's a{' '}
+            <a href="https://main.d1y92bo115vf7n.amplifyapp.com/">
+              new version
+            </a>{' '}
+            of this app that you can try now!
+          </Text>
+          <Button mt={2} onClick={() => setBannerVisible(false)}>
+            Dismiss
+          </Button>
+        </Box>
+      )}
       <Navbar
         connected={connected}
         connectedUsers={connectedUsers}

@@ -11,7 +11,7 @@
     "cypress:ci": "cross-env NODE_ENV=test node server.js"
   },
   "dependencies": {
-    "@iconify/icons-mdi": "^1.0.154",
+    "@iconify/icons-mdi": "^1.1.4",
     "@iconify/icons-mdi-light": "^1.0.5",
     "@iconify/icons-ri": "^1.0.1",
     "@iconify/icons-system-uicons": "^1.0.0",

@@ -204,7 +204,7 @@ const diceReducer = (state: DiceState, event: DiceEvent): DiceState => {
 };
 
 export default function Home(): React.ReactChild {
-  const [bannerVisible, setBannerVisible] = React.useState(true);
+  const [bannerVisible, setBannerVisible] = React.useState(false);
   const router = useRouter();
   const { name } = router.query;
   const [socket, setSocket] = React.useState<SocketIOClient.Socket>(null);

@@ -39,12 +39,28 @@ export default function Home() {
             </Link>
           </Text>
         </Flex>
-        <Box height={['740px', '740px', '640px']}>
+        <Box height="auto">
+          <Flex flexDirection="column" alignItems="center" px={3}>
+            <Text textAlign="center" mt={6} fontSize="24px" maxWidth="480px">
+              Coming soon!
+              <br />A brand new version of Roll With Me.
+            </Text>
+            <Text textAlign="center" mt={2} maxWidth="600px">
+              I've been hard at work updating the apps and rebuilding the site
+              from the ground up to offer an even better gaming experience. At
+              the beginning of March, this address will be updated to point to
+              the new version. Until then, you can try out the new version at{' '}
+              <Link href="https://next.rollwithme.xyz" color="text">
+                https://next.rollwithme.xyz
+              </Link>
+            </Text>
+          </Flex>
           <Flex
-            height="100%"
+            height="auto"
             justifyContent="center"
             alignItems="center"
             flexDirection="column"
+            my={6}
           >
             <Flex
               justifyContent="center"

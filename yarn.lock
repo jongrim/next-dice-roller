@@ -4593,10 +4593,10 @@ fsevents@^2.1.2, fsevents@~2.1.1, fsevents@~2.1.2:
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.1.3.tgz#fb738703ae8d2f9fe900c33836ddebee8b97f23e"
   integrity sha512-Auw9a4AxqWpa9GUfj370BMPzzyncfBABW8Mab7BGWBYDj4Isgq+cDKtx0i6u9jcX9pQDnswsaaOTgTmA5pEjuQ==
 
-fslightbox-react@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/fslightbox-react/-/fslightbox-react-1.5.0.tgz#07cf41d7ff8b02a79a0886d13519550b79dc50e5"
-  integrity sha512-xBe1K06pa3opWar/xBtArsHMnxMJWsmg5EmNdDtheDL9nMCqk2AXYlNnstfYVqtJJjqNReqeL21wc52Yy4rwWg==
+fslightbox-react@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/fslightbox-react/-/fslightbox-react-1.6.2.tgz#d4456843508f1a916277583204fb4d880057941f"
+  integrity sha512-rdWD+BkOhxHA6ZTEk4/ZHmdNwPuAmEVsF4Yfj75GivcI5YHkslf3G3pu7sf6lT5Yzy8l5UYfb2I5tC5fkNzNfQ==
 
 function-bind@^1.1.1:
   version "1.1.1"
